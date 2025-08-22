@@ -19,15 +19,23 @@ namespace ValheimCatManager.Tool
 
         AssetBundle catAsset;
 
+        /// <summary>
+        /// 注：构造函数，传入加载的AB包
+        /// </summary>
+        /// <param name="assetBundle">AB包</param>
         public CatResModManager(AssetBundle assetBundle) => catAsset = assetBundle;
 
-
+        /// <summary>
+        /// 注：给游戏添加物品
+        /// </summary>
+        /// <param name="itemName">预制件名</param>
+        /// <param name="mockCheck">是否启用mock</param>
         public void AddItem(string itemName, bool mockCheck)
         {
             GameObject itemPrefab = catAsset.LoadAsset<GameObject>(itemName);
             if (!itemPrefab)
             {
-                Debug.LogError($"添加_物品 方法执行时：未有找到：{itemName} ");
+                Debug.LogError($"执行AddItem时，从资源中未找到 Prefab：{itemName}，已跳过");
                 return;
             }
             int hash = itemPrefab.name.GetStableHashCode();
@@ -35,55 +43,18 @@ namespace ValheimCatManager.Tool
             if (mockCheck) if (!CatModData.模拟物品_字典.ContainsKey(hash)) CatModData.模拟物品_字典.Add(hash, itemPrefab.name);
         }
 
-
         /// <summary>
-        /// 注：给游戏添加 自定义配方的方法<br>使用方法：new RecipeConfig</br>
+        /// 注：给游戏添加配方
         /// </summary>
         /// <param name="recipeConfig"></param>
-        public void AddRecipe(string name, RecipeConfig recipeConfig)
-        {
-
-            if (string.IsNullOrEmpty(recipeConfig.物品))
-            {
-                Debug.LogError($"添加配方时 物品名不能为空！");
-                return;
-            }
-
-            CatModData.自定义配方_字典.Add(name, recipeConfig);
-
-        }
+        public void AddRecipe(RecipeConfig recipeConfig) => CatModData.自定义配方_字典.Add(recipeConfig.物品, recipeConfig);
 
 
 
-        /// <summary>
-        /// 注：针对性添加 摆放型食物
-        /// </summary>
-        /// <param name="foodName">注：物品名</param>
-        /// <param name="mockCheck">注：是否启用 mock功能</param>
-        public void AddFood(string foodName, string groupName, bool mockCheck)
-        {
-            GameObject itemPrefab = catAsset.LoadAsset<GameObject>(foodName);
-
-            if (!itemPrefab)
-            {
-                Debug.LogError($"添加食物摆件 执行时：未有找到：{foodName} ");
-                return;
-            }
-
-            int hash = itemPrefab.name.GetStableHashCode();
-
-            if (!CatModData.自定义物品_字典.ContainsKey(hash)) CatModData.自定义物品_字典.Add(hash, itemPrefab);
-
-            if (!CatModData.自定义食物_字典.ContainsKey(hash)) CatModData.自定义食物_字典.Add(hash, groupName);
-
-            if (mockCheck) if (!CatModData.模拟物品_字典.ContainsKey(hash)) CatModData.模拟物品_字典.Add(hash, itemPrefab.name);
-
-
-        }
 
 
 
-        public void AddVegetation(VegetationConfig vegetationConfig ,bool mock)
+        public void AddVegetation(VegetationConfig vegetationConfig, bool mock)
         {
 
             GameObject itemPrefab = catAsset.LoadAsset<GameObject>(vegetationConfig.预制件);
@@ -122,7 +93,69 @@ namespace ValheimCatManager.Tool
         }
 
 
+        public void AddSpawn(SpawnConfig spawnConfig) => CatModData.自定义生成_列表.Add(spawnConfig);
 
+
+
+        /// <summary>
+        /// 注：添加摆放型食物专用方法
+        /// </summary>
+        /// <param name="foodName">注：物品名</param>
+        /// <param name="groupName">Piece食物的分组</param>
+        /// <param name="mockCheck">注：是否启用 mock功能</param>
+        public void AddFood(string foodName, string groupName, bool mockCheck)
+        {
+            GameObject piecePrefab = catAsset.LoadAsset<GameObject>(foodName);
+
+            if (!piecePrefab)
+            {
+                Debug.LogError($"执行AddFood时，从资源中未找到 Prefab：{foodName}，已跳过");
+                return;
+            }
+
+            int hash = piecePrefab.name.GetStableHashCode();
+
+
+            if (!CatModData.自定义物品_字典.ContainsKey(hash)) CatModData.自定义物品_字典.Add(hash, piecePrefab);
+
+            PieceConfig pieceConfig = new PieceConfig(foodName);
+            pieceConfig.制作工具 = "Feaster";
+            pieceConfig.分组 = groupName;
+            pieceConfig.AddRequirement(foodName,1,true);
+
+            if (!CatModData.自定义物件_字典.ContainsKey(hash)) CatModData.自定义物件_字典.Add(hash, pieceConfig);
+
+            if (mockCheck) if (!CatModData.模拟物品_字典.ContainsKey(hash)) CatModData.模拟物品_字典.Add(hash, piecePrefab.name);
+
+
+        }
+
+
+
+
+
+
+
+        public void AddPiece(PieceConfig pieceConfig, bool mockCheck)
+        {
+            string name = pieceConfig.GetPrefabName();
+            GameObject piecePrefab = catAsset.LoadAsset<GameObject>(name);
+            if (!piecePrefab)
+            {
+                Debug.LogError($"AddPiece 执行时未有找到对应预制件：【{name}】");
+                return;
+            }
+
+            int hash = piecePrefab.name.GetStableHashCode();
+
+          
+            if (!CatModData.自定义物品_字典.ContainsKey(hash)) CatModData.自定义物品_字典.Add(hash, piecePrefab);
+
+            if (!CatModData.自定义物件_字典.ContainsKey(hash)) CatModData.自定义物件_字典.Add(hash, pieceConfig);
+
+            if (mockCheck) if (!CatModData.模拟物品_字典.ContainsKey(hash)) CatModData.模拟物品_字典.Add(hash, piecePrefab.name);
+
+        }
 
 
     }
@@ -130,179 +163,82 @@ namespace ValheimCatManager.Tool
 
 
 
-    [HarmonyPatch(typeof(ObjectDB), "Awake")]
-    [HarmonyPriority(Priority.Last)]
-    class AddItemsPatch
-    {
 
-        static void Postfix(ObjectDB __instance)
+    [HarmonyPatch]
+    public static class PatchManager
+    {
+        [HarmonyPatch(typeof(ObjectDB), "Awake")]
+        [HarmonyPriority(Priority.First)]
+        static void Postfix_MockePatch(ObjectDB __instance)
         {
             if (SceneManager.GetActiveScene().name == "main")
             {
-
-
-
-                CatToolManager.GetShaderToCache();
-
-                CatToolManager.RegisterFoodCategory();
-
-                CatToolManager.RegisterToZNetScene(CatModData.自定义物品_字典);
-
-                CatToolManager.RegisterToZNetScene(CatModData.自定义预制件_字典);
-
-                CatToolManager.RegisterToObjectDB(__instance, CatModData.自定义物品_字典);
+                MockSystem.StartMockReplacement();
+                CatModData.m_PrefabCache.Clear();
             }
         }
-    }
 
-
-    [HarmonyPatch(typeof(ObjectDB), "Awake")]
-    [HarmonyPriority(1)]
-    class AddRecipePatch
-    {
-        static void Postfix(ObjectDB __instance)
+        [HarmonyPatch(typeof(ObjectDB), "Awake")]
+        [HarmonyPriority(1)]
+        static void Postfix_AddRecipePatch(ObjectDB __instance)
         {
             if (SceneManager.GetActiveScene().name == "main")
             {
                 CatToolManager.RegisterRecipe(__instance, CatModData.自定义配方_字典);
             }
         }
-    }
 
-    [HarmonyPatch(typeof(ObjectDB), "Awake")]
-    [HarmonyPriority(2)]
-    class AddFoodPiecePatch
-    {
-        static void Postfix(ObjectDB __instance)
+        [HarmonyPatch(typeof(ObjectDB), "Awake")]
+        [HarmonyPriority(2)]
+        static void Postfix_AddPiecePatch(ObjectDB __instance)
         {
             if (SceneManager.GetActiveScene().name == "main")
             {
-                CatToolManager.RegisterFoodPiece(CatModData.自定义食物_字典);
+                CatToolManager.RegisterPiece(CatModData.自定义物件_字典);
             }
         }
-    }
 
-
-
-
-    [HarmonyPatch(typeof(ObjectDB), "Awake")]
-    [HarmonyPriority(Priority.First)]
-    class MockePatch
-    {
-        static void Postfix(ObjectDB __instance)
+        [HarmonyPatch(typeof(ObjectDB), "Awake")]
+        [HarmonyPriority(Priority.Last)]
+        static void Postfix_AddItemsPatch(ObjectDB __instance)
         {
-
             if (SceneManager.GetActiveScene().name == "main")
             {
-                MockSystem.StartMockReplacement();
-                CatModData.m_PrefabCache.Clear();
-
+                CatToolManager.GetShaderToCache();
+                CatToolManager.RegisterCategory();
+                CatToolManager.RegisterToZNetScene(CatModData.自定义物品_字典);
+                CatToolManager.RegisterToZNetScene(CatModData.自定义预制件_字典);
+                CatToolManager.RegisterToObjectDB(__instance, CatModData.自定义物品_字典);
             }
         }
-    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    [HarmonyPatch(typeof(ObjectDB), "CopyOtherDB")]
-    [HarmonyPriority(-101)]
-    class ItemsCopyOtherDB
-    {
-        static void Prefix(ObjectDB __instance, ObjectDB other)
+        [HarmonyPatch(typeof(ObjectDB), "CopyOtherDB")]
+        [HarmonyPriority(-101)]
+        static void Prefix_ItemsCopyOtherDB(ObjectDB __instance, ObjectDB other)
         {
-
             if (other == null) return;
             if (CatModData.自定义物品_字典 == null || CatModData.自定义物品_字典.Count == 0) return;
             // 关键：传入目标ObjectDB（other），而非源实例（__instance）
             CatToolManager.RegisterToObjectDB(other, CatModData.自定义物品_字典);
             CatToolManager.RegisterToZNetScene(CatModData.自定义物品_字典);
-
-
         }
 
+        [HarmonyPatch(typeof(ZoneSystem), "SetupLocations")]
+        [HarmonyPriority(0)]
+        static void Postfix_ZoneSystemPatch(ZoneSystem __instance) => CatToolManager.RegisterVegetation(CatModData.自定义植被_字典, __instance);
+
+        [HarmonyPatch(typeof(SpawnSystem), "Awake")]
+        [HarmonyPriority(Priority.VeryLow)]
+        static void Postfix_SpawnPatch(SpawnSystem __instance) => CatToolManager.RegisterSpawnList(__instance);
+
+        [HarmonyPatch(typeof(Enum), "GetValues")]
+        [HarmonyPriority(Priority.Normal)]
+        static void Postfix_EnumGetValuesPatch(Type enumType, ref Array __result) => CatToolManager.EnumGetPieceCategoryValuesPatch(enumType, ref __result);
+
+        [HarmonyPatch(typeof(Enum), "GetNames")]
+        [HarmonyPriority(Priority.Normal)]
+        static void Postfix_EnumGetNamesPatch(Type enumType, ref string[] __result) => CatToolManager.EnumGetPieceCategoryNamesPatch(enumType, ref __result);
     }
-
-
-
-
-
-
-
-
-    [HarmonyPatch(typeof(ZoneSystem), "SetupLocations")]
-    [HarmonyPriority(0)]
-    class ZoneSystemPatch
-    {
-        static void Postfix(ZoneSystem __instance)
-        {
-
-            CatToolManager.RegisterVegetation(CatModData.自定义植被_字典, __instance);
-
-        }
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    [HarmonyPatch(typeof(Enum), "GetValues")]
-    [HarmonyPriority(Priority.Normal)]
-    class EnumGetValuesPatch
-    {
-        static void Postfix(Type enumType, ref Array __result)
-        {
-            CatToolManager.EnumGetPieceCategoryValuesPatch(enumType, ref __result);
-
-        }
-
-    }
-
-
-
-    [HarmonyPatch(typeof(Enum), "GetNames")]
-    [HarmonyPriority(Priority.Normal)]
-    class EnumGetNamesPatch
-    {
-        static void Postfix(Type enumType, ref string[] __result)
-        {
-            CatToolManager.EnumGetPieceCategoryNamesPatch(enumType, ref __result);
- 
-        }
-
-    }
-
-
-
-
-
-
 
 
 

@@ -16,7 +16,8 @@ namespace ValheimCatManager.Data
         public static readonly Dictionary<int, GameObject> 自定义预制件_字典 = new Dictionary<int, GameObject>();
 
 
-        public static readonly Dictionary<int, string> 自定义食物_字典 = new Dictionary<int, string>();
+        public static readonly Dictionary<int, PieceConfig> 自定义物件_字典 = new Dictionary<int, PieceConfig>();
+
 
 
         public static readonly Dictionary<string, RecipeConfig> 自定义配方_字典 = new Dictionary<string, RecipeConfig>();
@@ -27,20 +28,23 @@ namespace ValheimCatManager.Data
 
 
 
+        public static readonly List<SpawnConfig> 自定义生成_列表 = new List<SpawnConfig>();
 
 
-
-        public static readonly Dictionary<string, Piece.PieceCategory> 自定义目录_字典 = new Dictionary<string, Piece.PieceCategory>();
-
+        public static  Dictionary<string, Piece.PieceCategory> 自定义目录_字典 { get; set; } = new Dictionary<string, Piece.PieceCategory>();
 
 
+        /// <summary>
+        /// 注：给 SpawnSystem 添加生成的类
+        /// </summary>
+        public static SpawnSystemList SpawnSystemList  = new SpawnSystemList();
         public static readonly Dictionary<string, GameObject> m_PrefabCache = new Dictionary<string, GameObject>();
-        public static readonly Dictionary<string, Shader> s_builtinShaderCache = new Dictionary<string, Shader>();
+        public static readonly Dictionary<string, Shader> m_haderCache  = new Dictionary<string, Shader>();
 
         public static readonly Dictionary<int, string> 模拟物品_字典 = new Dictionary<int, string>();
 
 
-
+        public static  Dictionary<string, PieceTable> m_PieceTableCache { get; set; } = new Dictionary<string, PieceTable>();
 
 
 

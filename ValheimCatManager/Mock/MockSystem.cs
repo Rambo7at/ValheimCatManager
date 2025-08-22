@@ -428,7 +428,7 @@ namespace ValheimCatManager.Mock
             foreach (var info in m_MockShaderInfoList)
             {
                 // 优先从缓存获取真实着色器，未命中则通过工具类获取
-                if (!CatModData.s_builtinShaderCache.TryGetValue(info.ShaderName, out Shader realShader) || realShader == null)
+                if (!CatModData.m_haderCache.TryGetValue(info.ShaderName, out Shader realShader) || realShader == null)
                 {
                     Debug.LogError($"[CatMockSystem] 未找到真实着色器：{info.ShaderName}（跳过）");
                     continue;

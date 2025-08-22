@@ -10,51 +10,61 @@ namespace ValheimCatManager.Data
 {
     public class RecipeConfig
     {
+        /// <summary>
+        /// 注：制作目标的预制件名
+        /// </summary>
+        /// <param name="Name"></param>
+        public RecipeConfig(string Name) => 物品 = Name;
 
-
-        //Recipe
 
         /// <summary>
-        /// 注：这是配方的名(只是单纯的配方名)<br>非必填</br>
+        /// 注：这是配方的名字(非必填)
         /// </summary>
         public string 名字 { get; set; } = string.Empty;
+
         /// <summary>
-        /// 注：配方制作的目标物品
+        /// 注：配方制作的目标物品.
         /// </summary>
         public string 物品 { get; set; } = string.Empty;
+
         /// <summary>
-        /// 注：物品的产量
+        /// 注：物品的产量<br/>(默认值：1)
         /// </summary>
         public int 产量 { get; set; } = 1;
+
         /// <summary>
-        /// 注：是否启用
+        /// 注：是否启用<br/>(默认值：true)
         /// </summary>
         public bool 启用 { get; set; } = true;
+
         /// <summary>
-        /// 注：一个 “乘数”，用来根据制作材料的 “品质”，调整配方最终产出的物品数量
+        /// 注：一个 “乘数”，用来根据制作材料的 “品质”，调整配方最终产出的物品数量<br/>(默认值：1)
         /// </summary>
         public float 品质产出数量乘数 { get; set; } = 1f;
+
         /// <summary>
-        /// 注：可能是 物品在制作界面的排序
+        /// 注：可能是 物品在制作界面的排序<br/>(默认值：100)
         /// </summary>
         public int 显示顺序 { get; set; } = 100;
 
         /// <summary>
-        /// 注：制作的工作台
+        /// 注：制作的工作台<br/>(默认值：空)
         /// </summary>
         public string 制作工作台 { get; set; } = string.Empty;
+
         /// <summary>
-        /// 注：维修的工作台
+        /// 注：维修的工作台<br/>(默认值：空)
         /// </summary>
         public string 维修工作台 { get; set; } = string.Empty;
 
 
         /// <summary>
-        /// 注：需求的工作台等级
+        /// 注：需求的工作台等级<br/>(默认值：1)
         /// </summary>
-        public int 最低工作台等级 { get; set; }= 1;
+        public int 最低工作台等级 { get; set; } = 1;
+
         /// <summary>
-        /// 注：只需要一种成分(默认-false)
+        /// 注：只需要一种成分(默认-false)<br/>(默认值：false)
         /// </summary>
         public bool 只需要一种成分 { get; set; } = false;
 
@@ -70,7 +80,7 @@ namespace ValheimCatManager.Data
         /// <param name="indx">注：材料需求数量</param>
         /// <param name="level">注：升级需求的材料</param>
         /// <param name="recover">注：拆除物品后是否返还</param>
-        public void 增加材料(string item , int indx , int level ) => requirementConfigs.Add(new RequirementConfig
+        public void 增加材料(string item, int indx, int level) => requirementConfigs.Add(new RequirementConfig
         {
             材料物品 = item,
             数量 = indx,
@@ -107,7 +117,7 @@ namespace ValheimCatManager.Data
                     gameobjetc = CatToolManager.GetGameObject(requirementConfigs[i].材料物品);
 
 
-                }    
+                }
                 if (gameobjetc == null) return null;
 
                 var itemdrop = gameobjetc.GetComponent<ItemDrop>();
@@ -126,7 +136,7 @@ namespace ValheimCatManager.Data
 
 
 
-        public  Recipe GetRecipe()
+        public Recipe GetRecipe()
         {
 
             Recipe recipe = ScriptableObject.CreateInstance<Recipe>();
@@ -140,7 +150,7 @@ namespace ValheimCatManager.Data
 
             recipe.name = 名字;
 
-            if (!CatModData.m_PrefabCache.TryGetValue(物品,out GameObject prefab))
+            if (!CatModData.m_PrefabCache.TryGetValue(物品, out GameObject prefab))
             {
                 prefab = CatToolManager.GetGameObject(物品);
             }
@@ -151,7 +161,7 @@ namespace ValheimCatManager.Data
                 return null;
 
             }
-            var itemDrop =  prefab.GetComponent<ItemDrop>();
+            var itemDrop = prefab.GetComponent<ItemDrop>();
 
 
             if (itemDrop == null)
@@ -166,7 +176,7 @@ namespace ValheimCatManager.Data
             recipe.m_qualityResultAmountMultiplier = 品质产出数量乘数;
             recipe.m_listSortWeight = 显示顺序;
 
-            var Station1 =  GetStation(制作工作台);
+            var Station1 = GetStation(制作工作台);
             var Station2 = GetStation(维修工作台);
             if (Station1 == null && Station2 == null)
             {

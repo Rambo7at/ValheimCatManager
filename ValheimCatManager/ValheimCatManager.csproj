@@ -97,7 +97,7 @@
     <Compile Include="Data\CatModData.cs" />
     <Compile Include="Data\SpawnConfig.cs" />
     <Compile Include="Data\VegetationConfig.cs" />
-    <Compile Include="Data\FoodPieceConfig.cs" />
+    <Compile Include="Data\PieceConfig.cs" />
     <Compile Include="Data\RequirementConfig.cs" />
     <Compile Include="Data\RecipeConfig.cs" />
     <Compile Include="Mock\MockSystem.cs" />
@@ -111,12 +111,8 @@
     <Analyzer Include="D:\SteamLibrary\steamapps\common\Valheim\valheim_Data\Managed\assembly_valheim.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Asset\" />
     <Folder Include="Patch\" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Asset\7atfood">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
   </ItemGroup>
   <!-- 新增：仅复制 DLL 到 Valheim 插件目录 -->
   <Target Name="CopyToValheimPlugins" AfterTargets="Build">

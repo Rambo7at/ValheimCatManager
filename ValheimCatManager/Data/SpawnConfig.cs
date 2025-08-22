@@ -4,20 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using ValheimCatManager.Tool;
 
 namespace ValheimCatManager.Data
 {
 
-    class SpawnConfig
+    public class SpawnConfig
     {
+        /// <summary>
+        /// 注：构造函数！名字一定要填！必填项！
+        /// </summary>
+        /// <param name="Name"></param>
+        public SpawnConfig(string Name)
+        {
 
-        public SpawnConfig()
-        { 
-        
-        
-        
-        
-        
+            if (!string.IsNullOrEmpty(Name)) 预制件 = Name;
+
+
+
         }
 
         /// <summary>
@@ -192,18 +196,24 @@ namespace ValheimCatManager.Data
 
         public SpawnSystem.SpawnData GetSpawnData()
         {
+            if (string.IsNullOrEmpty(预制件))
+            {
+                Debug.LogError("预制件生成传入了 【空字符串】");
+                return null;
+            }
+            var prefab = CatToolManager.GetGameObject(预制件);
+            if (!prefab) return null;
 
-
-
-
+            var biome = CatToolManager.GetBiome(生态区域);
+            if (biome == Heightmap.Biome.None) return null;
 
 
             return new SpawnSystem.SpawnData
             {
-                m_name = 名字,
-                m_prefab = 生物实例,
+                m_name = prefab.name,
+                m_prefab = prefab,
                 m_enabled = 启用,
-                m_biome = 生态实例,
+                m_biome = biome,
                 m_biomeArea = 区域范围,
                 m_maxSpawned = ((最大生成量 < 1) ? 1 : 最大生成量),
                 m_spawnInterval = 生成_间隔,

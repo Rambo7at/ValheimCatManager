@@ -15,10 +15,10 @@ namespace ValheimCatManager.Data
         /// <summary>
         /// 构造函数 传入植被预制件的名字
         /// </summary>
-        /// <param name="Nmae"></param>
-        public VegetationConfig(string Nmae)
+        /// <param name="name"></param>
+        public VegetationConfig(string name)
         {
-            if (!string.IsNullOrEmpty(Nmae)) 预制件 = Nmae;
+            if (!string.IsNullOrEmpty(name)) 预制件 = name;
 
         }
 

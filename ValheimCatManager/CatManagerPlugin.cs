@@ -17,7 +17,7 @@ namespace ValheimCatManager
 
         public const string pluginGUID = "com.rambo7at.CatManager";
         public const string pluginName = "猫咪：Mod管理";
-        public const string pluginVersion = "0.0.1";
+        public const string pluginVersion = "0.0.5";
 
 
         public static AssetBundle assetBundle;
@@ -25,7 +25,7 @@ namespace ValheimCatManager
 
         public void Awake()
         {
-            assetBundle = CatToolManager.LoadAssetBundle("7atfood");
+            assetBundle = CatToolManager.LoadAssetBundle("资源包");
 
 
             assetBundle.Unload(false);

@@ -126,35 +126,59 @@ namespace ValheimCatManager.Tool
 
 
 
-        public static void RegisterFoodPiece(Dictionary<int, string> foodPieceDictionary)
+        /// <summary>
+        /// 注：注册预制件 给对应的制作工具
+        /// <br>优化考虑：可以准备一个 Category 的缓存</br>
+        /// </summary>
+        /// <param name="pieceConfigDictionary"></param>
+        public static void RegisterPiece(Dictionary<int, PieceConfig> pieceConfigDictionary)
         {
 
-            var feaster = GetGameObject("Feaster");
-            PieceTable pieceTable = feaster.GetComponent<ItemDrop>().m_itemData.m_shared.m_buildPieces;
-
-            foreach (var food in foodPieceDictionary)
+            foreach (var pieceConfig in pieceConfigDictionary)
             {
-                string categoryName = food.Value;
+                string pieceName = pieceConfig.Value.GetPrefabName();
+                string categoryName = pieceConfig.Value.分组;
+                PieceTable pieceTable = pieceConfig.Value.GetPieceTable();
+                GameObject piecePrefab = CatToolManager.GetGameObject(pieceConfig.Key);
 
-                var foodPrefab = GetGameObject(food.Key);
-                Piece foodPiece = foodPrefab.GetComponent<Piece>();
 
-                if (pieceTable.m_pieces.Contains(foodPrefab) || foodPiece == null) continue;
+                if (piecePrefab == null)
+                {
+                    Debug.LogError($"执行RegisterPiece时，Piece：{pieceName}，预制件是空，已跳过");
+                    continue;
+                }
+
+                if (pieceTable == null)
+                {
+                    Debug.LogError($"执行RegisterPiece时，Piece：{pieceName}，对应的 【组件：pieceTable】 是空，已跳过");
+                    continue;
+                }
+
+                Piece piece = piecePrefab.GetComponent<Piece>();
+                if (piece == null)
+                {
+                    Debug.LogError($"执行RegisterPiece时，Piece：{pieceName}，对应的 【组件：Piece】 是空，已跳过");
+                    continue;
+                }
+
+
 
                 if (!pieceTable.m_categoryLabels.Contains(categoryName))
                 {
-
                     pieceTable.m_categoryLabels.Add(categoryName);
-                    pieceTable.m_categories.Add(GetFoodCategory(categoryName));
-
+                    pieceTable.m_categories.Add(GetCategory(categoryName));
                 }
-                
 
-                pieceTable.m_pieces.Add(foodPrefab);
-                foodPiece.m_category = GetFoodCategory(categoryName);
 
+                if (!pieceTable.m_pieces.Contains(piecePrefab)) pieceTable.m_pieces.Add(piecePrefab);
+                piece.m_category = GetCategory(categoryName);
             }
+
+
         }
+
+
+
 
 
 
@@ -178,50 +202,79 @@ namespace ValheimCatManager.Tool
 
 
 
-
-
-
-
-
-
-
-
-
-
-        private static Piece.PieceCategory GetFoodCategory(string categoryName)
+        public static void RegisterSpawnList( SpawnSystem instance)
         {
-
-            Array enumValues = Enum.GetValues(typeof(Piece.PieceCategory));
-            string[] enumNames = Enum.GetNames(typeof(Piece.PieceCategory));
-
-
-            for (int i = 0; i < enumNames.Length; i++)
+            if (!CatModData.自定义生成_列表.Any())
             {
-                if (enumNames[i] == categoryName)
+                foreach (var spawnConfig in CatModData.自定义生成_列表)
                 {
-                    return (Piece.PieceCategory)enumValues.GetValue(i);
 
+                    var spawnData = spawnConfig.GetSpawnData();
+                    if (spawnData == null)
+                    {
+                        Debug.LogError($"添加生成列表错误，生成数据是空检查：{spawnConfig.预制件}");
+                        continue;
+                    }
+
+                    CatModData.SpawnSystemList.m_spawners.Add(spawnData);
                 }
-               
+                CatModData.自定义生成_列表.Clear();
+
             }
 
-            Debug.LogError($"未找到自定义目录：{categoryName}检查一下");
-            return Piece.PieceCategory.All;
+
+            if (!CatModData.SpawnSystemList || !instance) return;
+
+
+            instance.m_spawnLists.Add(CatModData.SpawnSystemList);
+
 
         }
 
 
 
-        public   static void RegisterFoodCategory()
+
+
+
+
+
+        /// <summary>
+        /// 注：通过反射 游戏枚举Piece.PieceCategory 获取枚举值
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <returns>Piece.PieceCategory</returns>
+        private static Piece.PieceCategory GetCategory(string categoryName)
         {
-            foreach (var item in CatModData.自定义食物_字典)
+            Array enumValues = Enum.GetValues(typeof(Piece.PieceCategory));
+            string[] enumNames = Enum.GetNames(typeof(Piece.PieceCategory));
+
+            for (int i = 0; i < enumNames.Length; i++)
             {
-                if (!CatModData.自定义目录_字典.ContainsKey(item.Value))
+                if (enumNames[i] == categoryName) return (Piece.PieceCategory)enumValues.GetValue(i);
+            }
+            Debug.LogError($"执行GetCategory时，未找到对应名 枚举名：{categoryName}");
+            return Piece.PieceCategory.All;
+        }
+
+
+
+
+
+        /// <summary>
+        /// 注：注册自定义 Category
+        /// <br><paramref name="Category"></paramref></br>：
+        /// 指的是 Piece上方的目录条
+        /// </summary>
+        public static void RegisterCategory()
+        {
+            foreach (var item in CatModData.自定义物件_字典)
+            {
+                if (!CatModData.自定义目录_字典.ContainsKey(item.Value.分组))
                 {
                     //Debug.LogError($"有进入这里 ");
                     int indx = Enum.GetNames(typeof(Piece.PieceCategory)).Length - 1;
                     //Debug.LogError($"打点1 长度：{indx}");
-                    CatModData.自定义目录_字典.Add(item.Value, (Piece.PieceCategory)indx);
+                    CatModData.自定义目录_字典.Add(item.Value.分组, (Piece.PieceCategory)indx);
                     //Debug.LogError($"打点2 ");
                 }
             }
@@ -229,30 +282,60 @@ namespace ValheimCatManager.Tool
         }
 
 
+        public static void EnumGetPieceCategoryValuesPatch(Type enumType, ref Array __result)
+        {
+            if (!(enumType != typeof(Piece.PieceCategory)) && CatModData.自定义目录_字典.Count != 0)
+            {
+                Piece.PieceCategory[] array = new Piece.PieceCategory[__result.Length + CatModData.自定义目录_字典.Count];
+                __result.CopyTo(array, 0);
+                CatModData.自定义目录_字典.Values.CopyTo(array, __result.Length);
+                __result = array;
+            }
+        }
 
+
+        public static void EnumGetPieceCategoryNamesPatch(Type enumType, ref string[] __result)
+        {
+            if (!(enumType != typeof(Piece.PieceCategory)) && CatModData.自定义目录_字典.Count != 0)
+            {
+                __result = __result.AddRangeToArray(CatModData.自定义目录_字典.Keys.ToArray());
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// 注：获取游戏原版的着色器 给 <paramref name="m_haderCache"/> 缓存
+        /// </summary>
         public static void GetShaderToCache()
         {
 
             var realShader = CatToolManager.GetGameObject("Turnip").GetComponentsInChildren<Renderer>(true);
-
             foreach (var item in realShader)
             {
-
                 if (item is Renderer renderer)
                 {
-
                     for (int i = 0; i < renderer.sharedMaterials.Length; i++)
                     {
                         Material material = renderer.sharedMaterials[i];
                         if (material.shader.name == "Custom/Vegetation")
                         {
-                            if (!CatModData.s_builtinShaderCache.ContainsKey(material.shader.name)) CatModData.s_builtinShaderCache.Add(material.shader.name, material.shader);
+                            if (!CatModData.m_haderCache.ContainsKey(material.shader.name)) CatModData.m_haderCache.Add(material.shader.name, material.shader);
 
-                            Debug.LogError($"信息：{CatModData.s_builtinShaderCache.Count}");
+                            Debug.LogError($"信息：{CatModData.m_haderCache.Count}");
                         }
                             
-                        
-
                     }
 
 
@@ -300,25 +383,7 @@ namespace ValheimCatManager.Tool
 
 
 
-        public static void EnumGetPieceCategoryValuesPatch(Type enumType, ref Array __result)
-        {
-            if (!(enumType != typeof(Piece.PieceCategory)) && CatModData.自定义目录_字典.Count != 0)
-            {
-                Piece.PieceCategory[] array = new Piece.PieceCategory[__result.Length + CatModData.自定义目录_字典.Count];
-                __result.CopyTo(array, 0);
-                CatModData.自定义目录_字典.Values.CopyTo(array, __result.Length);
-                __result = array;
-            }
-        }
 
-
-        public static void EnumGetPieceCategoryNamesPatch(Type enumType, ref string[] __result)
-        {
-            if (!(enumType != typeof(Piece.PieceCategory)) && CatModData.自定义目录_字典.Count != 0)
-            {
-                __result = __result.AddRangeToArray(CatModData.自定义目录_字典.Keys.ToArray());
-            }
-        }
 
 
 
@@ -339,9 +404,12 @@ namespace ValheimCatManager.Tool
 
             if (string.IsNullOrEmpty(name))
             {
-                Debug.LogError("尝试获取预制体时传入了空名称");
+                Debug.LogError("获取预制件名时，传入了空字符");
                 return null;
             }
+
+            if (CatModData.m_PrefabCache.ContainsKey(name)) return CatModData.m_PrefabCache[name];
+
 
             GameObject itemPrefab = ZNetScene.instance.GetPrefab(name) ?? ObjectDB.instance.GetItemPrefab(name);
 
@@ -376,7 +444,7 @@ namespace ValheimCatManager.Tool
 
             if (itemPrefab == null)
             {
-                Debug.LogError($"未查询到注册预制件 查询的哈希值{hash}");
+                Debug.LogError($"未查询到注册预制件，哈希值：{hash}");
                 return null;
             }
             else
