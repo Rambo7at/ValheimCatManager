@@ -10,6 +10,53 @@ namespace ValheimCatManager.Data
 {
     public class RecipeConfig
     {
+
+
+
+
+        /// <summary>
+        /// 注：构造函数，传入制作目标的预制件名、工作台、工作台等级、产量和需求材料列表
+        /// </summary>
+        /// <param name="itemName"></param>
+        /// <param name="station"></param>
+        /// <param name="stationLevel"></param>
+        /// <param name="amount"></param>
+        /// <param name="resItemList"></param>
+        public RecipeConfig(string itemName, string station, int stationLevel, int amount, params (string resItem, int resAmount, int levelAmount)[] resItemList)
+        {
+            try
+            {
+                物品 = itemName;
+                制作工作台 = station;
+                最低工作台等级 = stationLevel;
+                产量 = amount;
+
+                foreach (var resItem in resItemList)
+                {
+                    增加材料(resItem.resItem, resItem.resAmount, resItem.levelAmount);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"添加{itemName}配方错误，捕获异常：{ex} ");
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         /// <summary>
         /// 注：制作目标的预制件名
         /// </summary>
@@ -80,9 +127,8 @@ namespace ValheimCatManager.Data
         /// <param name="indx">注：材料需求数量</param>
         /// <param name="level">注：升级需求的材料</param>
         /// <param name="recover">注：拆除物品后是否返还</param>
-        public void 增加材料(string item, int indx, int level) => requirementConfigs.Add(new RequirementConfig
+        public void 增加材料(string item, int indx, int level) => requirementConfigs.Add(new RequirementConfig(item)
         {
-            材料物品 = item,
             数量 = indx,
             升级数量 = level,
             恢复 = true,
@@ -91,14 +137,9 @@ namespace ValheimCatManager.Data
 
         private CraftingStation GetStation(string name)
         {
-            if (!CatModData.m_PrefabCache.TryGetValue(name, out GameObject prefab))
-            {
-                prefab = CatToolManager.GetGameObject(name);
-
-
-
-            }
+            var prefab = CatToolManager.GetGameObject(name);
             if (prefab == null) return null;
+
             var Station = prefab.GetComponent<CraftingStation>();
             if (Station == null) return null;
             return Station;
@@ -109,15 +150,13 @@ namespace ValheimCatManager.Data
         private Piece.Requirement[] GetRequirements()
         {
             Piece.Requirement[] requirements = new Piece.Requirement[requirementConfigs.Count];
+
             for (int i = 0; i < requirementConfigs.Count; i++)
             {
-                if (!CatModData.m_PrefabCache.TryGetValue(requirementConfigs[i].材料物品, out GameObject gameobjetc))
-                {
 
-                    gameobjetc = CatToolManager.GetGameObject(requirementConfigs[i].材料物品);
+                GameObject gameobjetc = CatToolManager.GetGameObject(requirementConfigs[i].GetPrefabName());
 
 
-                }
                 if (gameobjetc == null) return null;
 
                 var itemdrop = gameobjetc.GetComponent<ItemDrop>();
@@ -150,14 +189,11 @@ namespace ValheimCatManager.Data
 
             recipe.name = 名字;
 
-            if (!CatModData.m_PrefabCache.TryGetValue(物品, out GameObject prefab))
-            {
-                prefab = CatToolManager.GetGameObject(物品);
-            }
+            GameObject prefab = CatToolManager.GetGameObject(物品);
 
             if (prefab == null)
             {
-                Debug.LogError($"为找到对应预制件{物品}");
+                Debug.LogError($"未找到对应预制件{物品}");
                 return null;
 
             }
@@ -176,15 +212,20 @@ namespace ValheimCatManager.Data
             recipe.m_qualityResultAmountMultiplier = 品质产出数量乘数;
             recipe.m_listSortWeight = 显示顺序;
 
-            var Station1 = GetStation(制作工作台);
-            var Station2 = GetStation(维修工作台);
-            if (Station1 == null && Station2 == null)
-            {
-                Debug.LogError($"未获取到相关工作台组件 检查：{制作工作台}，{维修工作台}");
-                return null;
-            }
+
+
+
+            CraftingStation Station1 = (string.IsNullOrEmpty(制作工作台)) ? null : GetStation(制作工作台);
+            CraftingStation Station2 = (string.IsNullOrEmpty(维修工作台)) ? null : GetStation(维修工作台);
+
             recipe.m_craftingStation = Station1;
-            recipe.m_repairStation = Station2;
+            recipe.m_repairStation = Station2 ?? Station1;
+
+
+
+
+
+
             recipe.m_minStationLevel = 最低工作台等级;
             recipe.m_requireOnlyOneIngredient = 只需要一种成分;
 

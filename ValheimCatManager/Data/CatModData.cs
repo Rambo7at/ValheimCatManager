@@ -39,7 +39,7 @@ namespace ValheimCatManager.Data
         /// </summary>
         public static SpawnSystemList SpawnSystemList  = new SpawnSystemList();
         public static readonly Dictionary<string, GameObject> m_PrefabCache = new Dictionary<string, GameObject>();
-        public static  Dictionary<string, Shader> m_haderCache { get; set; } = new Dictionary<string, Shader>();
+        public static readonly Dictionary<string, Shader> m_haderCache  = new Dictionary<string, Shader>();
 
         public static readonly Dictionary<int, string> 模拟物品_字典 = new Dictionary<int, string>();
 

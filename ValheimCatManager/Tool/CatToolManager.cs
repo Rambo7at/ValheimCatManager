@@ -173,7 +173,7 @@ namespace ValheimCatManager.Tool
                 if (!pieceTable.m_pieces.Contains(piecePrefab)) pieceTable.m_pieces.Add(piecePrefab);
                 piece.m_category = GetCategory(categoryName);
 
-                if (piece.m_resources.Length != 0) continue;
+                if(piece.m_resources.Length != 0) continue;
 
                 piece.m_resources = pieceConfig.Value.GetRequirementS();
 
@@ -338,7 +338,7 @@ namespace ValheimCatManager.Tool
                         {
                             if (!CatModData.m_haderCache.ContainsKey(material.shader.name)) CatModData.m_haderCache.Add(material.shader.name, material.shader);
 
-                            Debug.LogError($"信息：{CatModData.m_haderCache.Count}");
+                            //Debug.LogError($"信息：{CatModData.m_haderCache.Count}");
                         }
                             
                     }

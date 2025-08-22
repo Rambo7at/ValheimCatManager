@@ -13,6 +13,44 @@ namespace ValheimCatManager.Data
     public class PieceConfig
     {
 
+
+
+
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="category"></param>
+        /// <param name="tool"></param>
+        /// <param name="resItemList"></param>
+        public PieceConfig(string name,string category,string tool ,params (string resItem, int resAmount, bool check)[] resItemList)
+        {
+
+            预制件 = name;
+
+            分组 = category;
+
+            制作工具 = tool;
+
+            foreach (var resItem in resItemList)
+            {
+                AddRequirement(resItem.resItem,resItem.resAmount,resItem.check);
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+
+
         List<RequirementConfig> resList = new List<RequirementConfig>();
 
 

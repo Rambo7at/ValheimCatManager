@@ -131,11 +131,6 @@ namespace ValheimCatManager.Tool
         }
 
 
-
-
-
-
-
         public void AddPiece(PieceConfig pieceConfig, bool mockCheck)
         {
             string name = pieceConfig.GetPrefabName();
@@ -149,7 +144,7 @@ namespace ValheimCatManager.Tool
             int hash = piecePrefab.name.GetStableHashCode();
 
           
-            if (!CatModData.自定义物品_字典.ContainsKey(hash)) CatModData.自定义物品_字典.Add(hash, piecePrefab);
+            if (!CatModData.自定义预制件_字典.ContainsKey(hash)) CatModData.自定义预制件_字典.Add(hash, piecePrefab);
 
             if (!CatModData.自定义物件_字典.ContainsKey(hash)) CatModData.自定义物件_字典.Add(hash, pieceConfig);
 
@@ -159,8 +154,6 @@ namespace ValheimCatManager.Tool
 
 
     }
-
-
 
 
 
@@ -217,9 +210,12 @@ namespace ValheimCatManager.Tool
 
             if (SceneManager.GetActiveScene().name == "main")
             {
+                var startTime1 = DateTime.Now;
+
                 MockSystem.StartMockReplacement();
                 CatModData.m_PrefabCache.Clear();
-
+                var elapsed1 = DateTime.Now - startTime1;
+                Debug.LogError($"mock 完成耗时: {elapsed1.TotalMilliseconds / 1000}秒");
             }
         }
     }
@@ -287,12 +283,6 @@ namespace ValheimCatManager.Tool
         }
 
     }
-
-
-
-
-
-
 
 
 
