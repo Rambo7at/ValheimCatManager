@@ -121,7 +121,7 @@ namespace ValheimCatManager.Tool
             PieceConfig pieceConfig = new PieceConfig(foodName);
             pieceConfig.制作工具 = "Feaster";
             pieceConfig.分组 = groupName;
-            pieceConfig.AddRequirement(foodName, 1, true);
+            pieceConfig.AddRequirement(foodName,1,true);
 
             if (!CatModData.自定义物件_字典.ContainsKey(hash)) CatModData.自定义物件_字典.Add(hash, pieceConfig);
 
@@ -148,7 +148,7 @@ namespace ValheimCatManager.Tool
 
             int hash = piecePrefab.name.GetStableHashCode();
 
-
+          
             if (!CatModData.自定义物品_字典.ContainsKey(hash)) CatModData.自定义物品_字典.Add(hash, piecePrefab);
 
             if (!CatModData.自定义物件_字典.ContainsKey(hash)) CatModData.自定义物件_字典.Add(hash, pieceConfig);
@@ -159,6 +159,7 @@ namespace ValheimCatManager.Tool
 
 
     }
+
 
 
 
@@ -286,6 +287,7 @@ namespace ValheimCatManager.Tool
         }
 
     }
+
 
 
 

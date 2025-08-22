@@ -172,6 +172,11 @@ namespace ValheimCatManager.Tool
 
                 if (!pieceTable.m_pieces.Contains(piecePrefab)) pieceTable.m_pieces.Add(piecePrefab);
                 piece.m_category = GetCategory(categoryName);
+
+                if (piece.m_resources.Length != 0) continue;
+
+                piece.m_resources = pieceConfig.Value.GetRequirementS();
+
             }
 
 

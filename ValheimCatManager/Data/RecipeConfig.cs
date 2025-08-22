@@ -80,8 +80,9 @@ namespace ValheimCatManager.Data
         /// <param name="indx">注：材料需求数量</param>
         /// <param name="level">注：升级需求的材料</param>
         /// <param name="recover">注：拆除物品后是否返还</param>
-        public void 增加材料(string item, int indx, int level) => requirementConfigs.Add(new RequirementConfig(item)
+        public void 增加材料(string item, int indx, int level) => requirementConfigs.Add(new RequirementConfig
         {
+            材料物品 = item,
             数量 = indx,
             升级数量 = level,
             恢复 = true,
@@ -110,10 +111,10 @@ namespace ValheimCatManager.Data
             Piece.Requirement[] requirements = new Piece.Requirement[requirementConfigs.Count];
             for (int i = 0; i < requirementConfigs.Count; i++)
             {
-                if (!CatModData.m_PrefabCache.TryGetValue(requirementConfigs[i].GetPrefabName(), out GameObject gameobjetc))
+                if (!CatModData.m_PrefabCache.TryGetValue(requirementConfigs[i].材料物品, out GameObject gameobjetc))
                 {
 
-                    gameobjetc = CatToolManager.GetGameObject(requirementConfigs[i].GetPrefabName());
+                    gameobjetc = CatToolManager.GetGameObject(requirementConfigs[i].材料物品);
 
 
                 }
