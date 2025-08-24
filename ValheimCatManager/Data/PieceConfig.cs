@@ -149,7 +149,7 @@ namespace ValheimCatManager.Data
 
             PieceTable pieceTable = prefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_buildPieces;
             if (pieceTable == null) return null;
-
+            CatModData.m_PieceTableCache.Add(制作工具,pieceTable);
             return pieceTable;
         }
 

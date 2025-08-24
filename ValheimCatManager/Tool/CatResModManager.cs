@@ -297,6 +297,10 @@ namespace ValheimCatManager.Tool
         } 
 
     }
+
+
+
+
     [HarmonyPatch(typeof(ZoneSystem), "SetupLocations")]
     [HarmonyPriority(0)]
     class ZoneSystemPatch

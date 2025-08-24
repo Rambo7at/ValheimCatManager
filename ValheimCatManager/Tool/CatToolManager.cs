@@ -191,7 +191,7 @@ namespace ValheimCatManager.Tool
 
         public static void RegisterSpawnList(SpawnSystem instance)
         {
-            if (!CatModData.自定义生成_列表.Any())
+            if (CatModData.自定义生成_列表.Count != 0)
             {
                 foreach (var spawnConfig in CatModData.自定义生成_列表)
                 {
@@ -210,11 +210,12 @@ namespace ValheimCatManager.Tool
             }
 
 
-            if (!CatModData.SpawnSystemList || !instance) return;
 
+            Debug.LogError($"长度：{CatModData.SpawnSystemList.m_spawners.Count}-----------------------");
+
+            if (!instance || CatModData.SpawnSystemList.m_spawners.Count == 0) return;
 
             instance.m_spawnLists.Add(CatModData.SpawnSystemList);
-
 
         }
 

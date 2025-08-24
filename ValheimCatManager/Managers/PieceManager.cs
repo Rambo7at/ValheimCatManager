@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
@@ -18,22 +20,74 @@ namespace ValheimCatManager.Managers
         // 内部字典，存储vanilla（原生）分类的标签
         private static readonly Dictionary<Piece.PieceCategory, string> vanillaLabels = new Dictionary<Piece.PieceCategory, string>();
 
+        private static bool categoryRefreshNeeded { set; get; } = true;
+
+        //这个补丁注释 餐盘会正常 但是耕地耙不正常
+        [HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode))]
+        [HarmonyPriority(Priority.Low)]
+        class RefreshCategoriesPatch
+        {
+
+            static void Postfix()
+            {
+
+                RefreshCategories();
+                Debug.LogError($"执行了：RefreshCategories");
+            }
 
 
-        // 这个补丁注释 餐盘会正常 但是耕地耙不正常
-        //[HarmonyPatch(typeof(Player), "SetPlaceMode")]
-        //[HarmonyPriority(Priority.Last)]
-        //class RefreshCategoriesPatch
-        //{
-
-        //    static void Postfix()
-        //    {
-
-        //        RefreshCategories();
-        //    }
+        }
 
 
-        //}
+
+        [HarmonyPatch(typeof(Hud), nameof(Hud.Awake))]
+        [HarmonyPriority(Priority.Low)]
+        class CreateCategoryTabsPatch
+        {
+            static void Postfix()
+            {
+                RefreshCategories();
+                Debug.LogError($"执行了：RefreshCategories");
+            }
+        }
+
+
+        [HarmonyPatch(typeof(Hud), nameof(Hud.UpdateBuild))]
+        [HarmonyPriority(Priority.Low)]
+        class Hud_UpdateBuild
+        {
+            static void Postfix()
+            {
+                RefreshCategoriesIfNeeded();
+            }
+        }
+
+        [HarmonyPatch(typeof(Hud), nameof(Hud.LateUpdate))]
+        [HarmonyPriority(Priority.Low)]
+        class Hud_LateUpdate
+        {
+            static void Postfix()
+            {
+                RefreshCategoriesIfNeeded();
+            }
+        }
+
+
+
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
+        [HarmonyPriority(Priority.Normal)] // 可根据需要调整优先级
+        class UpdateAvailableTranspilerPatch
+        {
+            [HarmonyTranspiler]
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                // 保持原有的转译逻辑，调用TranspileMaxCategory方法
+                return TranspileMaxCategory(instructions, 0);
+            }
+        }
+
+
 
 
 
@@ -49,23 +103,94 @@ namespace ValheimCatManager.Managers
                 {
                     RegisterCategory(); // 注册Category方法
                     RegisterPiece(CatModData.自定义物件_字典); // 注册Piece方法
-                    CatToolManager.GetPieceCategory(); // 检测方法
+                    RefreshCategories();
+                    PieceTableCheck(); // 检测方法
                 }
             }
         }
 
         [HarmonyPatch(typeof(PieceTable), "UpdateAvailable")]
-        class ExpandAvailablePiecesPatch1 { static void Prefix(PieceTable __instance) => ExpandAvailablePieces(__instance); }
+        class ExpandAvailablePiecesPatch1
+        {
+            static void Prefix(PieceTable __instance)
+            {
+
+
+                ExpandAvailablePieces(__instance);
+                Debug.LogError($"执行了：ExpandAvailablePieces");
+                PieceTableCheck(); // 检测方法
+            }
+
+        }
 
         [HarmonyPatch(typeof(PieceTable), "UpdateAvailable")]
         class ExpandAvailablePiecesPatch2
         {
             static void Postfix(PieceTable __instance)
             {
-                AdjustPieceTableArray(__instance);
-                ReorderAllCategoryPieces(__instance);
+
+                //AdjustPieceTableArray(__instance);
+                //ReorderAllCategoryPieces(__instance);
+                Debug.LogError($"执行了：AdjustPieceTableArray + ReorderAllCategoryPieces");
             }
         }
+
+
+        private static void RefreshCategoriesIfNeeded()
+        {
+            if (categoryRefreshNeeded)
+            {
+                categoryRefreshNeeded = false;
+                RefreshCategories();
+            }
+        }
+
+
+        // 获取最大分类值
+        private static int MaxCategory()
+        {
+            var cats = Enum.GetValues(typeof(Piece.PieceCategory)).Length - 1;
+            // 偏移所有在Piece.PieceCategory.All=100之后的分类
+            return cats < (int)GetCategory("All") ? cats : cats + 1;
+        }
+
+
+
+
+        // 转换最大分类值的transpile方法
+        private static IEnumerable<CodeInstruction> TranspileMaxCategory(IEnumerable<CodeInstruction> instructions, int maxOffset)
+        {
+            int number = (int)GetCategory("Max") + maxOffset;
+
+            foreach (CodeInstruction instruction in instructions)
+            {
+                if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo methodInfo && methodInfo.Name.Contains("MaxCategory"))
+                {
+                    // 其他模组可能有旧的MaxCategory实现，覆盖它们
+                    yield return new CodeInstruction(OpCodes.Call, AccessTools.DeclaredMethod(typeof(PieceManager), nameof(MaxCategory)));
+                }
+                else if (instruction.LoadsConstant(number))
+                {
+                    yield return new CodeInstruction(OpCodes.Call, AccessTools.DeclaredMethod(typeof(PieceManager), nameof(MaxCategory)));
+
+                    if (maxOffset != 0)
+                    {
+                        yield return new CodeInstruction(OpCodes.Ldc_I4, maxOffset);
+                        yield return new CodeInstruction(OpCodes.Add);
+                    }
+                }
+                else
+                {
+                    yield return instruction;
+                }
+            }
+        }
+
+
+
+
+
+
 
 
 
@@ -201,6 +326,7 @@ namespace ValheimCatManager.Managers
                 Debug.LogError("执行RefreshCategories时，Player.m_localPlayer是空");
                 return;
             }
+
             PieceTable pieceTable = Player.m_localPlayer.m_buildPieces;
 
             if (!pieceTable)
@@ -271,13 +397,16 @@ namespace ValheimCatManager.Managers
                 Debug.LogWarning("Category Refresh: Could not find background image, skipping resize");
             }
 
+
+            Hud.instance.GetComponentInParent<Localize>().RefreshLocalization();
         }
+
+
+
 
         private static void UpdatePieceTableCategories(PieceTable pieceTable, HashSet<Piece.PieceCategory> visibleCategories)
         {
             // 处理vanilla分类
-
-            
             for (int i = 0; i < (int)GetCategory("Max"); i++)
             {
                 Piece.PieceCategory category = (Piece.PieceCategory)i;
@@ -321,6 +450,7 @@ namespace ValheimCatManager.Managers
             }
         }
 
+
         // 获取vanilla分类的标签
         private static string GetVanillaLabel(Piece.PieceCategory category)
         {
@@ -332,7 +462,6 @@ namespace ValheimCatManager.Managers
             return vanillaLabels.TryGetValue(category, out string label) ? label : string.Empty;
         }
 
-        // 搜索并缓存vanilla分类的标签
         private static void SearchVanillaLabels()
         {
             foreach (var pieceTable in Resources.FindObjectsOfTypeAll<PieceTable>())
@@ -349,6 +478,27 @@ namespace ValheimCatManager.Managers
                 }
             }
         }
+
+        /// <summary>
+        /// 注：工具方法---检测 PieceTable 的 m_categoryLabels 和 m_categories 长度是否匹配
+        /// </summary>
+        static void PieceTableCheck()
+        {
+            Debug.LogError($"目录缓存的长度是：{CatModData.m_PieceTableCache.Count}");
+
+            foreach (var PieceTable in CatModData.m_PieceTableCache)
+            {
+
+                Debug.LogError($"工具：{PieceTable.Key}，m_categoryLabels长度：{PieceTable.Value.m_categoryLabels.Count}，m_categories长度：{PieceTable.Value.m_categories.Count}，m_availablePieces长度：{PieceTable.Value.m_availablePieces.Count}");
+
+            }
+        }
+
+
+
+
+
+
 
 
         #region 已经完成的功能：注册Piece和Category  
@@ -392,10 +542,10 @@ namespace ValheimCatManager.Managers
 
                 if (!pieceTable.m_categoryLabels.Contains(categoryName))
                 {
-                    Debug.LogError($"m_categoryLabels，长度：{pieceTable.m_categoryLabels.Count}，对应的 m_categories 长度：{pieceTable.m_categories.Count}");
+                    Debug.LogError($"物件：{pieceConfig.Value.制作工具}，m_categoryLabels，长度：{pieceTable.m_categoryLabels.Count}，对应的 m_categories 长度：{pieceTable.m_categories.Count}");
                     pieceTable.m_categoryLabels.Add(categoryName);
                     pieceTable.m_categories.Add(GetCategory(categoryName));
-                    Debug.LogError($"m_categoryLabels，长度：{pieceTable.m_categoryLabels.Count}，对应的 m_categories 长度：{pieceTable.m_categories.Count}");
+                    Debug.LogError($"物件：{pieceConfig.Value.制作工具}，m_categoryLabels，长度：{pieceTable.m_categoryLabels.Count}，对应的 m_categories 长度：{pieceTable.m_categories.Count}");
                 }
                 piece.m_category = GetCategory(categoryName);
 
@@ -419,11 +569,10 @@ namespace ValheimCatManager.Managers
             {
                 if (!CatModData.自定义目录_字典.ContainsKey(item.Value.分组))
                 {
-                    //Debug.LogError($"有进入这里 ");
                     int indx = Enum.GetNames(typeof(Piece.PieceCategory)).Length - 1;
-                    Debug.LogError($"打点1 长度：{indx}");
                     CatModData.自定义目录_字典.Add(item.Value.分组, (Piece.PieceCategory)indx);
-                    //Debug.LogError($"打点2 ");
+                    CreateCategoryTabs();
+
                 }
             }
 
