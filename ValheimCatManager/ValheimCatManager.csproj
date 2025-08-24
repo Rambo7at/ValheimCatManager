@@ -108,6 +108,7 @@
     <Compile Include="Data\PieceConfig.cs" />
     <Compile Include="Data\RequirementConfig.cs" />
     <Compile Include="Data\RecipeConfig.cs" />
+    <Compile Include="Managers\PieceManager.cs" />
     <Compile Include="Mock\MockSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tool\CatToolManager.cs" />
