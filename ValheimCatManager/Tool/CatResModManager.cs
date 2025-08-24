@@ -51,7 +51,12 @@ namespace ValheimCatManager.Tool
 
 
 
+        public void AddMonster(MonsterConfig monsterConfig, bool mock)
+        {
+            AddPrefab(monsterConfig.预制名, mock);
 
+            CatModData.自定义怪物_列表.Add(monsterConfig);
+        }
 
 
         public void AddVegetation(VegetationConfig vegetationConfig, bool mock)
@@ -73,7 +78,11 @@ namespace ValheimCatManager.Tool
 
         }
 
-
+        /// <summary>
+        /// 注：最常用的预制件增加，仅在ZNetScene中注册预制件
+        /// </summary>
+        /// <param name="PrefabName"></param>
+        /// <param name="mock"></param>
         public void AddPrefab(string PrefabName, bool mock)
         {
             GameObject itemPrefab = catAsset.LoadAsset<GameObject>(PrefabName);
@@ -100,9 +109,9 @@ namespace ValheimCatManager.Tool
         /// <summary>
         /// 注：添加摆放型食物专用方法
         /// </summary>
-        /// <param name="foodName">注：物品名</param>
+        /// <param name="foodName">预制件名</param>
         /// <param name="groupName">Piece食物的分组</param>
-        /// <param name="mockCheck">注：是否启用 mock功能</param>
+        /// <param name="mockCheck">是否启用 mock功能</param>
         public void AddFood(string foodName, string groupName, bool mockCheck)
         {
             GameObject piecePrefab = catAsset.LoadAsset<GameObject>(foodName);
@@ -121,7 +130,7 @@ namespace ValheimCatManager.Tool
             PieceConfig pieceConfig = new PieceConfig(foodName);
             pieceConfig.制作工具 = "Feaster";
             pieceConfig.分组 = groupName;
-            pieceConfig.AddRequirement(foodName,1,true);
+            pieceConfig.AddRequirement(foodName, 1, true);
 
             if (!CatModData.自定义物件_字典.ContainsKey(hash)) CatModData.自定义物件_字典.Add(hash, pieceConfig);
 
@@ -131,6 +140,11 @@ namespace ValheimCatManager.Tool
         }
 
 
+        /// <summary>
+        /// 注：添加Piece物件
+        /// </summary>
+        /// <param name="pieceConfig">预制件名</param>
+        /// <param name="mockCheck">是否启用 mock功能</param>
         public void AddPiece(PieceConfig pieceConfig, bool mockCheck)
         {
             string name = pieceConfig.GetPrefabName();
@@ -143,7 +157,7 @@ namespace ValheimCatManager.Tool
 
             int hash = piecePrefab.name.GetStableHashCode();
 
-          
+
             if (!CatModData.自定义预制件_字典.ContainsKey(hash)) CatModData.自定义预制件_字典.Add(hash, piecePrefab);
 
             if (!CatModData.自定义物件_字典.ContainsKey(hash)) CatModData.自定义物件_字典.Add(hash, pieceConfig);
@@ -153,23 +167,53 @@ namespace ValheimCatManager.Tool
         }
 
 
+
+        /// <summary>
+        /// 注：添加烹饪站配方
+        /// </summary>
+        /// <param name="cookingStationConfig">烹饪站配置类，用于定义烹饪站的参数设置</param>
+        public void AddCookingStation(CookingStationConfig cookingStationConfig) => CatModData.烹饪站配置_列表.Add(cookingStationConfig);
+
+
+
+        /// <summary>
+        /// 注：添加炼制站配方
+        /// </summary>
+        /// <param name="smeltersConfig">炼制站配置类，用于定义炼制站的参数设置</param>
+        public void AddSmelters(SmeltersConfig smeltersConfig) => CatModData.炼制站配置_列表.Add(smeltersConfig);
+
     }
 
 
 
+
+
+
+
+
+
+
+
+
     [HarmonyPatch(typeof(ObjectDB), "Awake")]
-    [HarmonyPriority(Priority.Last)]
+    [HarmonyPriority(0)]
     class AddItemsPatch
     {
         static void Postfix(ObjectDB __instance)
         {
             if (SceneManager.GetActiveScene().name == "main")
             {
+
+
+
                 CatToolManager.GetShaderToCache();
-                CatToolManager.RegisterCategory();
+
+
+
                 CatToolManager.RegisterToZNetScene(CatModData.自定义物品_字典);
                 CatToolManager.RegisterToZNetScene(CatModData.自定义预制件_字典);
                 CatToolManager.RegisterToObjectDB(__instance, CatModData.自定义物品_字典);
+                CatToolManager.RegisterMonsterConfig(CatModData.自定义怪物_列表);
             }
         }
     }
@@ -184,41 +228,43 @@ namespace ValheimCatManager.Tool
             if (SceneManager.GetActiveScene().name == "main")
             {
                 CatToolManager.RegisterRecipe(__instance, CatModData.自定义配方_字典);
+                CatToolManager.RegisterCookingStationConfig(CatModData.烹饪站配置_列表);
+                CatToolManager.RegisterSmeltersConfig(CatModData.炼制站配置_列表);
+                //CatToolManager.CreateCustomCategoryTabs();
+
             }
         }
     }
 
-    [HarmonyPatch(typeof(ObjectDB), "Awake")]
-    [HarmonyPriority(2)]
-    class AddPiecePatch
-    {
-        static void Postfix(ObjectDB __instance)
-        {
-            if (SceneManager.GetActiveScene().name == "main")
-            {
-                CatToolManager.RegisterPiece(CatModData.自定义物件_字典);
-            }
-        }
-    }
 
-    [HarmonyPatch(typeof(ObjectDB), "Awake")]
+
+
+
+
+
+
+
+    [HarmonyPatch(typeof(ZoneSystem), "Start")]
     [HarmonyPriority(Priority.First)]
     class MockePatch
     {
         static void Postfix(ObjectDB __instance)
         {
 
-            if (SceneManager.GetActiveScene().name == "main")
-            {
+            //if (SceneManager.GetActiveScene().name == "main")
+            //{
                 var startTime1 = DateTime.Now;
 
                 MockSystem.StartMockReplacement();
                 CatModData.m_PrefabCache.Clear();
                 var elapsed1 = DateTime.Now - startTime1;
                 Debug.LogError($"mock 完成耗时: {elapsed1.TotalMilliseconds / 1000}秒");
-            }
+            //}
+            
         }
     }
+
+
 
     [HarmonyPatch(typeof(ObjectDB), "CopyOtherDB")]
     [HarmonyPriority(-101)]
@@ -233,11 +279,24 @@ namespace ValheimCatManager.Tool
             CatToolManager.RegisterToObjectDB(other, CatModData.自定义物品_字典);
             CatToolManager.RegisterToZNetScene(CatModData.自定义物品_字典);
 
-
         }
 
     }
 
+
+
+    [HarmonyPatch(typeof(SpawnSystem), "Awake")]
+    [HarmonyPriority(Priority.VeryLow)]
+    class SpawnPatch
+    {
+
+        static void Postfix(SpawnSystem __instance)
+        {
+
+            CatToolManager.RegisterSpawnList(__instance);
+        } 
+
+    }
     [HarmonyPatch(typeof(ZoneSystem), "SetupLocations")]
     [HarmonyPriority(0)]
     class ZoneSystemPatch
@@ -251,38 +310,14 @@ namespace ValheimCatManager.Tool
 
     }
 
-    [HarmonyPatch(typeof(SpawnSystem), "Awake")]
-    [HarmonyPriority(Priority.VeryLow)]
-    public class SpawnPatch
-    {
-        static void Postfix(SpawnSystem __instance) => CatToolManager.RegisterSpawnList(__instance);
-
-    }
 
 
-    [HarmonyPatch(typeof(Enum), "GetValues")]
-    [HarmonyPriority(Priority.Normal)]
-    class EnumGetValuesPatch
-    {
-        static void Postfix(Type enumType, ref Array __result)
-        {
-            CatToolManager.EnumGetPieceCategoryValuesPatch(enumType, ref __result);
 
-        }
 
-    }
 
-    [HarmonyPatch(typeof(Enum), "GetNames")]
-    [HarmonyPriority(Priority.Normal)]
-    class EnumGetNamesPatch
-    {
-        static void Postfix(Type enumType, ref string[] __result)
-        {
-            CatToolManager.EnumGetPieceCategoryNamesPatch(enumType, ref __result);
 
-        }
 
-    }
+
 
 
 

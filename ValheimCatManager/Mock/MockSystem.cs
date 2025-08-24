@@ -48,10 +48,10 @@ namespace ValheimCatManager.Mock
         /// </summary>
         public static void StartMockReplacement()
         {
-            if (!ZNetScene.instance || !ObjectDB.instance || CatModData.模拟物品_字典.Count == 0)
-            {
-                return;
-            }
+            //if (!ZNetScene.instance || !ObjectDB.instance || CatModData.模拟物品_字典.Count == 0)
+            //{
+            //    return;
+            //}
 
             Debug.LogError($"[CatMockSystem] 开始执行 mock ");
             // 清理原有列表和新增的着色器列表
@@ -95,6 +95,20 @@ namespace ValheimCatManager.Mock
             componentList.AddRange(prefab.GetComponentsInChildren<ItemDrop>(true));
             componentList.AddRange(prefab.GetComponentsInChildren<Piece>(true));
             componentList.AddRange(prefab.GetComponentsInChildren<WearNTear>(true));
+
+            componentList.AddRange(prefab.GetComponentsInChildren<Plant>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<Destructible>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<Pickable>(true));
+
+            componentList.AddRange(prefab.GetComponentsInChildren<Humanoid>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<CharacterDrop>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<MonsterAI>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<AnimalAI>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<FootStep>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<Tameable>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<Procreation>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<Growup>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<Ragdoll>(true));
 
             // 新增：收集渲染组件（用于着色器检测）
             componentList.AddRange(prefab.GetComponentsInChildren<Renderer>(true));
@@ -360,11 +374,7 @@ namespace ValheimCatManager.Mock
                 if (!CatModData.m_PrefabCache.TryGetValue(info.prefabName, out GameObject realPrefab))
                 {
                     realPrefab = CatToolManager.GetGameObject(info.prefabName);
-                    if (realPrefab == null)
-                    {
-                        Debug.LogError($"[CatMockSystem] 未找到真实预制件：{info.prefabName}（跳过）");
-                        continue;
-                    }
+                    if (realPrefab == null) continue;
                 }
 
                 try

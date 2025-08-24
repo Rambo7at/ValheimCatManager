@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using ValheimCatManager.Data;
 using static Piece;
@@ -25,20 +26,16 @@ namespace ValheimCatManager.Tool
         /// <returns>AB包</returns>
         public static AssetBundle LoadAssetBundle(string AssetName)
         {
-            // 获取本体程序集
             Assembly resourceAssembly = Assembly.GetExecutingAssembly();
 
-            // 获取所有嵌入式资源名称 并 查找匹配的资源名称
             string resourceName = Array.Find(resourceAssembly.GetManifestResourceNames(), name => name.EndsWith(AssetName));
 
-            // 判断资源是否找到
             if (string.IsNullOrEmpty(resourceName))
             {
                 Debug.LogError($"Dll 中未有找到 {AssetName} 资源包");
                 return null;
             }
 
-            // 从资源流加载AssetBundle
             using (Stream stream = resourceAssembly.GetManifestResourceStream(resourceName))
             {
                 if (stream == null)
@@ -72,8 +69,29 @@ namespace ValheimCatManager.Tool
                 m_itemByHash.Add(hash, item.Value);
             }
         }
+        public static void RegisterToZNetScene(Dictionary<int, GameObject> itemDictionary)
+        {
+            if (ZNetScene.instance == null || itemDictionary.Count == 0) return;
+
+            var m_namedPrefabsField = AccessTools.Field(typeof(ZNetScene), "m_namedPrefabs");
+            var m_namedPrefabs = m_namedPrefabsField.GetValue(ZNetScene.instance) as Dictionary<int, GameObject>;
+
+            foreach (var item in itemDictionary)
+            {
+
+                if (m_namedPrefabs.ContainsKey(item.Key)) continue;
 
 
+                ZNetScene.instance.m_prefabs.Add(item.Value);
+                m_namedPrefabs.Add(item.Key, item.Value);
+            }
+        }
+
+
+
+        /// <summary>
+        /// 注：注册配方
+        /// </summary>
         public static void RegisterRecipe(ObjectDB instance ,Dictionary<string, RecipeConfig> recipeDictionary)
         {
 
@@ -104,110 +122,74 @@ namespace ValheimCatManager.Tool
 
 
 
-
-        public static void RegisterToZNetScene(Dictionary<int, GameObject> itemDictionary)
+        public static void RegisterSmeltersConfig(List<SmeltersConfig> smeltersConfigs)
         {
-            if (ZNetScene.instance == null || itemDictionary.Count == 0) return;
-
-            var m_namedPrefabsField = AccessTools.Field(typeof(ZNetScene), "m_namedPrefabs");
-            var m_namedPrefabs = m_namedPrefabsField.GetValue(ZNetScene.instance) as Dictionary<int, GameObject>;
-
-            foreach (var item in itemDictionary)
+            foreach (var item in smeltersConfigs)
             {
+                GameObject prefabSmelters = GetGameObject(item.预制名);
+                GameObject prefabInputItem = GetGameObject(item.输入);
+                GameObject prefabOutputItem = GetGameObject(item.输出);
+                if (prefabSmelters == null || prefabInputItem == null || prefabOutputItem == null)
+                {
+                    Debug.LogError($"执行RegisterSmeltersConfig时，有单个预制件是空[{item.预制名}],[{item.输入}],[{item.输出}]，已跳过");
+                    continue;
+                }
 
-                if (m_namedPrefabs.ContainsKey(item.Key)) continue;
+                Smelter smelter = prefabSmelters.GetComponent<Smelter>();
+                if (smelter == null)
+                {
+                    Debug.LogError($"执行RegisterSmeltersConfig时，[{item.预制名}] 没有对应的[smelters组件]，已跳过");
+                    continue;
+                }
 
+                ItemDrop itemDropInput = prefabInputItem.GetComponent<ItemDrop>();
+                ItemDrop itemDropOutput = prefabOutputItem.GetComponent<ItemDrop>();
+                if (itemDropInput == null || itemDropOutput == null)
+                {
+                    Debug.LogError($"执行RegisterSmeltersConfig时，物品：{item.输入}或{item.输出} 没有[ItemDrop组件]，已跳过");
+                    continue;
+                }
 
-                ZNetScene.instance.m_prefabs.Add(item.Value);
-                m_namedPrefabs.Add(item.Key, item.Value);
+                smelter.m_conversion.Add(new Smelter.ItemConversion {m_from = itemDropInput ,m_to = itemDropOutput});
+
             }
+
         }
 
-
-
-
-        /// <summary>
-        /// 注：注册预制件 给对应的制作工具
-        /// <br>优化考虑：可以准备一个 Category 的缓存</br>
-        /// </summary>
-        /// <param name="pieceConfigDictionary"></param>
-        public static void RegisterPiece(Dictionary<int, PieceConfig> pieceConfigDictionary)
+        public static void RegisterCookingStationConfig(List<CookingStationConfig> cookingStationConfigs)
         {
-
-            foreach (var pieceConfig in pieceConfigDictionary)
+            foreach (var item in cookingStationConfigs)
             {
-                string pieceName = pieceConfig.Value.GetPrefabName();
-                string categoryName = pieceConfig.Value.分组;
-                PieceTable pieceTable = pieceConfig.Value.GetPieceTable();
-                GameObject piecePrefab = CatToolManager.GetGameObject(pieceConfig.Key);
-
-
-                if (piecePrefab == null)
+                GameObject prefabCookingStation = GetGameObject(item.预制名);
+                GameObject prefabInputItem = GetGameObject(item.输入);
+                GameObject prefabOutputItem = GetGameObject(item.输出);
+                if (prefabCookingStation == null || prefabInputItem == null || prefabOutputItem == null)
                 {
-                    Debug.LogError($"执行RegisterPiece时，Piece：{pieceName}，预制件是空，已跳过");
+                    Debug.LogError($"执行RegisterCookingStationConfig时，有单个预制件是空[{item.预制名}],[{item.输入}],[{item.输出}]，已跳过");
+                    continue;
+                }
+                CookingStation cookingStation = prefabCookingStation.GetComponent<CookingStation>();
+                if (cookingStation == null)
+                {
+                    Debug.LogError($"执行RegisterCookingStationConfig时，[{item.预制名}] 没有对应的[CookingStation组件]，已跳过");
+                    continue;
+                }
+                ItemDrop itemDropInput = prefabInputItem.GetComponent<ItemDrop>();
+                ItemDrop itemDropOutput = prefabOutputItem.GetComponent<ItemDrop>();
+                if (itemDropInput == null || itemDropOutput == null)
+                {
+                    Debug.LogError($"执行RegisterCookingStationConfig时，物品：{item.输入}或{item.输出} 没有[ItemDrop组件]，已跳过");
                     continue;
                 }
 
-                if (pieceTable == null)
-                {
-                    Debug.LogError($"执行RegisterPiece时，Piece：{pieceName}，对应的 【组件：pieceTable】 是空，已跳过");
-                    continue;
-                }
+                cookingStation.m_conversion.Add(new CookingStation.ItemConversion { m_from = itemDropInput, m_to  = itemDropOutput , m_cookTime = item.时间 });
 
-                Piece piece = piecePrefab.GetComponent<Piece>();
-                if (piece == null)
-                {
-                    Debug.LogError($"执行RegisterPiece时，Piece：{pieceName}，对应的 【组件：Piece】 是空，已跳过");
-                    continue;
-                }
-
-
-
-                if (!pieceTable.m_categoryLabels.Contains(categoryName))
-                {
-                    pieceTable.m_categoryLabels.Add(categoryName);
-                    pieceTable.m_categories.Add(GetCategory(categoryName));
-                }
-
-
-                if (!pieceTable.m_pieces.Contains(piecePrefab)) pieceTable.m_pieces.Add(piecePrefab);
-                piece.m_category = GetCategory(categoryName);
-
-                if(piece.m_resources.Length != 0) continue;
-
-                piece.m_resources = pieceConfig.Value.GetRequirementS();
 
             }
-
-
         }
 
 
-
-
-
-
-        public static void RegisterVegetation(Dictionary<int, VegetationConfig> VegetationDictionary , ZoneSystem instance)
-        { 
-        
-             if (VegetationDictionary.Count == 0 || instance == null) return;
-
-
-
-            foreach (var VegetationS in VegetationDictionary)
-            {
-                var Vegetation = VegetationS.Value.GetZoneVegetation();
-                if (instance.m_vegetation.Contains(Vegetation)) continue;
-
-                instance.m_vegetation.Add(Vegetation);
-            }
-
-
-        }
-
-
-
-        public static void RegisterSpawnList( SpawnSystem instance)
+        public static void RegisterSpawnList(SpawnSystem instance)
         {
             if (!CatModData.自定义生成_列表.Any())
             {
@@ -236,84 +218,92 @@ namespace ValheimCatManager.Tool
 
         }
 
-
-
-
-
-
-
-
-        /// <summary>
-        /// 注：通过反射 游戏枚举Piece.PieceCategory 获取枚举值
-        /// </summary>
-        /// <param name="categoryName"></param>
-        /// <returns>Piece.PieceCategory</returns>
-        private static Piece.PieceCategory GetCategory(string categoryName)
+        public static void RegisterVegetation(Dictionary<int, VegetationConfig> VegetationDictionary, ZoneSystem instance)
         {
-            Array enumValues = Enum.GetValues(typeof(Piece.PieceCategory));
-            string[] enumNames = Enum.GetNames(typeof(Piece.PieceCategory));
 
-            for (int i = 0; i < enumNames.Length; i++)
+            if (VegetationDictionary.Count == 0 || instance == null) return;
+
+
+
+            foreach (var VegetationS in VegetationDictionary)
             {
-                if (enumNames[i] == categoryName) return (Piece.PieceCategory)enumValues.GetValue(i);
+                var Vegetation = VegetationS.Value.GetZoneVegetation();
+                if (instance.m_vegetation.Contains(Vegetation)) continue;
+
+                instance.m_vegetation.Add(Vegetation);
             }
-            Debug.LogError($"执行GetCategory时，未找到对应名 枚举名：{categoryName}");
-            return Piece.PieceCategory.All;
+
+
         }
 
 
-
-
-
-        /// <summary>
-        /// 注：注册自定义 Category
-        /// <br><paramref name="Category"></paramref></br>：
-        /// 指的是 Piece上方的目录条
-        /// </summary>
-        public static void RegisterCategory()
+        public static void RegisterMonsterConfig(List<MonsterConfig> monsterConfigs)
         {
-            foreach (var item in CatModData.自定义物件_字典)
+            foreach (var monster in monsterConfigs)
             {
-                if (!CatModData.自定义目录_字典.ContainsKey(item.Value.分组))
+                GameObject monsterPrefab = GetGameObject(monster.预制名);
+                if (monsterPrefab == null)
                 {
-                    //Debug.LogError($"有进入这里 ");
-                    int indx = Enum.GetNames(typeof(Piece.PieceCategory)).Length - 1;
-                    //Debug.LogError($"打点1 长度：{indx}");
-                    CatModData.自定义目录_字典.Add(item.Value.分组, (Piece.PieceCategory)indx);
-                    //Debug.LogError($"打点2 ");
+                    Debug.LogError($"执行RegisterMonsterConfig时，预制件是空[{monster.预制名}]，已跳过");
+                    continue;
                 }
-            }
+                if (monster.食谱.Length == 0) continue;
+                MonsterAI monsterAI = monsterPrefab.GetComponent<MonsterAI>();
+                if (monsterAI == null)
+                {
+                    Debug.LogError($"执行RegisterMonsterConfig时，预制件：[{monster.预制名}]没有对应的MonsterAI组件，已跳过");
+                    continue;
+                }
+                List<ItemDrop> itemDrops = new List<ItemDrop>();
 
+                foreach (var item in monster.食谱)
+                {
+                    GameObject itemPrefab = GetGameObject(item);
+                    if (itemPrefab == null)
+                    {
+                        Debug.LogError($"执行RegisterMonsterConfig遍历食谱时，预制件：[{item}]是空，对应生物[{monster.预制名}]，已跳过");
+                        continue;
+                    }
+                    ItemDrop itemDrop = itemPrefab.GetComponent<ItemDrop>();
+                    if (itemDrop == null)
+                    {
+                        Debug.LogError($"执行RegisterMonsterConfig遍历食谱时，预制件：[{item}]没有ItemDrop组件，对应生物[{monster.预制名}]，已跳过");
+                        continue;
+                    }
+                    itemDrops.Add(itemDrop);
+                }
+
+
+                if (itemDrops.Count > 0 )
+                {
+                    monsterAI.m_consumeItems = itemDrops;
+                }
+
+            }
         }
 
 
-        public static void EnumGetPieceCategoryValuesPatch(Type enumType, ref Array __result)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public static Heightmap.Biome GetBiome(string biomeName)
         {
-            if (!(enumType != typeof(Piece.PieceCategory)) && CatModData.自定义目录_字典.Count != 0)
-            {
-                Piece.PieceCategory[] array = new Piece.PieceCategory[__result.Length + CatModData.自定义目录_字典.Count];
-                __result.CopyTo(array, 0);
-                CatModData.自定义目录_字典.Values.CopyTo(array, __result.Length);
-                __result = array;
-            }
+            foreach (Heightmap.Biome biome in Enum.GetValues(typeof(Heightmap.Biome))) if (Enum.GetName(typeof(Heightmap.Biome), biome) == biomeName) return biome;
+            Debug.LogError($"未找到自定义区域：{biomeName}检查一下");
+            return Heightmap.Biome.None;
+
         }
-
-
-        public static void EnumGetPieceCategoryNamesPatch(Type enumType, ref string[] __result)
-        {
-            if (!(enumType != typeof(Piece.PieceCategory)) && CatModData.自定义目录_字典.Count != 0)
-            {
-                __result = __result.AddRangeToArray(CatModData.自定义目录_字典.Keys.ToArray());
-            }
-        }
-
-
-
-
-
-
-
-
 
 
 
@@ -352,14 +342,9 @@ namespace ValheimCatManager.Tool
         }
 
 
-
-
-
-
-
-
-
-
+        /// <summary>
+        /// 注：这是一个检测方法，检测 Piece.PieceCategory 反射出来的值
+        /// </summary>
         public static void GetPieceCategory()
         {
             Array enumValues = Enum.GetValues(typeof(Piece.PieceCategory));
@@ -380,25 +365,6 @@ namespace ValheimCatManager.Tool
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         /// <summary>
         /// 注：获取已经完成注册的预制件，并添加给缓存(以预制件名获取)
         /// </summary>
@@ -416,11 +382,10 @@ namespace ValheimCatManager.Tool
             if (CatModData.m_PrefabCache.ContainsKey(name)) return CatModData.m_PrefabCache[name];
 
 
-            GameObject itemPrefab = ZNetScene.instance.GetPrefab(name) ?? ObjectDB.instance.GetItemPrefab(name);
-
+            GameObject itemPrefab = ZNetScene.instance.GetPrefab(name) ?? ObjectDB.instance.GetItemPrefab(name)?? ResourcesGetGameObject(name);
             if (itemPrefab == null)
             {
-                Debug.LogError($"未查询到注册 预制件{name}");
+                Debug.LogError($"未查询到注册 预制件[{name}]");
                 return null;
             } 
             else
@@ -436,7 +401,6 @@ namespace ValheimCatManager.Tool
           
         }
 
-
         /// <summary>
         /// 注：获取已经完成注册的预制件，并添加给缓存(以哈希值获取)
         /// </summary>
@@ -449,7 +413,7 @@ namespace ValheimCatManager.Tool
 
             if (itemPrefab == null)
             {
-                Debug.LogError($"未查询到注册预制件，哈希值：{hash}");
+                Debug.LogError($"未查询到注册预制件，哈希值：[{hash}]");
                 return null;
             }
             else
@@ -461,18 +425,41 @@ namespace ValheimCatManager.Tool
 
 
 
-
-        public static Heightmap.Biome GetBiome (string biomeName)
+        static GameObject ResourcesGetGameObject(string name)
         {
-            foreach (Heightmap.Biome biome in Enum.GetValues(typeof(Heightmap.Biome))) if (Enum.GetName(typeof(Heightmap.Biome), biome) == biomeName) return biome;
-            Debug.LogError($"未找到自定义区域：{biomeName}检查一下");
-            return Heightmap.Biome.None;
+
+            var @object = Resources.FindObjectsOfTypeAll<GameObject>();
+
+            foreach (var item in @object)
+            {
+                if (item.name == name)
+                {
+
+
+
+                    return item;
+
+
+                }
+            }
+
+            
+            return null;
+
+
 
         }
-
-
-
-
-
     }
+
+
+
+
+
+
+
+
+
+
+
+
 }
