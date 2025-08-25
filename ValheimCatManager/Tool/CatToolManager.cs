@@ -367,39 +367,31 @@ namespace ValheimCatManager.Tool
         /// <returns></returns>
         public static Shader GetShader(string name)
         {
-         
             if (string.IsNullOrEmpty(name))
             {
                 Debug.LogError("获取着色器名时，传入了空字符");
                 return null;
             }
 
-
-
-            if (!CatModData.ValidShaderId.ContainsKey(name))
-            {
-                Debug.LogError($"[{name}]着色器：无对应实例ID！");
-                return null;
-            }
-
             if (CatModData.m_haderCache.ContainsKey(name)) return CatModData.m_haderCache[name];
-
+            List<Shader> shaderList = new List<Shader>();
             var Shaders = Resources.FindObjectsOfTypeAll<Shader>();
-
-            foreach (var Shader in Shaders)
+            foreach (var Shaderx in Shaders)
             {
-                if (Shader == null) continue;
+                if (Shaderx == null) continue;
 
-                if (Shader.GetInstanceID() == CatModData.ValidShaderId[name])
+                if (Shaderx.name == name)
                 {
-                    CatModData.m_haderCache.Add(Shader.name, Shader);
-                    return Shader;
+                    shaderList.Add(Shaderx);
                 }
 
             }
-
-            return null;
-
+            if (shaderList.Count != 0)
+            {
+                CatModData.m_haderCache.Add(shaderList[shaderList.Count - 1].name, shaderList[shaderList.Count - 1]);
+                return shaderList[0];
+            }
+            return null;    
         }
 
         /// <summary>
