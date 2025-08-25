@@ -361,34 +361,45 @@ namespace ValheimCatManager.Tool
         }
 
         /// <summary>
-        /// 注：获取游戏原版"Custom/Vegetation"着色器，并缓存到CatModData.m_haderCache中
-        /// 依赖：通过"Turnip"（芜菁）预制件的Renderer组件提取着色器（确保基础资源存在）
+        /// 注：按名称获取已注册的着色器，并缓存到CatModData.m_haderCache（避免重复查询）
         /// </summary>
-        public static void GetShaderToCache()
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static Shader GetShader(string name)
         {
-            // 加载"Turnip"预制件，获取其所有子对象的Renderer组件（用于提取着色器）
-            var realShader = CatToolManager.GetGameObject("Turnip").GetComponentsInChildren<Renderer>(true);
-
-            foreach (var item in realShader)
+         
+            if (string.IsNullOrEmpty(name))
             {
-                if (item is Renderer renderer)
-                {
-                    // 遍历Renderer的所有材质
-                    for (int i = 0; i < renderer.sharedMaterials.Length; i++)
-                    {
-                        Material material = renderer.sharedMaterials[i];
-                        // 匹配目标着色器（"Custom/Vegetation"）
-                        if (material.shader.name == "Custom/Vegetation")
-                        {
-                            // 避免重复缓存，添加到着色器缓存字典
-                            if (!CatModData.m_haderCache.ContainsKey(material.shader.name))
-                            {
-                                CatModData.m_haderCache.Add(material.shader.name, material.shader);
-                            }
-                        }
-                    }
-                }
+                Debug.LogError("获取着色器名时，传入了空字符");
+                return null;
             }
+
+
+
+            if (!CatModData.ValidShaderId.ContainsKey(name))
+            {
+                Debug.LogError($"[{name}]着色器：无对应实例ID！");
+                return null;
+            }
+
+            if (CatModData.m_haderCache.ContainsKey(name)) return CatModData.m_haderCache[name];
+
+            var Shaders = Resources.FindObjectsOfTypeAll<Shader>();
+
+            foreach (var Shader in Shaders)
+            {
+                if (Shader == null) continue;
+
+                if (Shader.GetInstanceID() == CatModData.ValidShaderId[name])
+                {
+                    CatModData.m_haderCache.Add(Shader.name, Shader);
+                    return Shader;
+                }
+
+            }
+
+            return null;
+
         }
 
         /// <summary>
@@ -499,6 +510,7 @@ namespace ValheimCatManager.Tool
                 if (item.name == name)
                 {
                     return item;
+
                 }
             }
 

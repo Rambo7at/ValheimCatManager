@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using ValheimCatManager.Data;
 using ValheimCatManager.Mock;
+using BepInEx;
 using Debug = UnityEngine.Debug;
 
 namespace ValheimCatManager.Tool
@@ -19,14 +20,45 @@ namespace ValheimCatManager.Tool
     /// </summary>
     public class CatResModManager
     {
-        // 加载的AssetBundle资源包（存储自定义资源）
-        AssetBundle catAsset;
+
+        // 1. 关键1：静态实例（属于类，全局唯一）
+        private static CatResModManager _instance;
+
+        // 2. 关键2：静态访问入口（外部唯一能拿到实例的方式）
+        public static CatResModManager Instance
+        {
+            get
+            {
+                // 如果实例还没创建，就创建一个（懒加载：用的时候才创建）
+                if (_instance == null)
+                {
+                    _instance = new CatResModManager();
+                }
+                return _instance;
+            }
+        }
+
+        // 3. 私有构造：阻止外部用 new 创建，确保只能通过 Instance 获取
+        private CatResModManager() { }
+
+        // 你原有的资源包字段（保留，改为私有更安全）
+        private AssetBundle catAsset;
 
         /// <summary>
-        /// 注：构造函数，初始化资源模块管理器并传入已加载的AssetBundle
+        /// 注：加载资源包（传入已加载的AssetBundle实例，初始化资源包）
         /// </summary>
-        /// <param name="assetBundle">已加载的AssetBundle资源包（包含自定义预制件、配置等资源）</param>
-        public CatResModManager(AssetBundle assetBundle) => catAsset = assetBundle;
+        /// <param name="assetBundle"></param>
+        public void LoadAssetBundle(AssetBundle assetBundle)
+        {
+            if (catAsset != null)
+            {
+          
+                Debug.LogError("CatResModManager内的资源包已经有内容，返回。");
+                return;
+            }
+            catAsset = assetBundle;
+        }
+
 
         /// <summary>
         /// 注：给游戏添加自定义物品（从AssetBundle加载物品预制件，注册到物品字典，可选启用模拟）
@@ -216,7 +248,6 @@ namespace ValheimCatManager.Tool
             // 仅在主场景（"main"）执行（避免非游戏场景误触发）
             if (SceneManager.GetActiveScene().name == "main")
             {
-                CatToolManager.GetShaderToCache(); // 加载着色器到缓存
                 CatToolManager.RegisterToObjectDB(__instance, CatModData.自定义物品_字典); // 注册自定义物品到ObjectDB
                 CatToolManager.RegisterMonsterConfig(CatModData.自定义怪物_列表); // 注册自定义怪物配置
             }

@@ -443,17 +443,16 @@ namespace ValheimCatManager.Mock
         {
             foreach (var info in m_MockShaderInfoList)
             {
-                // 从缓存获取真实着色器
-                if (!CatModData.m_haderCache.TryGetValue(info.ShaderName, out Shader realShader) || realShader == null)
+                var shader =  CatToolManager.GetShader(info.ShaderName);
+                if (shader == null)
                 {
-                    Debug.LogError($"[CatMockSystem] 未找到真实着色器：{info.ShaderName}（跳过）");
-                    continue;
+                    Debug.LogError($"[CatMockSystem] 执行ReplaceMockShaders时 找不到着色器：{info.ShaderName}");
                 }
 
                 try
                 {
                     // 替换材质中的着色器为真实着色器
-                    info.TargetMaterial.shader = realShader;
+                    info.TargetMaterial.shader = shader;
                 }
                 catch (Exception ex)
                 {
