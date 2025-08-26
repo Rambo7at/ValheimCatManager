@@ -13,13 +13,13 @@ using static Player;
 
 namespace ValheimCatManager
 {
-    [BepInPlugin(pluginGUID, pluginName, pluginVersion)]
+    [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     public class CatManagerPlugin : BaseUnityPlugin
     {
 
-        public const string pluginGUID = "com.rambo7at.CatManager";
-        public const string pluginName = "猫咪：Mod管理";
-        public const string pluginVersion = "0.1.0";
+        public const string PluginGUID = "com.rambo7at.CatManager";
+        public const string PluginName = "猫咪：Mod管理";
+        public const string PluginVersion = "0.1.0";
 
         public static AssetBundle assetBundle;
 

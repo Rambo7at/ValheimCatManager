@@ -119,18 +119,14 @@ namespace ValheimCatManager.Tool
         /// <param name="mockCheck">是否启用Mock功能（true则将物品加入模拟物品字典，用于后续MockSystem替换）</param>
         public void AddItem(string itemName, bool mockCheck)
         {
-            // 从AssetBundle加载物品预制件
             GameObject itemPrefab = catAsset.LoadAsset<GameObject>(itemName);
             if (!itemPrefab)
             {
                 Debug.LogError($"执行AddItem时，从资源中未找到 Prefab：{itemName}，已跳过");
                 return;
             }
-            // 生成预制件名的稳定哈希（作为字典键，确保唯一性）
             int hash = itemPrefab.name.GetStableHashCode();
-            // 若物品字典中无该物品，添加到自定义物品字典
             if (!CatModData.自定义物品_字典.ContainsKey(hash)) CatModData.自定义物品_字典.Add(hash, itemPrefab);
-            // 若启用Mock，且模拟物品字典中无该物品，添加到模拟物品字典
             if (mockCheck) if (!CatModData.模拟物品_字典.ContainsKey(hash)) CatModData.模拟物品_字典.Add(hash, itemPrefab.name);
         }
 
