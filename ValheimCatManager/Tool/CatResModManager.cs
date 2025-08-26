@@ -23,10 +23,7 @@ namespace ValheimCatManager.Tool
     public class CatResModManager
     {
 
-        // 1. 关键1：静态实例（属于类，全局唯一）
         private static CatResModManager _instance;
-
-        // 2. 关键2：静态访问入口（外部唯一能拿到实例的方式）
         public static CatResModManager Instance
         {
             get
@@ -39,8 +36,6 @@ namespace ValheimCatManager.Tool
                 return _instance;
             }
         }
-
-        // 3. 私有构造：阻止外部用 new 创建，确保只能通过 Instance 获取
         private CatResModManager()
         {
             var harmony = new Harmony("CatManager");

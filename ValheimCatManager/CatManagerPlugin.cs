@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
-using static ItemDrop;
-using static Player;
 
 namespace ValheimCatManager
 {
@@ -25,7 +23,7 @@ namespace ValheimCatManager
 
         public void Awake()
         {
-
+            CatResModManager.Instance.LoadAssetBundle("1111");
         }
 
 

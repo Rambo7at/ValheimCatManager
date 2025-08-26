@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using ValheimCatManager.Data;
-using static Piece;
 
 namespace ValheimCatManager.Tool
 {
