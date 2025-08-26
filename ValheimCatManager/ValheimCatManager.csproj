@@ -1,183 +1,113 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E8B6EF84-F520-4CCC-A4E2-CB090D36A257}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ValheimCatManager</RootNamespace>
-    <AssemblyName>ValheimCatManager</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+
+
+	<PropertyGroup>
+		<!-- 指定目标框架为 .NET Framework 4.8.1 -->
+		<TargetFramework>net481</TargetFramework>
+
+		<!-- 设置 C# 语言版本为 12.0 -->
+		<LangVersion>12.0</LangVersion>
+
+		<!-- 启用隐式 Using 指令 -->
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<!-- 启用 Nullable 引用类型 -->
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <WarningLevel>0</WarningLevel>
+	</PropertyGroup>
+
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <WarningLevel>0</WarningLevel>
+	</PropertyGroup>
+
+
+
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="0Harmony">
       <HintPath>Libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="assembly_guiutils, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="assembly_guiutils">
       <HintPath>Libs\assembly_guiutils.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="assembly_utils, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="assembly_utils">
       <HintPath>Libs\assembly_utils.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="assembly_valheim_publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="assembly_valheim">
       <HintPath>Libs\assembly_valheim_publicized.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="BepInEx, Version=5.4.22.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="BepInEx">
       <HintPath>Libs\BepInEx.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="BepInEx.Harmony, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="BepInEx.Harmony">
       <HintPath>Libs\BepInEx.Harmony.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="BepInEx.Preloader, Version=5.4.22.2, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="BepInEx.Preloader">
       <HintPath>Libs\BepInEx.Preloader.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="HarmonyXInterop, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="HarmonyXInterop">
       <HintPath>Libs\HarmonyXInterop.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Mono.Cecil">
       <HintPath>Libs\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Cecil.Mdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Mono.Cecil.Mdb">
       <HintPath>Libs\Mono.Cecil.Mdb.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Cecil.Pdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Mono.Cecil.Pdb">
       <HintPath>Libs\Mono.Cecil.Pdb.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Mono.Cecil.Rocks, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Mono.Cecil.Rocks">
       <HintPath>Libs\Mono.Cecil.Rocks.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="MonoMod.RuntimeDetour, Version=22.1.29.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="MonoMod.RuntimeDetour">
       <HintPath>Libs\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="MonoMod.Utils, Version=22.1.29.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="MonoMod.Utils">
       <HintPath>Libs\MonoMod.Utils.dll</HintPath>
-    </Reference>
-    <Reference Include="System">
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Core">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Xml.Linq">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Data">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Net.Http">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Xml">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Unity.TextMeshPro">
       <HintPath>Libs\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine">
       <HintPath>Libs\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>Libs\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine.CoreModule">
       <HintPath>Libs\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="UnityEngine.UI">
       <HintPath>Libs\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CatManagerPlugin.cs" />
-    <Compile Include="Data\CatModData.cs" />
-    <Compile Include="Data\CookingStationConfig.cs" />
-    <Compile Include="Data\MonsterConfig.cs" />
-    <Compile Include="Data\SmeltersConfig.cs" />
-    <Compile Include="Data\SpawnConfig.cs" />
-    <Compile Include="Data\VegetationConfig.cs" />
-    <Compile Include="Data\PieceConfig.cs" />
-    <Compile Include="Data\RequirementConfig.cs" />
-    <Compile Include="Data\RecipeConfig.cs" />
-    <Compile Include="Managers\PieceManager.cs" />
-    <Compile Include="Mock\MockSystem.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tool\CatToolManager.cs" />
-    <Compile Include="Tool\CatResModManager.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="D:\publicized_assemblies\assembly_valheim_publicized.dll" />
-    <Analyzer Include="D:\SteamLibrary\steamapps\common\Valheim\valheim_Data\Managed\assembly_utils.dll" />
-    <Analyzer Include="D:\SteamLibrary\steamapps\common\Valheim\valheim_Data\Managed\assembly_valheim.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Asset\" />
-    <Folder Include="Patch\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Libs\0Harmony.dll" />
-    <Content Include="Libs\assembly_guiutils.dll" />
-    <Content Include="Libs\assembly_utils.dll" />
-    <Content Include="Libs\assembly_valheim_publicized.dll" />
-    <Content Include="Libs\BepInEx.dll" />
-    <Content Include="Libs\BepInEx.Harmony.dll" />
-    <Content Include="Libs\BepInEx.Preloader.dll" />
-    <Content Include="Libs\HarmonyXInterop.dll" />
-    <Content Include="Libs\Mono.Cecil.dll" />
-    <Content Include="Libs\Mono.Cecil.Mdb.dll" />
-    <Content Include="Libs\Mono.Cecil.Pdb.dll" />
-    <Content Include="Libs\Mono.Cecil.Rocks.dll" />
-    <Content Include="Libs\MonoMod.RuntimeDetour.dll" />
-    <Content Include="Libs\MonoMod.Utils.dll" />
-    <Content Include="Libs\Unity.TextMeshPro.dll" />
-    <Content Include="Libs\UnityEngine.AssetBundleModule.dll" />
-    <Content Include="Libs\UnityEngine.CoreModule.dll" />
-    <Content Include="Libs\UnityEngine.dll" />
-    <Content Include="Libs\UnityEngine.UI.dll" />
-  </ItemGroup>
-  <!-- 新增：仅复制 DLL 到 Valheim 插件目录 -->
+
+  <!-- 保留自定义构建目标（自动复制到 Valheim 插件目录） -->
   <Target Name="CopyToValheimPlugins" AfterTargets="Build">
     <PropertyGroup>
       <ValheimPluginsDir>D:\SteamLibrary\steamapps\common\Valheim\BepInEx\plugins</ValheimPluginsDir>
@@ -185,5 +115,56 @@
     <MakeDir Directories="$(ValheimPluginsDir)" Condition="!Exists('$(ValheimPluginsDir)')" />
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(ValheimPluginsDir)\$(TargetFileName)" SkipUnchangedFiles="true" />
   </Target>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Reference Update="mscorlib">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.Core">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.Data">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.Drawing">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.IO.Compression.FileSystem">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.Numerics">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.Runtime.Serialization">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.Xml">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Update="System.Xml.Linq">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- SDK 项目自动导入 C# 目标，无需手动导入 Microsoft.CSharp.targets -->
 </Project>

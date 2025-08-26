@@ -108,7 +108,7 @@ namespace ValheimCatManager.Data
         /// 注：从 列表：resList 获取 Piece.Requirement[]
         /// </summary>
         /// <returns>Piece.Requirement[]</returns>
-        public Piece.Requirement[] GetRequirementArr()
+        public Piece.Requirement[]? GetRequirementArr()
         {
 
             if (resList.Count == 0) return null;
