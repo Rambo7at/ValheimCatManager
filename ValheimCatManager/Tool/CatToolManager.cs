@@ -18,43 +18,7 @@ namespace ValheimCatManager.Tool
     /// </summary>
     public class CatToolManager
     {
-        /// <summary>
-        /// 注：从当前程序集（DLL）中加载指定名称的AssetBundle资源包
-        /// </summary>
-        /// <param name="AssetName">要加载的AssetBundle名称（含后缀，如"catmod.unity3d"）</param>
-        /// <returns>加载成功的AssetBundle实例；加载失败（未找到资源/资源流异常）则返回null</returns>
-        /// <remarks>
-        /// <paramref name="AssetName"/> ：传入资源名 string 类型，需与DLL中嵌入的资源名完全匹配<br/>
-        /// 内部逻辑：1. 获取当前执行程序集 → 2. 查找匹配名称的资源 → 3. 读取资源流 → 4. 从流加载AssetBundle
-        /// </remarks>
-        public static AssetBundle LoadAssetBundle(string AssetName)
-        {
-            // 获取当前执行的程序集（即包含该工具类的DLL）
-            Assembly resourceAssembly = Assembly.GetExecutingAssembly();
 
-            // 从程序集中查找名称以目标AssetName结尾的资源（匹配嵌入的AB包）
-            string resourceName = Array.Find(resourceAssembly.GetManifestResourceNames(), name => name.EndsWith(AssetName));
-
-            // 未找到对应资源时打印错误并返回null
-            if (string.IsNullOrEmpty(resourceName))
-            {
-                Debug.LogError($"Dll 中未有找到 {AssetName} 资源包");
-                return null;
-            }
-
-            // 读取资源流并加载AssetBundle
-            using (Stream stream = resourceAssembly.GetManifestResourceStream(resourceName))
-            {
-                if (stream == null)
-                {
-                    Debug.LogError($"无法获取资源流: {resourceName}");
-                    return null;
-                }
-
-                // 从资源流加载AssetBundle
-                return AssetBundle.LoadFromStream(stream);
-            }
-        }
 
         /// <summary>
         /// 注：将自定义物品注册到ObjectDB（游戏物品数据库），确保物品可被游戏识别
@@ -509,5 +473,62 @@ namespace ValheimCatManager.Tool
             // 未找到时返回null
             return null;
         }
+
+
+
+        static void GetVegetationInfo(ZoneSystem zoneSystem)
+        {
+            // 打印植被总数量
+            Debug.LogError($"当前植被总数量：{zoneSystem.m_vegetation.Count}");
+            Debug.LogError("=============================================");
+            foreach (var item in zoneSystem.m_vegetation)
+            {
+                // 1. 基础信息：名称、预制体
+                Debug.LogError($"当前植被名称：{item.m_name}");
+                Debug.LogError($"当前植被预制件名称：{item.m_prefab.name}");
+
+                // 2. 生成开关与密度
+                Debug.LogError($"当前植被生成开关（m_enable）：{(item.m_enable)}");
+                Debug.LogError($"当前植被生成密度-最小值（m_min）：{item.m_min}");
+                Debug.LogError($"当前植被生成密度-最大值（m_max）：{item.m_max}");
+                Debug.LogError($"当前植被是否强制生成（m_forcePlacement）：{(item.m_forcePlacement)}");
+
+                // 3. 缩放与倾斜
+                Debug.LogError($"当前植被缩放-最小值（m_scaleMin）：{item.m_scaleMin}");
+                Debug.LogError($"当前植被缩放-最大值（m_scaleMax）：{item.m_scaleMax}");
+                Debug.LogError($"当前植被随机倾斜角度（m_randTilt）：{item.m_randTilt}°");
+                Debug.LogError($"当前植被地面倾斜复用概率（m_chanceToUseGroundTilt）：{item.m_chanceToUseGroundTilt}");
+
+                Debug.LogError($"当前植被适用生物群系（m_biome）：{item.m_biome}");
+                Debug.LogError($"当前植被适用生物群系区域（m_biomeArea）：{item.m_biomeArea}");
+
+                // 5. 地形与海拔限制
+                Debug.LogError($"当前植被是否开启阻挡检测（m_blockCheck）：{item.m_blockCheck}");
+                Debug.LogError($"当前植被是否吸附静态固体（m_snapToStaticSolid）：{item.m_snapToStaticSolid}");
+                Debug.LogError($"当前植被生成海拔-最小值（m_minAltitude）：{item.m_minAltitude}");
+                Debug.LogError($"当前植被生成海拔-最大值（m_maxAltitude）：{item.m_maxAltitude}");
+                Debug.LogError($"当前植被生成地形倾斜-最小值（m_minTilt）：{item.m_minTilt}°");
+                Debug.LogError($"当前植被生成地形倾斜-最大值（m_maxTilt）：{item.m_maxTilt}°");
+
+                // 6. 组生成配置
+                Debug.LogError($"当前植被组生成大小-最小值（m_groupSizeMin）：{item.m_groupSizeMin}");
+                Debug.LogError($"当前植被组生成大小-最大值（m_groupSizeMax）：{item.m_groupSizeMax}");
+                Debug.LogError($"当前植被组生成半径（m_groupRadius）：{item.m_groupRadius}");
+
+                // 7. 森林内生成条件
+                Debug.LogError($"当前植被是否仅在森林内生成（m_inForest）：{item.m_inForest}");
+                if (item.m_inForest)
+                {
+                    Debug.LogError($"当前植被森林生成阈值-最小值（m_forestTresholdMin）：{item.m_forestTresholdMin}");
+                    Debug.LogError($"当前植被森林生成阈值-最大值（m_forestTresholdMax）：{item.m_forestTresholdMax}");
+                }
+
+                // 分隔线：区分不同植被的打印信息
+                Debug.LogError("---------------------------------------------");
+
+            }
+
+        }
+
     }
 }

@@ -1,16 +1,18 @@
-﻿using HarmonyLib;
+﻿using BepInEx;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using ValheimCatManager.Data;
 using ValheimCatManager.Mock;
-using BepInEx;
 using Debug = UnityEngine.Debug;
 
 namespace ValheimCatManager.Tool
@@ -39,7 +41,11 @@ namespace ValheimCatManager.Tool
         }
 
         // 3. 私有构造：阻止外部用 new 创建，确保只能通过 Instance 获取
-        private CatResModManager() { }
+        private CatResModManager()
+        {
+            var harmony = new Harmony("CatManager");
+            harmony.PatchAll();
+        }
 
         // 你原有的资源包字段（保留，改为私有更安全）
         private AssetBundle catAsset;
@@ -48,7 +54,7 @@ namespace ValheimCatManager.Tool
         /// 注：加载资源包（传入已加载的AssetBundle实例，初始化资源包）
         /// </summary>
         /// <param name="assetBundle"></param>
-        public void LoadAssetBundle(AssetBundle assetBundle)
+        public void LoadAssetBundle(string assetName)
         {
             if (catAsset != null)
             {
@@ -56,8 +62,54 @@ namespace ValheimCatManager.Tool
                 Debug.LogError("CatResModManager内的资源包已经有内容，返回。");
                 return;
             }
-            catAsset = assetBundle;
+
+            catAsset = LoadAssetBundleToCatAsset(assetName);
         }
+
+
+
+        /// <summary>
+        /// 注：从当前程序集（DLL）中加载指定名称的AssetBundle资源包
+        /// </summary>
+        /// <param name="AssetName">要加载的AssetBundle名称（含后缀，如"catmod.unity3d"）</param>
+        /// <returns>加载成功的AssetBundle实例；加载失败（未找到资源/资源流异常）则返回null</returns>
+        /// <remarks>
+        /// <paramref name="AssetName"/> ：传入资源名 string 类型，需与DLL中嵌入的资源名完全匹配<br/>
+        /// 内部逻辑：1. 获取当前执行程序集 → 2. 查找匹配名称的资源 → 3. 读取资源流 → 4. 从流加载AssetBundle
+        /// </remarks>
+        private AssetBundle LoadAssetBundleToCatAsset(string AssetName)
+        {
+            // 获取当前执行的程序集（即包含该工具类的DLL）
+            Assembly resourceAssembly = Assembly.GetExecutingAssembly();
+
+            // 从程序集中查找名称以目标AssetName结尾的资源（匹配嵌入的AB包）
+            string resourceName = Array.Find(resourceAssembly.GetManifestResourceNames(), name => name.EndsWith(AssetName));
+
+            // 未找到对应资源时打印错误并返回null
+            if (string.IsNullOrEmpty(resourceName))
+            {
+                Debug.LogError($"Dll 中未有找到 {AssetName} 资源包");
+                return null;
+            }
+
+            // 读取资源流并加载AssetBundle
+            using (Stream stream = resourceAssembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                {
+                    Debug.LogError($"无法获取资源流: {resourceName}");
+                    return null;
+                }
+
+                // 从资源流加载AssetBundle
+                return AssetBundle.LoadFromStream(stream);
+            }
+        }
+
+
+
+
+
 
 
         /// <summary>

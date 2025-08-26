@@ -163,21 +163,6 @@ namespace ValheimCatManager.Data
         public float 最大倾斜 { get; set; } = 35f;
 
         /// <summary>
-        /// 最小地形高度变化量<br>(默认值：0)</br>
-        /// </summary>
-        public float 地形高度变化半径 { get; set; } = 0f;
-
-        /// <summary>
-        /// 值越低，植被越倾向于生成在平坦区域。。<br>(默认值：10)</br>
-        /// </summary>
-        public float 最大_地形高度变化 { get; set; } = 10f;
-
-        /// <summary>
-        /// 值越高，植被越倾向于生成在斜坡区域。<br>(默认值：0)</br>
-        /// </summary>
-        public float 最小_地形高度变化 { get; set; } = 0f;
-
-        /// <summary>
         /// 若启用，植被会放置在水位处而非地形表面。 <br>(默认值：false)</br>
         /// </summary>
         public bool 吸附水面 { get; set; } = false;
@@ -185,7 +170,7 @@ namespace ValheimCatManager.Data
         /// <summary>
         /// 注：在地面上方生成 <br>(默认值：0.5)</br>
         /// </summary>
-        public float 地面偏移 { get; set; } = 0.5f;
+        public float 地面偏移 { get; set; } = 0f;
 
         /// <summary>
         /// 注：组合生成的最小数量<br>(默认值：1)</br>
@@ -204,14 +189,14 @@ namespace ValheimCatManager.Data
 
 
         /// <summary>
-        /// 注：是否可在森林里生成<br>(默认值：true)</br>
+        /// 注：是否可在森林里生成<br>(默认值：false)</br>
         /// </summary>
-        public bool 森林内生成 { get; set; } = true;
+        public bool 森林内生成 { get; set; } = false;
 
         /// <summary>
         /// 最小森林值（若仅在森林中生成）
         /// </summary>
-        public float 森林最小值阈值 { get; set; } = 0f;
+        public float 森林最小阈值 { get; set; } = 0f;
 
         /// <summary>
         /// 最大森林值（若仅在森林中生成）
@@ -219,7 +204,6 @@ namespace ValheimCatManager.Data
         public float 森林最大阈值 { get; set; } = 0f;
 
 
-        //public bool m_foldout;
 
 
 
@@ -235,12 +219,13 @@ namespace ValheimCatManager.Data
             var prefab = CatToolManager.GetGameObject(预制件);
             if (!prefab) return null;
 
+            名字 = $"Veg_{prefab.name}";
             var biome = CatToolManager.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;
 
             return new ZoneVegetation
             {
-                m_name = prefab.name,
+                m_name = 名字,
                 m_prefab = prefab,
                 m_enable = 启用,
                 m_min = 最小_数量,
@@ -266,17 +251,14 @@ namespace ValheimCatManager.Data
                 m_maxOceanDepth = 海洋深度小 > 海洋深度大 ? 海洋深度小 : 海洋深度大,
                 m_minTilt = 最小倾斜,
                 m_maxTilt = 最小倾斜 > 最大倾斜 ? 最小倾斜 : 最大倾斜,
-                m_terrainDeltaRadius = 地形高度变化半径,
-                m_minTerrainDelta = 最小_地形高度变化,
-                m_maxTerrainDelta = 最小_地形高度变化 > 最大_地形高度变化 ? 最小_地形高度变化 : 最大_地形高度变化,
                 m_snapToWater = 吸附水面,
                 m_groundOffset = 地面偏移,
                 m_groupSizeMin = 组最小,
                 m_groupSizeMax = 组最小 > 组最大 ? 组最小 : 组最大,
                 m_groupRadius = 组间距,
                 m_inForest = 森林内生成,
-                m_forestTresholdMin = 森林最小值阈值,
-                m_forestTresholdMax = 森林最小值阈值 > 森林最大阈值 ? 森林最小值阈值 : 森林最大阈值
+                m_forestTresholdMin = 森林最小阈值,
+                m_forestTresholdMax = 森林最小阈值 > 森林最大阈值 ? 森林最小阈值 : 森林最大阈值
             };
         }
 
