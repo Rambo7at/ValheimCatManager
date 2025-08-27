@@ -512,7 +512,11 @@ namespace ValheimCatManager.Managers
             GameObject newTab = UnityEngine.Object.Instantiate(firstTab, firstTab.transform.parent);
             newTab.SetActive(false); // 初始隐藏
 
-            // 调整文本组件属性（自适应大小、换行、截断等）
+            // 添加输入处理组件并绑定点击事件 - 这是正确的调用方式
+            UIInputHandler handler = newTab.GetOrAddComponent<UIInputHandler>();
+            handler.m_onLeftDown += Hud.instance.OnLeftClickCategory;
+
+            // 调整文本组件属性
             foreach (var text in newTab.GetComponentsInChildren<TMP_Text>(true))
             {
                 text.rectTransform.offsetMin = new Vector2(3, 1);
@@ -682,11 +686,10 @@ namespace ValheimCatManager.Managers
         /// <returns>处理偏移后的最大分类索引值</returns>
         private static int MaxCategory()
         {
-            // 获取枚举所有值的总长度，减1得到原生最大索引
-            var cats = Enum.GetValues(typeof(Piece.PieceCategory)).Length - 1;
-            // 偏移所有在 Piece.PieceCategory.All（索引100）之后的分类，避免索引冲突
-            return cats < (int)GetPieceCategory("All") ? cats : cats + 1;
+            return Enum.GetValues(typeof(Piece.PieceCategory)).Length - 1;
         }
+
+
 
         #endregion
     }

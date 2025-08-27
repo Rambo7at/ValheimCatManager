@@ -15,7 +15,7 @@ namespace ValheimCatManager.Tool
     /// <summary>
     /// 工具管理类（提供资源加载、游戏对象注册、配置注册等核心工具方法，支撑自定义内容接入游戏）
     /// </summary>
-    public class CatToolManager
+    public static class CatToolManager
     {
 
 
@@ -473,7 +473,10 @@ namespace ValheimCatManager.Tool
             return null;
         }
 
-
+        public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
+        {
+            return gameObject.TryGetComponent(out T component) ? component : gameObject.AddComponent<T>();
+        }
 
         static void GetVegetationInfo(ZoneSystem zoneSystem)
         {
