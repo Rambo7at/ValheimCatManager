@@ -18,7 +18,7 @@ namespace ValheimCatManager.Data
         public static readonly List<MonsterConfig> 自定义怪物_列表 = new List<MonsterConfig>();
 
 
-       
+
 
 
 
@@ -64,6 +64,14 @@ namespace ValheimCatManager.Data
         /// 注：给 SpawnSystem 添加生成的类
         /// </summary>
         public static SpawnSystemList SpawnSystemList = new SpawnSystemList();
+
+
+
+
+     
+
+
+
 
     }
 }

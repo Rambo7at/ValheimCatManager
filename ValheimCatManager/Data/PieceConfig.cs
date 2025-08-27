@@ -30,7 +30,7 @@ namespace ValheimCatManager.Data
 
             预制件 = name;
 
-            分组 = category;
+            目录 = category;
 
             制作工具 = tool;
 
@@ -82,7 +82,7 @@ namespace ValheimCatManager.Data
         /// <summary>
         /// 注：制作的分组标签
         /// </summary>
-        public string 分组 { get; set; } = string.Empty;
+        public string 目录 { get; set; } = string.Empty;
 
 
 
@@ -158,7 +158,7 @@ namespace ValheimCatManager.Data
         /// <summary>
         /// 注：获取预制名
         /// </summary>
-        /// <returns>Requirement的材料名</returns>
+        /// <returns>Piece的预制件名</returns>
         public string GetPrefabName() { return 预制件; }
 
 

@@ -80,12 +80,12 @@ namespace ValheimCatManager.Data
         /// <summary>
         /// 注：与玩家的最小距离。<br>(默认值：40)</br>
         /// </summary>
-        public float 最小玩家间距 { get; set; } = 40f;
+        public float 最小玩家间距 { get; set; }
 
         /// <summary>
         /// 注：与玩家的最大距离。<br>(默认值：80)</br>
         /// </summary>
-        public float 最大玩家间距 { get; set; } = 80f;
+        public float 最大玩家间距 { get; set; }
 
 
 
@@ -191,7 +191,6 @@ namespace ValheimCatManager.Data
         /// 注：在地面上方生成<br>(默认值：0.5)</br>
         /// </summary>
         public float 地面偏移 { get; set; } = 0.5f;
-
 
 
         public SpawnSystem.SpawnData GetSpawnData()

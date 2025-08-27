@@ -12,6 +12,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
+using static Player;
 
 namespace ValheimCatManager.Managers
 {
@@ -19,6 +20,11 @@ namespace ValheimCatManager.Managers
     {
         // 内部字典，存储vanilla（原生）分类的标签
         private static readonly Dictionary<Piece.PieceCategory, string> vanillaLabels = new Dictionary<Piece.PieceCategory, string>();
+
+        // 分类名称列表，原生分类
+       static List<string> category = new() { "Misc", "Crafting", "BuildingWorkbench", "BuildingWorkbench", "BuildingStonecutter", "Furniture", "Feasts", "Food", "Meads", "Max", "All" };
+
+
 
         private static bool RefreshCategoriesCheck { set; get; } = true;
 
@@ -33,10 +39,9 @@ namespace ValheimCatManager.Managers
             foreach (var pieceConfig in pieceConfigDictionary)
             {
                 string pieceName = pieceConfig.Value.GetPrefabName();
-                string categoryName = pieceConfig.Value.分组;
+                string categoryName = pieceConfig.Value.目录;
                 PieceTable pieceTable = pieceConfig.Value.GetPieceTable();
                 GameObject piecePrefab = CatToolManager.GetGameObject(pieceConfig.Key);
-
 
                 if (piecePrefab == null)
                 {
@@ -51,21 +56,25 @@ namespace ValheimCatManager.Managers
                 }
 
                 Piece piece = piecePrefab.GetComponent<Piece>();
+
                 if (piece == null)
                 {
                     Debug.LogError($"执行RegisterPiece时，Piece：{pieceName}，对应的 【组件：Piece】 是空，已跳过");
                     continue;
                 }
 
-                // 若PieceTable中不包含该预制件，则添加
+                
                 if (!pieceTable.m_pieces.Contains(piecePrefab)) pieceTable.m_pieces.Add(piecePrefab);
 
-                // 若分类标签不存在，则添加分类标签和分类实例
-                if (!pieceTable.m_categoryLabels.Contains(categoryName))
+
+
+                if (CatModData.自定义目录_字典.ContainsKey((categoryName)))
                 {
                     pieceTable.m_categoryLabels.Add(categoryName);
                     pieceTable.m_categories.Add(GetPieceCategory(categoryName));
                 }
+
+
                 // 设置Piece的分类
                 piece.m_category = GetPieceCategory(categoryName);
 
@@ -80,14 +89,20 @@ namespace ValheimCatManager.Managers
         /// </summary>
         public static void RegisterCategory()
         {
+            
             foreach (var item in CatModData.自定义物件_字典)
             {
-                // 若自定义目录字典中不包含该分组，则添加并创建分类标签页
-                if (!CatModData.自定义目录_字典.ContainsKey(item.Value.分组))
+                if (!PieceManager.category.Contains(item.Value.目录))
                 {
-                    int indx = Enum.GetNames(typeof(Piece.PieceCategory)).Length - 1;
-                    CatModData.自定义目录_字典.Add(item.Value.分组, (Piece.PieceCategory)indx);
-                    CreateCategoryTabs();
+                    // 若自定义目录字典中不包含该分组，则添加并创建分类标签页
+                    if (!CatModData.自定义目录_字典.ContainsKey(item.Value.目录))
+                    {
+                        int indx = Enum.GetNames(typeof(Piece.PieceCategory)).Length - 1;
+
+                        CatModData.自定义目录_字典.Add(item.Value.目录, (Piece.PieceCategory)indx);
+
+                        CreateCategoryTabs();
+                    }
                 }
             }
         }

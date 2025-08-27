@@ -114,6 +114,9 @@ namespace ValheimCatManager.Mock
             componentList.AddRange(prefab.GetComponentsInChildren<Growup>(true));
             componentList.AddRange(prefab.GetComponentsInChildren<Ragdoll>(true));
 
+            componentList.AddRange(prefab.GetComponentsInChildren<SpawnAbility>(true));
+            componentList.AddRange(prefab.GetComponentsInChildren<Projectile>(true));
+
             // 新增：收集渲染组件（用于检测和处理着色器）
             componentList.AddRange(prefab.GetComponentsInChildren<Renderer>(true));
 

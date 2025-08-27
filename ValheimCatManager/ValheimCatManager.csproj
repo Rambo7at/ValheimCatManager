@@ -1,34 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-
 	<PropertyGroup>
-		<!-- 指定目标框架为 .NET Framework 4.8.1 -->
 		<TargetFramework>net481</TargetFramework>
-
-		<!-- 设置 C# 语言版本为 12.0 -->
 		<LangVersion>12.0</LangVersion>
-
-		<!-- 启用隐式 Using 指令 -->
 		<ImplicitUsings>enable</ImplicitUsings>
-
-		<!-- 启用 Nullable 引用类型 -->
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
-
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 	  <WarningLevel>0</WarningLevel>
 	</PropertyGroup>
 
+<PropertyGroup>
+  <!-- 程序集版本（.NET 内部版本号，4段格式） -->
+  <Version>0.1.1.0</Version>          
+  <!-- 文件版本（Windows 文件属性 → 详细信息 → 文件版本） -->
+  <FileVersion>0.1.1.0</FileVersion>      
+  <!-- 产品版本（Windows 文件属性 → 详细信息 → 产品版本） -->
+  <InformationalVersion>0.1.1.0</InformationalVersion>  
+  <!-- 文件说明（Windows 文件属性 → 详细信息 → 文件说明） -->
+  <AssemblyTitle>猫咪：Mod管理</AssemblyTitle>
+  <!-- 产品名称（Windows 文件属性 → 详细信息 → 产品名称） -->
+  <AssemblyProduct>猫咪：Mod管理</AssemblyProduct>
+
+  <!-- 关键：关闭 Git 自动注入版本哈希（如果项目用了 GitInfo/SourceLink 包） -->
+  <DisableGitVersioning>true</DisableGitVersioning>
+</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 	  <WarningLevel>0</WarningLevel>
 	</PropertyGroup>
-
-
-
+  
   <ItemGroup>
+    <!-- 第三方引用 -->
     <Reference Include="0Harmony">
       <HintPath>Libs\0Harmony.dll</HintPath>
       <Private>False</Private>
@@ -105,9 +109,46 @@
       <HintPath>Libs\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
+    <!-- 系统引用配置 -->
+    <Reference Update="mscorlib">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System.Core">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System.Data">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System.Drawing">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System.IO.Compression.FileSystem">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System.Numerics">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System.Runtime.Serialization">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System.Xml">
+      <Private>False</Private>
+    </Reference>
+    <Reference Update="System.Xml.Linq">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Asset\" />
+    <Folder Include="Patch\" />
   </ItemGroup>
 
-  <!-- 保留自定义构建目标（自动复制到 Valheim 插件目录） -->
+  <!-- 自动复制到Valheim插件目录 -->
   <Target Name="CopyToValheimPlugins" AfterTargets="Build">
     <PropertyGroup>
       <ValheimPluginsDir>D:\SteamLibrary\steamapps\common\Valheim\BepInEx\plugins</ValheimPluginsDir>
@@ -115,56 +156,4 @@
     <MakeDir Directories="$(ValheimPluginsDir)" Condition="!Exists('$(ValheimPluginsDir)')" />
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(ValheimPluginsDir)\$(TargetFileName)" SkipUnchangedFiles="true" />
   </Target>
-  <ItemGroup>
-    <Reference Update="mscorlib">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System.Core">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System.Data">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System.Drawing">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System.IO.Compression.FileSystem">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System.Numerics">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System.Runtime.Serialization">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System.Xml">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Update="System.Xml.Linq">
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-
-  <!-- SDK 项目自动导入 C# 目标，无需手动导入 Microsoft.CSharp.targets -->
 </Project>

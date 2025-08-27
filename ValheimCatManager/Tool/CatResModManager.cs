@@ -225,7 +225,7 @@ namespace ValheimCatManager.Tool
             // 创建食物的Piece配置（设置制作工具为Feaster，分组为指定名称，需求为自身1个）
             PieceConfig pieceConfig = new PieceConfig(foodName);
             pieceConfig.制作工具 = "Feaster";
-            pieceConfig.分组 = groupName;
+            pieceConfig.目录 = groupName;
             pieceConfig.AddRequirement(foodName, 1, true);
 
             // 若物件字典中无该食物配置，添加到自定义物件字典
