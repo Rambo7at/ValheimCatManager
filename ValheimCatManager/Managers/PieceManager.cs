@@ -70,8 +70,12 @@ namespace ValheimCatManager.Managers
 
                 if (CatModData.自定义目录_字典.ContainsKey((categoryName)))
                 {
-                    pieceTable.m_categoryLabels.Add(categoryName);
-                    pieceTable.m_categories.Add(GetPieceCategory(categoryName));
+                    if (!pieceTable.m_categoryLabels.Contains(categoryName))
+                    {
+                        pieceTable.m_categoryLabels.Add(categoryName);
+                        pieceTable.m_categories.Add(GetPieceCategory(categoryName));
+                    }
+
                 }
 
 

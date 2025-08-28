@@ -17,7 +17,7 @@
   <!-- 文件版本（Windows 文件属性 → 详细信息 → 文件版本） -->
   <FileVersion>0.1.1.0</FileVersion>      
   <!-- 产品版本（Windows 文件属性 → 详细信息 → 产品版本） -->
-  <InformationalVersion>0.1.1.0</InformationalVersion>  
+  <InformationalVersion>0.1.4.0</InformationalVersion>  
   <!-- 文件说明（Windows 文件属性 → 详细信息 → 文件说明） -->
   <AssemblyTitle>猫咪：Mod管理</AssemblyTitle>
   <!-- 产品名称（Windows 文件属性 → 详细信息 → 产品名称） -->
