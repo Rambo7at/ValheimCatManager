@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ValheimCatManager;
+using ValheimCatManager.Config;
+using ValheimCatManager.Data;
 
-namespace ValheimCatManager.Data
+namespace ValheimCatManager.Config
 {
     public class MonsterConfig
     {

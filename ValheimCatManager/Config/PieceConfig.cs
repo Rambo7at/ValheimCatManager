@@ -5,10 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using ValheimCatManager;
+using ValheimCatManager.Config;
+using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
 using Debug = UnityEngine.Debug;
 
-namespace ValheimCatManager.Data
+namespace ValheimCatManager.Config
 {
     public class PieceConfig
     {

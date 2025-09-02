@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using ValheimCatManager;
+using ValheimCatManager.Config;
+using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
 using static ZoneSystem;
 
-namespace ValheimCatManager.Data
+namespace ValheimCatManager.Config
 {
     public class VegetationConfig
     {

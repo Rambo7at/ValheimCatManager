@@ -1,10 +1,14 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
+using 准备开饭小子;
 
 namespace ValheimCatManager.Mock
 {
@@ -38,21 +42,65 @@ namespace ValheimCatManager.Mock
     /// </summary>
     public class MockSystem
     {
+        /// <summary>
+        /// 注：默认预制件字典
+        /// </summary>
+        public readonly Dictionary<int, string> mockPrefabDict = new Dictionary<int, string>();
+
         // 存储需要替换的预制件信息列表
-        private static readonly List<MockPrefabInfo> m_MockPrefabInfoList = new List<MockPrefabInfo>();
+        private readonly List<MockPrefabInfo> m_MockPrefabInfoList = new List<MockPrefabInfo>();
         // 新增：存储需要替换的着色器信息列表
-        private static readonly List<MockShaderInfo> m_MockShaderInfoList = new List<MockShaderInfo>();
+        private readonly List<MockShaderInfo> m_MockShaderInfoList = new List<MockShaderInfo>();
+
+        private static MockSystem _instance;
+
+        public static MockSystem Instance
+        {
+            get 
+            { 
+               if (_instance == null) { _instance = new MockSystem(); }
+               return _instance;
+            }
+        }
+
+        private MockSystem()
+        {
+            new Harmony("MockSystem").PatchAll(typeof(MockSystemPatch));
+        }
+
+
+        private class MockSystemPatch()
+        {
+            [HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.Start)), HarmonyPostfix, HarmonyPriority(Priority.First)]
+            static void mockStart(ObjectDB __instance)
+            {
+                // 仅在主场景（"main"）执行
+                if (SceneManager.GetActiveScene().name == "main")
+                {
+                    var startTime1 = DateTime.Now; // 记录开始时间（用于统计耗时）
+
+                    Instance.StartMockReplacement(); // 执行占位预制件/着色器替换
+                    CatModData.m_PrefabCache.Clear(); // 清理预制件缓存，释放资源
+
+                    var elapsed1 = DateTime.Now - startTime1; // 计算耗时
+                    Debug.LogError($"mock 完成耗时: {elapsed1.TotalMilliseconds / 1000}秒"); // 打印耗时日志
+                }
+            }
+
+        }
+
+
 
         /// <summary>
         /// 需求组件的列表信息（用于收集需处理的组件）
         /// </summary>
-        private static readonly List<Component> ComponentsList = new List<Component>();
+        private  readonly List<Component> ComponentsList = new List<Component>();
 
         /// <summary>
         /// 启用 MockSystem（执行预制件和着色器的替换流程）
         /// 流程：清理原有数据 → 收集预制件信息 → 收集着色器信息 → 替换预制件 → 替换着色器 → 最终清理
         /// </summary>
-        public static void StartMockReplacement()
+        private void StartMockReplacement()
         {
             Debug.LogError($"[{CatManagerPlugin.PluginName}] 开始执行 mock ");
             // 清理原有列表（包括新增的着色器列表）
@@ -72,9 +120,9 @@ namespace ValheimCatManager.Mock
         /// 【阶段一】<br></br>
         /// 注：收集需要mock的预制件信息（遍历模拟物品字典，处理关联预制件）
         /// </summary>
-        private static void CollectMockPrefab()
+        private  void CollectMockPrefab()
         {
-            foreach (var item in CatModData.模拟物品_字典)
+            foreach (var item in Instance.mockPrefabDict)
             {
                 GameObject prefab = ZNetScene.instance.GetPrefab(item.Key);
                 if (!prefab) continue;
@@ -92,7 +140,7 @@ namespace ValheimCatManager.Mock
         /// 原有：收集物品、建筑、实体等功能组件
         /// 新增：收集渲染组件（用于检测着色器）
         /// </summary>
-        private static void CollectComponents(GameObject prefab)
+        private  void CollectComponents(GameObject prefab)
         {
             List<Component> componentList = new List<Component>();
             // 原有组件收集（功能相关）
@@ -135,7 +183,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 新增：检查渲染组件中的材质和着色器，收集JVLmock_前缀的占位着色器信息
         /// </summary>
-        private static void CheckRendererShaders(Component component)
+        private  void CheckRendererShaders(Component component)
         {
             // 处理普通渲染器（如MeshRenderer、SkinnedMeshRenderer等）
             if (component is Renderer renderer)
@@ -147,7 +195,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 新增：检查普通渲染器的材质列表，检测并收集含占位着色器的材质信息（支持多材质）
         /// </summary>
-        private static void CheckRendererMaterials(Renderer renderer)
+        private  void CheckRendererMaterials(Renderer renderer)
         {
             if (!renderer || renderer.sharedMaterials == null) return;
 
@@ -168,7 +216,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 新增：将JVLmock_占位着色器的信息添加到替换列表（解析真实着色器名称并存储关联数据）
         /// </summary>
-        private static void AddMockShaderInfo(Component rootComponent, Material material, int matIndex)
+        private  void AddMockShaderInfo(Component rootComponent, Material material, int matIndex)
         {
             // 去除JVLmock_前缀，获取真实着色器名称
             string realShaderName = material.shader.name.Substring("JVLmock_".Length);
@@ -185,9 +233,9 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 新增：【阶段一】补充收集所有需要替换的着色器信息（遍历模拟物品关联的预制件，二次检查渲染组件）
         /// </summary>
-        private static void CollectMockShaders()
+        private  void CollectMockShaders()
         {
-            foreach (var item in CatModData.模拟物品_字典)
+            foreach (var item in Instance.mockPrefabDict)
             {
                 GameObject prefab = ZNetScene.instance.GetPrefab(item.Key);
                 if (prefab && prefab.name == item.Value)
@@ -206,7 +254,7 @@ namespace ValheimCatManager.Mock
         /// 【阶段二】<br></br>
         /// 注：检查组件的字段（根层级），收集需要替换的占位预制件信息（处理直接引用、集合、自定义对象等）
         /// </summary>
-        private static void CheckComponentFields(Component component)
+        private  void CheckComponentFields(Component component)
         {
             Type compType = component.GetType();
             FieldInfo[] fields = compType.GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -250,7 +298,7 @@ namespace ValheimCatManager.Mock
         /// 【阶段二】<br></br>
         /// 注：递归检查自定义对象的内部字段，收集嵌套结构中的占位预制件信息
         /// </summary>
-        private static void CheckObjectFields(Component rootComponent, FieldInfo parentField, object obj, object parentObject)
+        private  void CheckObjectFields(Component rootComponent, FieldInfo parentField, object obj, object parentObject)
         {
             if (obj == null) return;
 
@@ -294,7 +342,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 注：收集占位预制件信息（仅处理名称以JVLmock_为前缀的预制件，解析目标名称并存储关联数据）
         /// </summary>
-        private static void CheckAndAddPlaceholder(Component rootComponent, FieldInfo targetField, GameObject prefab, object parentObject, int arrayIndex)
+        private  void CheckAndAddPlaceholder(Component rootComponent, FieldInfo targetField, GameObject prefab, object parentObject, int arrayIndex)
         {
             // 仅处理占位预制件（名称以JVLmock_为前缀）
             if (!prefab || !prefab.name.StartsWith("JVLmock_")) return;
@@ -323,7 +371,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 处理集合类型（数组、列表等）中的元素，检查并收集占位预制件信息
         /// </summary>
-        private static void HandleEnumerable(Component rootComponent, FieldInfo rootField, IEnumerable enumerable, object parentObject)
+        private  void HandleEnumerable(Component rootComponent, FieldInfo rootField, IEnumerable enumerable, object parentObject)
         {
             int index = 0;
             foreach (var item in enumerable)
@@ -348,7 +396,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 注：辅助方法 检测集合内的预制件字段（处理集合中的GameObject、Component、嵌套集合或自定义对象）
         /// </summary>
-        private static void CheckItemInCollection(Component rootComponent, FieldInfo rootField, object item, object parentObject, int index)
+        private  void CheckItemInCollection(Component rootComponent, FieldInfo rootField, object item, object parentObject, int index)
         {
             if (item == null) return;
 
@@ -373,7 +421,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 注：替换占位预制件为真实预制件（从缓存或工具类获取真实预制件，更新字段引用）
         /// </summary>
-        private static void ReplacePlaceholders()
+        private  void ReplacePlaceholders()
         {
             foreach (var info in m_MockPrefabInfoList)
             {
@@ -398,7 +446,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 替换字段值（根据字段类型和索引，更新占位预制件引用为真实预制件）
         /// </summary>
-        private static void ReplaceFieldValue(MockPrefabInfo info, GameObject realPrefab)
+        private  void ReplaceFieldValue(MockPrefabInfo info, GameObject realPrefab)
         {
             if (info.ParentObject == null || info.TargetField == null)
             {
@@ -442,7 +490,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 新增：【阶段二】替换所有JVLmock_占位着色器为真实着色器（从缓存获取真实着色器，更新材质引用）
         /// </summary>
-        private static void ReplaceMockShaders()
+        private  void ReplaceMockShaders()
         {
             foreach (var info in m_MockShaderInfoList)
             {
@@ -467,7 +515,7 @@ namespace ValheimCatManager.Mock
         /// <summary>
         /// 清理方法（清空预制件和着色器的替换列表，释放资源）
         /// </summary>
-        private static void Cleanup()
+        private  void Cleanup()
         {
             m_MockPrefabInfoList.Clear();
             m_MockShaderInfoList.Clear(); // 新增：清理着色器列表

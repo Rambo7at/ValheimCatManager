@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using ValheimCatManager;
+using ValheimCatManager.Config;
+using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
 
-namespace ValheimCatManager.Data
+namespace ValheimCatManager.Config
 {
 
     public class SpawnConfig
@@ -214,31 +217,31 @@ namespace ValheimCatManager.Data
                 m_enabled = 启用,
                 m_biome = biome,
                 m_biomeArea = 区域范围,
-                m_maxSpawned = ((最大生成量 < 1) ? 1 : 最大生成量),
+                m_maxSpawned = 最大生成量 < 1 ? 1 : 最大生成量,
                 m_spawnInterval = 生成_间隔,
                 m_spawnChance = 生成_概率,
                 m_spawnDistance = 生成_间隔,
                 m_spawnRadiusMin = 最小玩家间距,
-                m_spawnRadiusMax = ((最小玩家间距 > 最大玩家间距) ? 最小玩家间距 : 最大玩家间距),
+                m_spawnRadiusMax = 最小玩家间距 > 最大玩家间距 ? 最小玩家间距 : 最大玩家间距,
                 m_requiredGlobalKey = 需求_条件,
                 m_requiredEnvironments = 需求_天气,
                 m_groupSizeMin = 组最小,
-                m_groupSizeMax = ((组最大 < 组最小) ? 组最小 : 组最大),
+                m_groupSizeMax = 组最大 < 组最小 ? 组最小 : 组最大,
                 m_groupRadius = 组间距,
                 m_spawnAtNight = 晚上生成,
                 m_spawnAtDay = 白天生成,
                 m_minAltitude = 最小高度,
-                m_maxAltitude = ((最大高度 < 最小高度) ? 最小高度 : 最大高度),
+                m_maxAltitude = 最大高度 < 最小高度 ? 最小高度 : 最大高度,
                 m_minTilt = 最小倾斜,
-                m_maxTilt = ((最大倾斜 < 最小倾斜) ? 最小倾斜 : 最大倾斜),
+                m_maxTilt = 最大倾斜 < 最小倾斜 ? 最小倾斜 : 最大倾斜,
                 m_inForest = 森林内生成,
                 m_outsideForest = 森林外生成,
                 m_minOceanDepth = 最小海洋深度,
-                m_maxOceanDepth = ((最大海洋深度 < 最小海洋深度) ? 最小海洋深度 : 最大海洋深度),
+                m_maxOceanDepth = 最大海洋深度 < 最小海洋深度 ? 最小海洋深度 : 最大海洋深度,
                 m_huntPlayer = 追杀玩家,
                 m_groundOffset = 地面偏移,
                 m_minLevel = 生物_最低等级,
-                m_maxLevel = ((生物_最高等级 < 生物_最低等级) ? 生物_最低等级 : 生物_最高等级)
+                m_maxLevel = 生物_最高等级 < 生物_最低等级 ? 生物_最低等级 : 生物_最高等级
             };
 
 

@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using ValheimCatManager;
+using ValheimCatManager.Config;
+using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
 
-namespace ValheimCatManager.Data
+namespace ValheimCatManager.Config
 {
     public class RecipeConfig
     {
@@ -215,8 +218,8 @@ namespace ValheimCatManager.Data
 
 
 
-            CraftingStation Station1 = (string.IsNullOrEmpty(制作工作台)) ? null : GetStation(制作工作台);
-            CraftingStation Station2 = (string.IsNullOrEmpty(维修工作台)) ? null : GetStation(维修工作台);
+            CraftingStation Station1 = string.IsNullOrEmpty(制作工作台) ? null : GetStation(制作工作台);
+            CraftingStation Station2 = string.IsNullOrEmpty(维修工作台) ? null : GetStation(维修工作台);
 
             recipe.m_craftingStation = Station1;
             recipe.m_repairStation = Station2 ?? Station1;

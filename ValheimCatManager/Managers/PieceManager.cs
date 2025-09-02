@@ -10,23 +10,156 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using ValheimCatManager.Config;
 using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
 using static Player;
 
 namespace ValheimCatManager.Managers
 {
-    internal class PieceManager
+    public class PieceManager
     {
+
+        /// <summary>
+        /// 注：自定义物件字典-注册用
+        /// </summary>
+        public readonly Dictionary<int, PieceConfig> customPieceDict = new Dictionary<int, PieceConfig>();
+
         // 内部字典，存储vanilla（原生）分类的标签
         private static readonly Dictionary<Piece.PieceCategory, string> vanillaLabels = new Dictionary<Piece.PieceCategory, string>();
 
-        // 分类名称列表，原生分类
-       static List<string> category = new() { "Misc", "Crafting", "BuildingWorkbench", "BuildingWorkbench", "BuildingStonecutter", "Furniture", "Feasts", "Food", "Meads", "Max", "All" };
+        /// <summary>
+        /// 注：英灵神殿原目录
+        /// </summary>
+        private readonly List<string> valheimPieceCategory = new() { "Misc", "Crafting", "BuildingWorkbench", "BuildingWorkbench", "BuildingStonecutter", "Furniture", "Feasts", "Food", "Meads", "Max", "All" };
 
+        /// <summary>
+        /// 注：自定义目录字典-注册用
+        /// </summary>
+        private readonly Dictionary<string, Piece.PieceCategory> customCategoryDict = new Dictionary<string, Piece.PieceCategory>();
 
+        private bool HarmonyCheck1 = true;
+
+        private bool HarmonyCheck2 = true;
 
         private static bool RefreshCategoriesCheck { set; get; } = true;
+
+        private static PieceManager _instance;
+
+        public static PieceManager Instance => _instance ?? (_instance = new PieceManager());
+        private Harmony harmony;
+
+        private PieceManager()
+        {
+            harmony = new Harmony("PieceManager");
+            harmony.PatchAll(typeof(PiecePatch));
+        }
+
+
+
+        private static class PiecePatch
+        {
+            [HarmonyPatch(typeof(ObjectDB), nameof(ObjectDB.Awake)), HarmonyPostfix, HarmonyPriority(Priority.VeryLow)]
+            static void RegisterPiecePatch(ObjectDB __instance)
+            {
+                Instance.RegisterCategory();
+                if (SceneManager.GetActiveScene().name == "main")
+                {
+                    Instance.RegisterPiece(Instance.customPieceDict);
+                }
+
+            }
+
+        }
+
+
+        private static class PieceCategoryPatch
+        {
+
+
+            [HarmonyPatch(typeof(ObjectDB), nameof(ObjectDB.Awake)), HarmonyPostfix, HarmonyPriority(101)]
+            static void RefreshCategories()
+            {
+                if (SceneManager.GetActiveScene().name == "main")
+                {
+                    Instance.RefreshCategories();
+                }
+
+            }
+
+            /// <summary>
+            /// 注：对PieceTable.UpdateAvailable方法的Transpiler补丁，用于修改与最大分类值相关的IL指令
+            /// </summary>
+            [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable)), HarmonyTranspiler]
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                // 调用TranspileMaxCategory处理指令，最大偏移量为0
+                return Instance.TranspileMaxCategory(instructions, 0);
+            }
+
+            [HarmonyPatch(typeof(Enum), nameof(Enum.GetValues)), HarmonyPostfix, HarmonyPriority(Priority.Normal)]
+            static void EnumGetEnumValues(Type enumType, ref Array __result) => Instance.EnumGetPieceCategoryValues(enumType, ref __result);
+
+            [HarmonyPatch(typeof(Enum), nameof(Enum.GetNames)), HarmonyPostfix, HarmonyPriority(Priority.Normal)]
+            static void EnumGetEnumNames(Type enumType, ref string[] __result) => Instance.EnumGetPieceCategoryNames(enumType, ref __result);
+
+
+            /// <summary>
+            /// 注：对PieceTable.UpdateAvailable方法的Prefix补丁，用于在更新可用部件前扩展可用部件列表
+            /// </summary>
+            [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable)), HarmonyPrefix]
+            /// <summary>
+            /// 注：在UpdateAvailable执行前调用，扩展部件表的可用部件列表
+            /// </summary>
+            /// <param name="__instance">当前PieceTable实例</param>
+            static void PiecesTableUpdateAvailablePrefix(PieceTable __instance) => Instance.ExpandAvailablePieces(__instance);
+
+
+            /// <summary>
+            /// 注：对PieceTable.UpdateAvailable方法的Postfix补丁，用于在更新可用部件后调整数组和重排序部件
+            /// </summary>
+            [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable)), HarmonyPostfix]
+            /// <summary>
+            /// 注：在UpdateAvailable执行后调用，调整部件表数组大小并重新排序所有分类的部件
+            /// </summary>
+            /// <param name="__instance">当前PieceTable实例</param>
+            static void PiecesTableUpdateAvailablePostfix(PieceTable __instance)
+            {
+                Instance.AdjustPieceTableArray(__instance);
+                Instance.ReorderAllCategoryPieces(__instance);
+            }
+
+
+            /// <summary>
+            /// 注：对Player.SetPlaceMode方法的Postfix补丁，用于在切换放置模式后刷新分类标签
+            /// </summary>
+            [HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode)), HarmonyPostfix, HarmonyPriority(Priority.Low)]
+            static void PlayerSetPlaceModePostfix() => Instance.RefreshCategories();
+
+            /// <summary>
+            /// 注：对Hud.Awake方法的Postfix补丁，用于在HUD初始化时刷新分类标签
+            /// </summary>
+            [HarmonyPatch(typeof(Hud), nameof(Hud.Awake)), HarmonyPostfix, HarmonyPriority(Priority.Low)]
+            static void HudAwakePostfix() => Instance.RefreshCategories();
+
+            /// <summary>
+            /// 注：对Hud.UpdateBuild方法的Postfix补丁，用于在构建界面更新时检查是否需要刷新分类
+            /// </summary>
+            [HarmonyPatch(typeof(Hud), nameof(Hud.UpdateBuild)), HarmonyPostfix, HarmonyPriority(Priority.Low)]
+            static void HudUpdateBuildPostfix() => Instance.RefreshCategoriesIfNeeded();
+
+            /// <summary>
+            /// 注：对Hud.LateUpdate方法的Postfix补丁，用于在HUD晚更新时检查是否需要刷新分类
+            /// </summary>
+            [HarmonyPatch(typeof(Hud), nameof(Hud.LateUpdate)), HarmonyPostfix, HarmonyPriority(Priority.Low)]
+            static void HudLateUpdatePostfix() => Instance.RefreshCategoriesIfNeeded();
+
+
+        }
+
+
+
+
 
         #region 第一部分：注册 Category + Piece
 
@@ -34,7 +167,7 @@ namespace ValheimCatManager.Managers
         /// 注：读取PieceConfig配置，注册Piece到对应的PieceTable，并设置分类和资源需求
         /// </summary>
         /// <param name="pieceConfigDictionary">包含Piece配置的字典，键为配置ID，值为PieceConfig实例</param>
-        public static void RegisterPiece(Dictionary<int, PieceConfig> pieceConfigDictionary)
+        private void RegisterPiece(Dictionary<int, PieceConfig> pieceConfigDictionary)
         {
             foreach (var pieceConfig in pieceConfigDictionary)
             {
@@ -63,19 +196,18 @@ namespace ValheimCatManager.Managers
                     continue;
                 }
 
-                
+
                 if (!pieceTable.m_pieces.Contains(piecePrefab)) pieceTable.m_pieces.Add(piecePrefab);
 
 
 
-                if (CatModData.自定义目录_字典.ContainsKey((categoryName)))
+                if (Instance.customCategoryDict.ContainsKey((categoryName)))
                 {
                     if (!pieceTable.m_categoryLabels.Contains(categoryName))
                     {
                         pieceTable.m_categoryLabels.Add(categoryName);
                         pieceTable.m_categories.Add(GetPieceCategory(categoryName));
                     }
-
                 }
 
 
@@ -88,24 +220,33 @@ namespace ValheimCatManager.Managers
             }
         }
 
+
+
+
+
         /// <summary>
         /// 注：注册自定义物件的分类标签，避免重复注册
         /// </summary>
-        public static void RegisterCategory()
+        private void RegisterCategory()
         {
-            
-            foreach (var item in CatModData.自定义物件_字典)
+
+            foreach (var item in Instance.customPieceDict)
             {
-                if (!PieceManager.category.Contains(item.Value.目录))
+                if (!Instance.valheimPieceCategory.Contains(item.Value.目录))
                 {
-                    // 若自定义目录字典中不包含该分组，则添加并创建分类标签页
-                    if (!CatModData.自定义目录_字典.ContainsKey(item.Value.目录))
+                    if (!Instance.customCategoryDict.ContainsKey(item.Value.目录))
                     {
                         int indx = Enum.GetNames(typeof(Piece.PieceCategory)).Length - 1;
 
-                        CatModData.自定义目录_字典.Add(item.Value.目录, (Piece.PieceCategory)indx);
+                        Instance.customCategoryDict.Add(item.Value.目录, (Piece.PieceCategory)indx);
 
                         CreateCategoryTabs();
+
+                        if (HarmonyCheck2)
+                        {
+                            harmony.PatchAll(typeof(PieceCategoryPatch));
+                            HarmonyCheck2 = false;
+                        }
                     }
                 }
             }
@@ -116,19 +257,19 @@ namespace ValheimCatManager.Managers
         /// </summary>
         /// <param name="enumType">枚举类型</param>
         /// <param name="__result">枚举值数组的引用，用于输出包含自定义分类的结果</param>
-        public static void EnumGetPieceCategoryValues(Type enumType, ref Array __result)
+        private void EnumGetPieceCategoryValues(Type enumType, ref Array __result)
         {
-            if ((enumType == typeof(Piece.PieceCategory)) && CatModData.自定义目录_字典.Count != 0)
+            if ((enumType == typeof(Piece.PieceCategory)) && Instance.customCategoryDict.Count != 0)
             {
                 // 创建新数组：长度 = 原枚举值数组长度 + 自定义分类数量
                 // 用于存储"原生枚举值 + 自定义分类"的全部内容
-                Piece.PieceCategory[] array = new Piece.PieceCategory[__result.Length + CatModData.自定义目录_字典.Count];
+                Piece.PieceCategory[] array = new Piece.PieceCategory[__result.Length + Instance.customCategoryDict.Count];
 
                 // 复制原生枚举值到新数组的起始位置（从索引0开始）
                 __result.CopyTo(array, 0);
 
                 // 复制自定义分类值到新数组的后续位置
-                CatModData.自定义目录_字典.Values.CopyTo(array, __result.Length);
+                Instance.customCategoryDict.Values.CopyTo(array, __result.Length);
 
                 __result = array;
             }
@@ -139,43 +280,12 @@ namespace ValheimCatManager.Managers
         /// </summary>
         /// <param name="enumType">枚举类型</param>
         /// <param name="__result">枚举名称数组的引用，用于输出包含自定义分类名称的结果</param>
-        public static void EnumGetPieceCategoryNames(Type enumType, ref string[] __result)
+        private void EnumGetPieceCategoryNames(Type enumType, ref string[] __result)
         {
-            if ((enumType == typeof(Piece.PieceCategory)) && CatModData.自定义目录_字典.Count != 0)
+            if ((enumType == typeof(Piece.PieceCategory)) && Instance.customCategoryDict.Count != 0)
             {
                 // 将自定义分类名称添加到原有名称数组中
-                __result = __result.AddRangeToArray(CatModData.自定义目录_字典.Keys.ToArray());
-            }
-        }
-
-        /// <summary>
-        /// 注：对Enum.GetValues方法的补丁，用于在获取Piece.PieceCategory枚举值时包含自定义分类
-        /// </summary>
-        [HarmonyPatch(typeof(Enum), "GetValues")]
-        [HarmonyPriority(Priority.Normal)]
-        class EnumGetValuesPatch { static void Postfix(Type enumType, ref Array __result) => EnumGetPieceCategoryValues(enumType, ref __result); }
-
-        /// <summary>
-        /// 注：对Enum.GetNames方法的补丁，用于在获取Piece.PieceCategory枚举名称时包含自定义分类
-        /// </summary>
-        [HarmonyPatch(typeof(Enum), "GetNames")]
-        [HarmonyPriority(Priority.Normal)]
-        class EnumGetNamesPatch { static void Postfix(Type enumType, ref string[] __result) => EnumGetPieceCategoryNames(enumType, ref __result); }
-
-
-
-        [HarmonyPatch(typeof(ObjectDB), "Awake")]
-        [HarmonyPriority(1)]
-        class RegisterCategoryAndPiece
-        {
-            static void Postfix(ObjectDB __instance)
-            {
-                if (SceneManager.GetActiveScene().name == "main")
-                {
-                    RegisterCategory(); // 注册Category方法
-                    RegisterPiece(CatModData.自定义物件_字典); // 注册Piece方法
-                    RefreshCategories();
-                }
+                __result = __result.AddRangeToArray(Instance.customCategoryDict.Keys.ToArray());
             }
         }
 
@@ -185,34 +295,15 @@ namespace ValheimCatManager.Managers
         #region 第二部分：转换最大Category值
 
         /// <summary>
-        /// 注：对PieceTable.UpdateAvailable方法的Transpiler补丁，用于修改与最大分类值相关的IL指令
-        /// </summary>
-        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
-        [HarmonyPriority(Priority.Normal)]
-        class UpdateAvailableTranspilerPatch
-        {
-            /// <summary>
-            /// 注：Transpiler处理器，用于转换UpdateAvailable方法的IL指令流
-            /// </summary>
-            /// <param name="instructions">原方法的IL指令集合</param>
-            /// <returns>修改后的IL指令集合</returns>
-            [HarmonyTranspiler]
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                // 调用TranspileMaxCategory处理指令，最大偏移量为0
-                return TranspileMaxCategory(instructions, 0);
-            }
-        }
-        /// <summary>
         /// 注：转换与最大分类值相关的IL指令，替换原有的MaxCategory调用或常量加载
         /// </summary>
         /// <param name="instructions">待处理的IL指令集合</param>
         /// <param name="maxOffset">最大分类值的偏移量，用于调整计算结果</param>
         /// <returns>处理后的IL指令集合</returns>
-        private static IEnumerable<CodeInstruction> TranspileMaxCategory(IEnumerable<CodeInstruction> instructions, int maxOffset)
+        private IEnumerable<CodeInstruction> TranspileMaxCategory(IEnumerable<CodeInstruction> instructions, int maxOffset)
         {
             // 计算基础最大分类值（从GetPieceCategory获取"Max"对应的枚举值）加上偏移量
-            int number = (int)GetPieceCategory("Max") + maxOffset;
+            int number = (int)Instance.GetPieceCategory("Max") + maxOffset;
 
             // 遍历所有IL指令进行处理
             foreach (CodeInstruction instruction in instructions)
@@ -246,43 +337,11 @@ namespace ValheimCatManager.Managers
 
         #region 第三部分：扩展PieceTable 调整PieceTable数组大小 重新排序所有Category
 
-
-        /// <summary>
-        /// 注：对PieceTable.UpdateAvailable方法的Prefix补丁，用于在更新可用部件前扩展可用部件列表
-        /// </summary>
-        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
-        class ExAvailablePieces
-        {
-            /// <summary>
-            /// 注：在UpdateAvailable执行前调用，扩展部件表的可用部件列表
-            /// </summary>
-            /// <param name="__instance">当前PieceTable实例</param>
-            static void Prefix(PieceTable __instance) => ExpandAvailablePieces(__instance);
-        }
-
-        /// <summary>
-        /// 注：对PieceTable.UpdateAvailable方法的Postfix补丁，用于在更新可用部件后调整数组和重排序部件
-        /// </summary>
-        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
-        class ArPieceTable
-        {
-            /// <summary>
-            /// 注：在UpdateAvailable执行后调用，调整部件表数组大小并重新排序所有分类的部件
-            /// </summary>
-            /// <param name="__instance">当前PieceTable实例</param>
-            static void Postfix(PieceTable __instance)
-            {
-                AdjustPieceTableArray(__instance);
-                ReorderAllCategoryPieces(__instance);
-            }
-        }
-
-
         /// <summary>
         /// 注：扩展部件表的可用部件列表，确保列表数量与分类数量匹配
         /// </summary>
         /// <param name="__instance">当前PieceTable实例</param>
-        private static void ExpandAvailablePieces(PieceTable __instance)
+        private void ExpandAvailablePieces(PieceTable __instance)
         {
             if (__instance.m_availablePieces.Count > 0)
             {
@@ -298,7 +357,7 @@ namespace ValheimCatManager.Managers
         /// 注：调整部件表中相关数组的大小，使其与可用部件列表数量保持一致
         /// </summary>
         /// <param name="__instance">当前PieceTable实例</param>
-        private static void AdjustPieceTableArray(PieceTable __instance)
+        private void AdjustPieceTableArray(PieceTable __instance)
         {
             // 调整选中部件数组大小
             Array.Resize(ref __instance.m_selectedPiece, __instance.m_availablePieces.Count);
@@ -310,7 +369,7 @@ namespace ValheimCatManager.Managers
         /// 注：重新排序所有分类的部件，将属于"All"分类的部件置于每个列表的开头
         /// </summary>
         /// <param name="__instance">当前PieceTable实例</param>
-        private static void ReorderAllCategoryPieces(PieceTable __instance)
+        private void ReorderAllCategoryPieces(PieceTable __instance)
         {
             // 获取所有部件的Piece组件列表
             List<Piece> pieces = __instance.m_pieces.Select(i => i.GetComponent<Piece>()).ToList();
@@ -337,61 +396,12 @@ namespace ValheimCatManager.Managers
 
 
         #region 第四部分：刷新分类标签
-        /// <summary>
-        /// 注：对Player.SetPlaceMode方法的Postfix补丁，用于在切换放置模式后刷新分类标签
-        /// </summary>
-        [HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode))]
-        [HarmonyPriority(Priority.Low)]
-        class RefreshCategoriesPatch
-        {
-            /// <summary>
-            /// 注：在SetPlaceMode执行后调用，刷新分类标签
-            /// </summary>
-            static void Postfix() => RefreshCategories();
-        }
 
-        /// <summary>
-        /// 注：对Hud.Awake方法的Postfix补丁，用于在HUD初始化时刷新分类标签
-        /// </summary>
-        [HarmonyPatch(typeof(Hud), nameof(Hud.Awake))]
-        [HarmonyPriority(Priority.Low)]
-        class CreateCategoryTabsPatch
-        {
-            /// <summary>
-            /// 注：在HUD唤醒后调用，刷新分类标签
-            /// </summary>
-            static void Postfix() => RefreshCategories();
-        }
-        /// <summary>
-        /// 注：对Hud.UpdateBuild方法的Postfix补丁，用于在构建界面更新时检查是否需要刷新分类
-        /// </summary>
-        [HarmonyPatch(typeof(Hud), nameof(Hud.UpdateBuild))]
-        [HarmonyPriority(Priority.Low)]
-        class Hud_UpdateBuild
-        {
-            /// <summary>
-            /// 注：在UpdateBuild执行后调用，检查并刷新分类（如果需要）
-            /// </summary>
-            static void Postfix() => RefreshCategoriesIfNeeded();
-        }
-
-        /// <summary>
-        /// 注：对Hud.LateUpdate方法的Postfix补丁，用于在HUD晚更新时检查是否需要刷新分类
-        /// </summary>
-        [HarmonyPatch(typeof(Hud), nameof(Hud.LateUpdate))]
-        [HarmonyPriority(Priority.Low)]
-        class Hud_LateUpdate
-        {
-            /// <summary>
-            /// 注：在LateUpdate执行后调用，检查并刷新分类（如果需要）
-            /// </summary>
-            static void Postfix() => RefreshCategoriesIfNeeded();
-        }
 
         /// <summary>
         /// 注：检查是否需要刷新分类，若需要则执行刷新并重置检查标志
         /// </summary>
-        private static void RefreshCategoriesIfNeeded()
+        private void RefreshCategoriesIfNeeded()
         {
             if (RefreshCategoriesCheck)
             {
@@ -403,7 +413,7 @@ namespace ValheimCatManager.Managers
         /// <summary>
         /// 注：刷新分类标签UI，调整布局，更新可见分类及部件表分类配置
         /// </summary>
-        private static void RefreshCategories()
+        private void RefreshCategories()
         {
             // 确保所有分类标签都已正确创建
             CreateCategoryTabs();
@@ -484,7 +494,7 @@ namespace ValheimCatManager.Managers
         /// <summary>
         /// 注：创建缺失的分类标签，确保标签数量与分类总数匹配
         /// </summary>
-        private static void CreateCategoryTabs()
+        private void CreateCategoryTabs()
         {
             if (!Hud.instance) return;
 
@@ -509,7 +519,7 @@ namespace ValheimCatManager.Managers
         /// 注：创建单个分类标签（以第一个标签为模板）
         /// </summary>
         /// <returns>新创建的分类标签GameObject</returns>
-        private static GameObject CreateCategoryTab()
+        private GameObject CreateCategoryTab()
         {
             // 以第一个标签为模板实例化新标签
             GameObject firstTab = Hud.instance.m_pieceCategoryTabs[0];
@@ -541,7 +551,7 @@ namespace ValheimCatManager.Managers
         /// </summary>
         /// <param name="pieceTable">目标部件表</param>
         /// <returns>包含所有可见分类的哈希集</returns>
-        private static HashSet<Piece.PieceCategory> CategoriesInPieceTable(PieceTable pieceTable)
+        private HashSet<Piece.PieceCategory> CategoriesInPieceTable(PieceTable pieceTable)
         {
             HashSet<Piece.PieceCategory> categories = new HashSet<Piece.PieceCategory>();
 
@@ -559,7 +569,7 @@ namespace ValheimCatManager.Managers
         /// </summary>
         /// <param name="pieceTable">目标部件表</param>
         /// <param name="visibleCategories">可见分类集合</param>
-        private static void UpdatePieceTableCategories(PieceTable pieceTable, HashSet<Piece.PieceCategory> visibleCategories)
+        private void UpdatePieceTableCategories(PieceTable pieceTable, HashSet<Piece.PieceCategory> visibleCategories)
         {
             // 处理香草分类（原生游戏分类）
             for (int i = 0; i < (int)GetPieceCategory("Max"); i++)
@@ -583,7 +593,7 @@ namespace ValheimCatManager.Managers
             }
 
             // 处理自定义分类
-            foreach (var entry in CatModData.自定义目录_字典)
+            foreach (var entry in Instance.customCategoryDict)
             {
                 string name = entry.Key;
                 Piece.PieceCategory category = entry.Value;
@@ -610,7 +620,7 @@ namespace ValheimCatManager.Managers
         /// </summary>
         /// <param name="category">目标分类</param>
         /// <returns>分类的标签文本，未找到则返回空字符串</returns>
-        private static string GetVanillaLabel(Piece.PieceCategory category)
+        private string GetVanillaLabel(Piece.PieceCategory category)
         {
             if (!vanillaLabels.ContainsKey(category))
             {
@@ -623,7 +633,7 @@ namespace ValheimCatManager.Managers
         /// <summary>
         /// 注：搜索并缓存所有香草分类（原生游戏分类）的标签文本
         /// </summary>
-        private static void SearchVanillaLabels()
+        private void SearchVanillaLabels()
         {
             // 遍历所有部件表，收集分类标签
             foreach (var pieceTable in Resources.FindObjectsOfTypeAll<PieceTable>())
@@ -651,7 +661,7 @@ namespace ValheimCatManager.Managers
         /// 2. 逐个打印每个 PieceTable 的关键属性长度：m_categoryLabels（分类标签列表）、m_categories（分类列表）、m_availablePieces（可用部件列表）
         /// 用于排查分类相关列表长度不匹配的问题
         /// </summary>
-        static void PieceTableCheck()
+        private void PieceTableCheck()
         {
             Debug.LogError($"[CatModData.m_PieceTableCache]的长度是：{CatModData.m_PieceTableCache.Count}");
             foreach (var PieceTable in CatModData.m_PieceTableCache)
@@ -666,7 +676,7 @@ namespace ValheimCatManager.Managers
         /// </summary>
         /// <param name="categoryName">要查找的分类名称（需与枚举名完全一致）</param>
         /// <returns>匹配的 Piece.PieceCategory 枚举值；未找到时打印错误日志并返回 Piece.PieceCategory.All</returns>
-        private static Piece.PieceCategory GetPieceCategory(string categoryName)
+        private Piece.PieceCategory GetPieceCategory(string categoryName)
         {
             Array enumValues = Enum.GetValues(typeof(Piece.PieceCategory));
             string[] enumNames = Enum.GetNames(typeof(Piece.PieceCategory));
