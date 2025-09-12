@@ -6,11 +6,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using ValheimCatManager.Config;
 using ValheimCatManager.Data;
 using ValheimCatManager.Managers;
@@ -273,6 +275,42 @@ namespace ValheimCatManager.Tool
         /// </summary>
         /// <param name="smeltersConfig">炼制站配置实例（包含炼制站类型、可炼制物品、炼制时间等信息）</param>
         public void AddSmelters(SmeltersConfig smeltersConfig) => SmeltersManger.Instance.customSmelters.Add(smeltersConfig);
+
+
+        /// <summary>
+        /// 注：将自定义地区图标加入游戏
+        /// </summary>
+        /// <param name="iconName">图标名</param>
+        public void AddLocationIcon(string iconName)
+        {
+            Texture2D texture2D = catAsset.LoadAsset<Texture2D>(iconName);
+            if (!texture2D) Debug.Log($"AddLocationIcon,执行时未有找到对应图片！");
+
+            var sprite = Sprite.Create(texture2D, new Rect(0, 0, 64, 64), Vector2.zero);
+            if (!sprite) Debug.Log($"AddLocationIcon,执行 Sprite.Create 对象为空！");
+
+            LocationIconManager.Instance.customLocationIconDict.Add(iconName, sprite);
+        }
+
+
+        /// <summary>
+        /// 注：将自定义效果添加给游戏
+        /// </summary>
+        public void AddStatusEffect(string seName)
+        {
+            StatusEffect statusEffect = catAsset.LoadAsset<StatusEffect>(seName);
+            if (!statusEffect)
+            {
+                Debug.Log($"AddStatusEffect,执行时未找到对于效果：[{seName}]");
+                return;
+            }
+            if (!StatusEffectManager.Instance.customStatusEffectDict.ContainsKey(seName))
+            {
+                StatusEffectManager.Instance.customStatusEffectDict.Add(seName, statusEffect);
+                return;
+            }
+            Debug.Log($"AddStatusEffect,执行时发现重复效果：[{seName}]");
+        }
 
     }
 

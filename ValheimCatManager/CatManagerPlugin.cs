@@ -19,7 +19,7 @@ namespace ValheimCatManager
 
         public const string PluginGUID = "com.rambo7at.CatManager";
         public const string PluginName = "猫咪：Mod管理";
-        public const string PluginVersion = "0.1.4.3";
+        public const string PluginVersion = "0.1.4.4";
 
         public static AssetBundle assetBundle;
 
@@ -30,7 +30,7 @@ namespace ValheimCatManager
 
             // 加载AB包资源(关键步骤)
             CatResModManager.Instance.LoadAssetBundle("AB包名称");
-
+            
 
             // 添加物品：这些物品会注册至 ObjectDB 和 ZNetScene
             // 参数： 1，预制件名，2，启用mock

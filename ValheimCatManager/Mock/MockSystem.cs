@@ -8,7 +8,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
-using 准备开饭小子;
 
 namespace ValheimCatManager.Mock
 {
