@@ -37,7 +37,7 @@
 
 ## 🌟 项目简介
 
-**ValheimCatManager** 是一个专为Valheim模组开发者设计的现代化资源管理框架。它采用最新的.NET技术栈，提供了一套完整、直观的API，让您能够轻松管理游戏中的各种资源和配置。
+**ValheimCatManager** 是一个专为Valheim模组开发者设计的资源管理框架。它采用最新的.NET技术栈，提供了一套完整、直观的API，让您能够轻松管理游戏中的各种资源和配置。
 
 ### 🎯 为什么选择ValheimCatManager？
 
