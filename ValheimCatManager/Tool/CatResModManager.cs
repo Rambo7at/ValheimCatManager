@@ -301,7 +301,7 @@ namespace ValheimCatManager.Tool
             StatusEffect statusEffect = catAsset.LoadAsset<StatusEffect>(seName);
             if (!statusEffect)
             {
-                Debug.Log($"AddStatusEffect,执行时未找到对于效果：[{seName}]");
+                Debug.LogError($"AddStatusEffect,执行时未找到对于效果：[{seName}]");
                 return;
             }
             if (!StatusEffectManager.Instance.customStatusEffectDict.ContainsKey(seName))
@@ -309,7 +309,7 @@ namespace ValheimCatManager.Tool
                 StatusEffectManager.Instance.customStatusEffectDict.Add(seName, statusEffect);
                 return;
             }
-            Debug.Log($"AddStatusEffect,执行时发现重复效果：[{seName}]");
+            Debug.LogError($"AddStatusEffect,执行时发现重复效果：[{seName}]");
         }
 
     }

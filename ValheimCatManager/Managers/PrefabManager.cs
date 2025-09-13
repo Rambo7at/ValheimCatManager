@@ -59,7 +59,7 @@ namespace ValheimCatManager.Managers
             static void CopyOtherDBPatch(ObjectDB __instance, ObjectDB other)
             {
                 if (other == null) return;
-                Instance.RegisterToObjectDB(__instance, Instance.customItemDict);
+                Instance.RegisterToObjectDB(other, Instance.customItemDict);
             }
 
         }
@@ -84,7 +84,7 @@ namespace ValheimCatManager.Managers
                 instance.m_itemByHash.Add(hash, item.Value);
             }
         }
-
+        
         private void RegisterToZNetScene(ZNetScene instance, Dictionary<int, GameObject> itemDictionary)
         {
             // 实例为空或无预制件时直接返回
