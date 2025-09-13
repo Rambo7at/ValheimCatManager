@@ -31,7 +31,7 @@ namespace ValheimCatManager.Managers
         /// 注：自定义预制件的字典，准备注册给游戏
         /// </summary>
         public  readonly Dictionary<int, GameObject> customPrefabDict = new();
-
+        
 
         /// <summary>
         /// 注：注册物品 与 自定义预制件的补丁
