@@ -22,7 +22,7 @@ namespace ValheimCatManager
         public const string PluginVersion = "0.1.4.5";
 
         public static AssetBundle assetBundle;
-
+         
         public void Awake()
         {
             // AB包添加：新建文件夹(名称随意)，选择添加现项目，将资源修改成嵌入式。
