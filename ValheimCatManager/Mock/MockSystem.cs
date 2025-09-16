@@ -82,7 +82,7 @@ namespace ValheimCatManager.Mock
                     CatModData.m_PrefabCache.Clear(); // 清理预制件缓存，释放资源
 
                     var elapsed1 = DateTime.Now - startTime1; // 计算耗时
-                    Debug.LogError($"mock 完成耗时: {elapsed1.TotalMilliseconds / 1000}秒"); // 打印耗时日志
+                    Debug.Log($"mock 完成耗时: {elapsed1.TotalMilliseconds / 1000}秒"); // 打印耗时日志
                 }
             }
 
@@ -101,7 +101,7 @@ namespace ValheimCatManager.Mock
         /// </summary>
         private void StartMockReplacement()
         {
-            Debug.LogError($"[{CatManagerPlugin.PluginName}] 开始执行 mock ");
+            Debug.Log($"[{CatManagerPlugin.PluginName}] 开始执行 mock ");
             // 清理原有列表（包括新增的着色器列表）
             m_MockPrefabInfoList.Clear();
             m_MockShaderInfoList.Clear();
@@ -111,7 +111,7 @@ namespace ValheimCatManager.Mock
             ReplacePlaceholders();     // 原有：替换预制件
             ReplaceMockShaders();      // 新增：替换着色器
 
-            Debug.LogError($"[{CatManagerPlugin.PluginName}] 替换流程完成，处理预制件 {m_MockPrefabInfoList.Count} 个，处理着色器 {m_MockShaderInfoList.Count} 个");
+            Debug.Log($"[{CatManagerPlugin.PluginName}] 替换流程完成，处理预制件 {m_MockPrefabInfoList.Count} 个，处理着色器 {m_MockShaderInfoList.Count} 个");
             Cleanup();
         }
 
@@ -288,7 +288,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[{CatManagerPlugin.PluginName}] 处理字段 {field.Name} 时出错：{ex.Message}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 处理字段 {field.Name} 时出错：{ex.Message}");
                 }
             }
         }
@@ -333,7 +333,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[{CatManagerPlugin.PluginName}] 处理对象 {objType.Name} 的字段 {field.Name} 时出错：{ex.Message}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 处理对象 {objType.Name} 的字段 {field.Name} 时出错：{ex.Message}");
                 }
             }
         }
@@ -386,7 +386,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[{CatManagerPlugin.PluginName}] 处理列表元素（索引：{index}）时出错：{ex.Message}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 处理列表元素（索引：{index}）时出错：{ex.Message}");
                 }
                 index++;
             }
@@ -437,7 +437,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[{CatManagerPlugin.PluginName}] 替换 {info.mockPrefab.name} 时出错：{ex.Message}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 替换 {info.mockPrefab.name} 时出错：{ex.Message}");
                 }
             }
         }
@@ -449,7 +449,7 @@ namespace ValheimCatManager.Mock
         {
             if (info.ParentObject == null || info.TargetField == null)
             {
-                Debug.LogError($"[{CatManagerPlugin.PluginName}] 替换失败：ParentObject或TargetField为null");
+                Debug.Log($"[{CatManagerPlugin.PluginName}] 替换失败：ParentObject或TargetField为null");
                 return;
             }
 
@@ -457,7 +457,7 @@ namespace ValheimCatManager.Mock
             // 验证字段所属关系，避免类型不匹配
             if (!info.TargetField.DeclaringType.IsAssignableFrom(targetType))
             {
-                Debug.LogError($"[{CatManagerPlugin.PluginName}] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
+                Debug.Log($"[{CatManagerPlugin.PluginName}] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
                 return;
             }
 
@@ -496,7 +496,7 @@ namespace ValheimCatManager.Mock
                 var shader =  CatToolManager.GetShader(info.ShaderName);
                 if (shader == null)
                 {
-                    Debug.LogError($"[{CatManagerPlugin.PluginName}] 执行ReplaceMockShaders时 找不到着色器：{info.ShaderName}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 执行ReplaceMockShaders时 找不到着色器：{info.ShaderName}");
                 }
 
                 try
@@ -506,7 +506,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[{CatManagerPlugin.PluginName}] 替换着色器 {info.MockShader.name} 失败：{ex.Message}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 替换着色器 {info.MockShader.name} 失败：{ex.Message}");
                 }
             }
         }

@@ -91,7 +91,7 @@ namespace ValheimCatManager.Tool
                 Debug.LogError($"Dll 中未有找到 {AssetName} 资源包");
                 return null;
             }
-
+            
             // 读取资源流并加载AssetBundle
             using (Stream stream = resourceAssembly.GetManifestResourceStream(resourceName))
             {
@@ -311,6 +311,10 @@ namespace ValheimCatManager.Tool
             }
             Debug.LogError($"AddStatusEffect,执行时发现重复效果：[{seName}]");
         }
+
+
+
+        public void EnableVersionCheck(string version,string rpcName) => RpcVersionCheckManager.Instance.EnableVersionCheck(version, rpcName);
 
     }
 

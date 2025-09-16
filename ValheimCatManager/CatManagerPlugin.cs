@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -19,15 +20,13 @@ namespace ValheimCatManager
 
         public const string PluginGUID = "com.rambo7at.CatManager";
         public const string PluginName = "猫咪：Mod管理";
-        public const string PluginVersion = "0.1.4.5";
+        public const string PluginVersion = "0.1.4.7";
 
         public static AssetBundle assetBundle;
-         
+        ConfigEntry<bool> ConfigEntry;
         public void Awake()
         {
             // AB包添加：新建文件夹(名称随意)，选择添加现项目，将资源修改成嵌入式。
-
-
             // 加载AB包资源(关键步骤)
             CatResModManager.Instance.LoadAssetBundle("AB包名称");
             

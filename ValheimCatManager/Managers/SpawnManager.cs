@@ -26,7 +26,7 @@ namespace ValheimCatManager.Managers
 
         public static SpawnManager Instance => _instance ?? (_instance = new SpawnManager());
 
-        private SpawnManager() => new Harmony("SpawnManagerPatch").PatchAll(typeof(SpawnManager));
+        private SpawnManager() => new Harmony("SpawnManagerPatch").PatchAll(typeof(SpawnPatch));
 
 
 
@@ -34,7 +34,7 @@ namespace ValheimCatManager.Managers
         private static class SpawnPatch
         {
             [HarmonyPatch(typeof(SpawnSystem), nameof(SpawnSystem.Awake)), HarmonyPostfix, HarmonyPriority(Priority.VeryLow)]
-            static void RegisterSpawnPatch(SpawnSystem instance) => RegisterSpawnList(instance);
+            static void RegisterSpawnPatch(SpawnSystem __instance) => RegisterSpawnList(__instance);
         }
 
 
