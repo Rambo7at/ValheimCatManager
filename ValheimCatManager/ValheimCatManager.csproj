@@ -89,6 +89,9 @@
       <HintPath>Libs\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SoftReferenceableAssets">
+      <HintPath>Libs\SoftReferenceableAssets.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>Libs\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
@@ -146,6 +149,12 @@
   <ItemGroup>
     <Folder Include="Asset\" />
     <Folder Include="Patch\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Libs\SoftReferenceableAssets.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <!-- 自动复制到Valheim插件目录 -->

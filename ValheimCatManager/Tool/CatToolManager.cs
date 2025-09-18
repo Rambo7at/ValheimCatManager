@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using SoftReferenceableAssets;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Assertions;
 using ValheimCatManager.Config;
 using ValheimCatManager.Data;
 
@@ -191,10 +193,24 @@ namespace ValheimCatManager.Tool
             return null;
         }
 
+
+
+        // 方法定义（已存在于代码中）
+        public static AssetID AssetIDFromObject(UnityEngine.Object obj)
+        {
+            int id = obj.GetInstanceID();
+            return new AssetID(1, 1, 1, (uint)id);
+        }
+
+
+
+
+
         public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
         {
             return gameObject.TryGetComponent(out T component) ? component : gameObject.AddComponent<T>();
         }
+
 
         static void GetVegetationInfo(ZoneSystem zoneSystem)
         {
@@ -249,6 +265,8 @@ namespace ValheimCatManager.Tool
             }
 
         }
+
+
 
     }
 }

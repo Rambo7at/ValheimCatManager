@@ -17,6 +17,7 @@ using ValheimCatManager.Config;
 using ValheimCatManager.Data;
 using ValheimCatManager.Managers;
 using ValheimCatManager.Mock;
+
 using Debug = UnityEngine.Debug;
 
 namespace ValheimCatManager.Tool
@@ -290,7 +291,27 @@ namespace ValheimCatManager.Tool
             if (!sprite) Debug.Log($"AddLocationIcon,执行 Sprite.Create 对象为空！");
 
             LocationIconManager.Instance.customLocationIconDict.Add(iconName, sprite);
+
         }
+
+
+
+        public void AddLocation(LocationConfig locationConfig) => LocationManager.Instance.customLocationList.Add(locationConfig);
+
+        public GameObject GetAssetBundleGameObject(string name)
+        {
+            var asset =  catAsset.LoadAsset<GameObject>(name);
+            if (asset == null)
+            {
+                Debug.LogError($"GetAssetBundleGameObject 执行时未有找到对应预制件：【{name}】");
+                return null;
+            }
+
+            return asset;
+        }
+
+
+
 
 
         /// <summary>
@@ -310,6 +331,8 @@ namespace ValheimCatManager.Tool
                 return;
             }
             Debug.LogError($"AddStatusEffect,执行时发现重复效果：[{seName}]");
+
+            
         }
 
 

@@ -20,7 +20,7 @@ namespace ValheimCatManager
 
         public const string PluginGUID = "com.rambo7at.CatManager";
         public const string PluginName = "猫咪：Mod管理";
-        public const string PluginVersion = "0.1.4.7";
+        public const string PluginVersion = "0.1.4.8";
 
         public static AssetBundle assetBundle;
         ConfigEntry<bool> ConfigEntry;
@@ -47,7 +47,7 @@ namespace ValheimCatManager
             CatResModManager.Instance.AddFood("预制件名","蔬菜类" ,true);
 
 
-
+            
 
 
             //////////////////////////有配置的类///////////////////////////////////////////
