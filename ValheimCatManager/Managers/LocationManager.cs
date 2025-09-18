@@ -1,12 +1,14 @@
 ﻿using HarmonyLib;
+using SoftReferenceableAssets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ValheimCatManager.Config;
 using UnityEngine;
+using ValheimCatManager.Config;
+using ValheimCatManager.Tool;
 using Debug = UnityEngine.Debug;
 
 namespace ValheimCatManager.Managers
@@ -50,17 +52,17 @@ namespace ValheimCatManager.Managers
                     continue;
                 }
 
+                SoftReference<GameObject> softRef = CatToolManager.AddLoadedSoftReferenceAsset(locationConfig.预制件);
+
+                location.m_prefab = softRef;
 
                 instance.m_locations.Add(location);
                 instance.m_locationsByHash.Add(location.Hash, location);
+
+               
             }
 
         }
-
-
-
-
-
 
     }
 }

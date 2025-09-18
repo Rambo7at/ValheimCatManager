@@ -12,11 +12,7 @@ namespace ValheimCatManager.Config
 {
     public class LocationConfig
     {
-        /// <summary>
-        /// 构造函数 传入位置预制件的名字
-        /// </summary>
-        /// <param name="prefabName"></param>
-        public LocationConfig(string prefabName) => 预制件 = CatResModManager.Instance.GetAssetBundleGameObject(prefabName);
+
 
         /// <summary>
         /// 注：位置的预制件名(必填项)
@@ -184,14 +180,12 @@ namespace ValheimCatManager.Config
             }
 
 
-
             var biome = CatToolManager.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;
 
             return new ZoneLocation
             {
                 m_name = 预制件.name,
-                m_prefab = new SoftReference<GameObject>(CatToolManager.AssetIDFromObject(预制件)),
                 m_enable = 启用,
                 m_biome = biome,
                 m_biomeArea = 区域范围,

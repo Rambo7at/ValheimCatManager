@@ -12,6 +12,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using ValheimCatManager.Config;
 using ValheimCatManager.Data;
+using Object = UnityEngine.Object;
 
 namespace ValheimCatManager.Tool
 {
@@ -74,7 +75,7 @@ namespace ValheimCatManager.Tool
                 CatModData.m_shaderCache.Add(shaderList[shaderList.Count - 1].name, shaderList[shaderList.Count - 1]);
                 return shaderList[0];
             }
-            return null;    
+            return null;
         }
 
         /// <summary>
@@ -148,8 +149,8 @@ namespace ValheimCatManager.Tool
         public static GameObject GetGameObject(int hash)
         {
             // 按优先级查找预制件：ZNetScene → ObjectDB
-            GameObject itemPrefab = ZNetScene.instance.GetPrefab(hash)
-                                 ?? ObjectDB.instance.GetItemPrefab(hash);
+            GameObject itemPrefab = ZNetScene.instance.GetPrefab(hash) ?? ObjectDB.instance.GetItemPrefab(hash);
+
 
             // 未找到预制件时打印错误
             if (itemPrefab == null)
@@ -193,25 +194,77 @@ namespace ValheimCatManager.Tool
             return null;
         }
 
-
-
-        // 方法定义（已存在于代码中）
+        /// <summary>
+        /// 注：获取资源ID
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public static AssetID AssetIDFromObject(UnityEngine.Object obj)
         {
             int id = obj.GetInstanceID();
             return new AssetID(1, 1, 1, (uint)id);
         }
 
+        /// <summary>
+        /// 注：手动将已加载的Unity对象注册到游戏的AssetBundleLoader系统中，并创建对应的软引用
+        /// 核心功能：通过生成唯一AssetID、创建AssetLoader并注册到系统，解决KeyNotFoundException问题
+        /// 用途：为自定义地点/预制件创建可在游戏系统中正确使用的SoftReference，避免资源查找失败
+        /// </summary>
+        /// <typeparam name="T">Unity对象类型（通常为GameObject）</typeparam>
+        /// <param name="obj">已加载的Unity对象实例（不能为null）</param>
+        /// <returns>注册成功后返回对应的SoftReference<T>，用于游戏系统配置</returns>
+        /// <exception cref="ArgumentNullException">当传入的obj参数为null时抛出</exception>
+        /// <exception cref="InvalidOperationException">当AssetBundleLoader实例未初始化时抛出</exception>
+        public static SoftReference<T> AddLoadedSoftReferenceAsset<T>(T obj) where T : Object
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj), "不能为null对象创建SoftReference");
+            }
 
+            AssetBundleLoader bundleLoader = AssetBundleLoader.Instance;
+            if (bundleLoader == null)
+            {
+                throw new InvalidOperationException("AssetBundleLoader实例为空，无法注册资源");
+            }
 
+            // 确保有一个空的加载器索引（防止系统崩溃）
+            if (!bundleLoader.m_bundleNameToLoaderIndex.ContainsKey(""))
+            {
+                bundleLoader.m_bundleNameToLoaderIndex[""] = 0;
+            }
 
+            // 基于对象InstanceID生成唯一AssetID
+            AssetID id = CatToolManager.AssetIDFromObject(obj);
 
+            // 创建AssetLoader包装器，配置资源引用和加载状态
+            AssetLoader loader = new AssetLoader(id, new AssetLocation("", ""))
+            {
+                m_asset = obj,
+                m_referenceCounter = new ReferenceCounter(2),
+                m_shouldBeLoaded = true,
+            };
+
+            // 扩展加载器数组容量（如需）
+            int count = bundleLoader.m_assetIDToLoaderIndex.Count;
+            if (count >= bundleLoader.m_assetLoaders.Length)
+            {
+                Array.Resize(ref bundleLoader.m_assetLoaders, bundleLoader.m_assetIDToLoaderIndex.Count + 256);
+            }
+
+            // 注册加载器到系统：数组存储 + 字典索引映射
+            bundleLoader.m_assetLoaders[count] = loader;
+            bundleLoader.m_assetIDToLoaderIndex[id] = count;
+
+            //Debug.Log($"成功注册资源: {obj.name}, AssetID: {id}, 加载器索引: {count}");
+
+            // 返回可用于游戏系统的软引用
+            return new SoftReference<T>(id) { m_name = obj.name };
+        }
         public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
         {
             return gameObject.TryGetComponent(out T component) ? component : gameObject.AddComponent<T>();
         }
-
-
         static void GetVegetationInfo(ZoneSystem zoneSystem)
         {
             // 打印植被总数量

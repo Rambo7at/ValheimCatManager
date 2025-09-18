@@ -199,6 +199,16 @@ namespace ValheimCatManager.Tool
             if (mock) if (!MockSystem.Instance.mockPrefabDict.ContainsKey(hash)) MockSystem.Instance.mockPrefabDict.Add(hash, itemPrefab.name);
         }
 
+        private void AddPrefab(GameObject gameObject)
+        {
+
+            int hash = gameObject.name.GetStableHashCode();
+
+            if (!PrefabManager.Instance.customPrefabDict.ContainsKey(hash)) PrefabManager.Instance.customLocationDict.Add(hash, gameObject);
+            if (!MockSystem.Instance.mockPrefabDict.ContainsKey(hash)) MockSystem.Instance.mockPrefabDict.Add(hash, gameObject.name);
+        }
+
+
         /// <summary>
         /// 注：给游戏添加自定义生成配置（将生成配置加入生成列表）
         /// </summary>
@@ -296,7 +306,21 @@ namespace ValheimCatManager.Tool
 
 
 
-        public void AddLocation(LocationConfig locationConfig) => LocationManager.Instance.customLocationList.Add(locationConfig);
+        public void AddLocation(string LocationName, LocationConfig locationConfig)
+        {
+
+            GameObject LocationPrefab = catAsset.LoadAsset<GameObject>(LocationName);
+            if (!LocationPrefab)
+            {
+                Debug.LogError($"执行AddLocation方法执行时：未找到预制件：[{LocationName}] ");
+                return;
+            }
+
+            Instance.AddPrefab(LocationPrefab);
+            locationConfig.预制件 = LocationPrefab;
+
+            LocationManager.Instance.customLocationList.Add(locationConfig);
+        }
 
         public GameObject GetAssetBundleGameObject(string name)
         {
