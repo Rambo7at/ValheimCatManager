@@ -251,6 +251,12 @@ namespace ValheimCatManager.Mock
             {
                 try
                 {
+                    // 新增：跳过 null 元素，避免空引用
+                    if (item == null)
+                    {
+                        index++;
+                        continue;
+                    }
                     CheckFieldOrElement(rootComponent, rootField, item, parentObject, index);
                 }
                 catch (Exception ex)
@@ -273,11 +279,19 @@ namespace ValheimCatManager.Mock
                 {
                     try
                     {
-                        ReplaceFieldValue(info, CatToolManager.GetGameObject(info.prefabName));
+                        GameObject realPrefab = CatToolManager.GetGameObject(info.prefabName);
+                        // 新增：检查真实预制件是否存在
+                        if (realPrefab == null)
+                        {
+                            Debug.LogError($"[{CatManagerPlugin.PluginName}] 替换失败：未找到真实预制件 {info.prefabName}（对应占位预制件 {info.mockPrefab.name}）");
+                            continue;
+                        }
+                        ReplaceFieldValue(info, realPrefab);
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log($"[{CatManagerPlugin.PluginName}] 替换 {info.mockPrefab.name} 时出错：{ex.Message}");
+                        // 新增：输出详细错误信息（包含字段类型和预制件名称）
+                        Debug.LogError($"[{CatManagerPlugin.PluginName}] 替换 {info.mockPrefab.name} 时出错：字段类型 {info.TargetField.FieldType.Name}，错误：{ex.Message}");
                     }
                 }
                 else if (!string.IsNullOrEmpty(info.ShaderName))
@@ -313,40 +327,62 @@ namespace ValheimCatManager.Mock
             }
 
             Type targetType = info.ParentObject.GetType();
-            // 验证字段所属关系，避免类型不匹配
-            if (!info.TargetField.DeclaringType.IsAssignableFrom(targetType))
-            {
-                Debug.Log($"[{CatManagerPlugin.PluginName}] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
-                return;
-            }
+            Type fieldType = info.TargetField.FieldType;
 
             object fieldValue = info.TargetField.GetValue(info.ParentObject);
-            if (fieldValue == null) return;
-
-            // 根据目标字段类型获取正确的赋值对象
-            object valueToSet = GetValueForFieldType(info.TargetField.FieldType, realPrefab);
-            if (valueToSet == null)
+            if (fieldValue == null)
             {
-                Debug.LogError($"[{CatManagerPlugin.PluginName}] 预制件 {realPrefab.name} 不包含字段所需的组件类型 {info.TargetField.FieldType.Name}");
+                Debug.Log($"[{CatManagerPlugin.PluginName}] 字段值为null：{info.TargetField.Name}");
                 return;
             }
 
-            // 处理数组/列表元素
-            if (info.ArrayIndex != -1)
+            object valueToSet = GetValueForFieldType(fieldType, realPrefab);
+            if (valueToSet == null)
             {
-                if (fieldValue is Array array && info.ArrayIndex >= 0 && info.ArrayIndex < array.Length)
+                Debug.LogError($"[{CatManagerPlugin.PluginName}] 无法获取替换值，字段类型：{fieldType.Name}，预制件：{realPrefab?.name}");
+                return;
+            }
+
+            // 检查替换值与字段类型是否匹配（关键验证）
+            if (!fieldType.IsInstanceOfType(valueToSet))
+            {
+                Debug.LogError($"[{CatManagerPlugin.PluginName}] 类型不匹配：字段类型 {fieldType.Name}，替换值类型 {valueToSet.GetType().Name}");
+                return;
+            }
+
+            try
+            {
+                // 处理数组/列表元素
+                if (info.ArrayIndex != -1)
                 {
-                    array.SetValue(valueToSet, info.ArrayIndex);
+                    // 数组处理（针对单元素替换，而非整个数组替换）
+                    if (fieldValue is GameObject[] gameObjectArray)
+                    {
+                        if (info.ArrayIndex >= 0 && info.ArrayIndex < gameObjectArray.Length)
+                        {
+                            // 若字段是GameObject[]数组，直接替换指定索引的元素为真实预制件
+                            gameObjectArray[info.ArrayIndex] = realPrefab;
+                        }
+                        else
+                        {
+                            Debug.LogError($"[{CatManagerPlugin.PluginName}] 数组索引越界：{info.ArrayIndex}（数组长度：{gameObjectArray.Length}）");
+                        }
+                    }
+                    else if (fieldValue is IList list)
+                    {
+                        list[info.ArrayIndex] = valueToSet;
+                    }
                 }
-                else if (fieldValue is IList list && info.ArrayIndex >= 0 && info.ArrayIndex < list.Count)
+                // 处理整个数组替换（直接赋值新数组）
+                else
                 {
-                    list[info.ArrayIndex] = valueToSet;
+                    info.TargetField.SetValue(info.ParentObject, valueToSet);
                 }
             }
-            // 处理直接引用
-            else
+            catch (Exception ex)
             {
-                info.TargetField.SetValue(info.ParentObject, valueToSet);
+                // 输出完整异常信息（包括堆栈跟踪）
+                Debug.LogError($"[{CatManagerPlugin.PluginName}] 赋值时出错：字段 {info.TargetField.Name}，类型 {fieldType.Name}，错误：{ex.Message}\n堆栈：{ex.StackTrace}");
             }
         }
 
@@ -358,18 +394,46 @@ namespace ValheimCatManager.Mock
         /// </summary>
         private object GetValueForFieldType(Type fieldType, GameObject realPrefab)
         {
-            // 字段类型是GameObject，直接返回
+            // 处理 GameObject 直接引用
             if (fieldType == typeof(GameObject))
             {
                 return realPrefab;
             }
-            // 字段类型是Component或其派生类，获取组件
+            // 处理 GameObject[] 数组
+            else if (fieldType == typeof(GameObject[]))
+            {
+                if (realPrefab == null)
+                {
+                    Debug.LogError($"[{CatManagerPlugin.PluginName}] 真实预制件为null，无法创建GameObject[]");
+                    return null;
+                }
+                // 返回包含真实预制件的单元素数组（根据实际需求调整长度）
+                var result = new GameObject[] { realPrefab };
+                return result;
+            }
+            // 处理 Component 引用（原有逻辑）
             else if (typeof(Component).IsAssignableFrom(fieldType))
             {
-                return realPrefab.GetComponent(fieldType);
+                Component comp = realPrefab.GetComponent(fieldType);
+                if (comp == null)
+                {
+                    Debug.LogWarning($"[{CatManagerPlugin.PluginName}] 预制件 {realPrefab.name} 缺少组件 {fieldType.Name}");
+                }
+                return comp;
             }
-            // 不支持的类型
-            return null;
+            // 处理其他数组类型（如 Component[]）
+            else if (fieldType.IsArray)
+            {
+                Type elementType = fieldType.GetElementType();
+                Debug.LogWarning($"[{CatManagerPlugin.PluginName}] 暂不支持数组类型 {fieldType.Name}（元素类型：{elementType.Name}）");
+                return null;
+            }
+            // 其他不支持的类型
+            else
+            {
+                Debug.LogWarning($"[{CatManagerPlugin.PluginName}] 不支持的字段类型：{fieldType.FullName}");
+                return null;
+            }
         }
         /// <summary>
         /// 注：清空预制件和着色器的替换列表，释放资源）
