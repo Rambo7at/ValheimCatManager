@@ -67,7 +67,7 @@ namespace ValheimCatManager.Mock
             CollectMockPrefab();       // 收集信息
             ReplacePlaceholders();     // 原有：替换预制件
             var elapsed1 = DateTime.Now - startTime1; // 计算耗时
-            Debug.Log($"[{CatMonstAltar.PluginName}] Mock完成-处理数量:[{MockObjectInfoList.Count}]-耗时: {elapsed1.TotalMilliseconds / 1000}秒 ");
+            Debug.Log($"[{CatManagerPlugin.PluginName}] Mock完成-处理数量:[{MockObjectInfoList.Count}]-耗时: {elapsed1.TotalMilliseconds / 1000}秒 ");
             Cleanup();
         }
 
@@ -128,7 +128,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.Log($"[{CatMonstAltar.PluginName}] 处理字段 {field.Name} 时出错：{ex.Message}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 处理字段 {field.Name} 时出错：{ex.Message}");
                 }
             }
         }
@@ -157,7 +157,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.Log($"[{CatMonstAltar.PluginName}] 处理对象 {objType.Name} 的字段 {field.Name} 时出错：{ex.Message}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 处理对象 {objType.Name} 的字段 {field.Name} 时出错：{ex.Message}");
                 }
             }
         }
@@ -194,7 +194,7 @@ namespace ValheimCatManager.Mock
             // 验证字段所属关系，避免类型不匹配
             if (!targetField.DeclaringType.IsAssignableFrom(parentType))
             {
-                Debug.LogWarning($"[{CatMonstAltar.PluginName}]：字段：【{targetField.Name}】不属于对象 类型：【{parentType.Name}】 跳过");
+                Debug.LogWarning($"[{CatManagerPlugin.PluginName}]：字段：【{targetField.Name}】不属于对象 类型：【{parentType.Name}】 跳过");
                 return;
             }
 
@@ -255,7 +255,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.Log($"[{CatMonstAltar.PluginName}] 处理列表元素（索引：{index}）时出错：{ex.Message}");
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 处理列表元素（索引：{index}）时出错：{ex.Message}");
                 }
                 index++;
             }
@@ -277,7 +277,7 @@ namespace ValheimCatManager.Mock
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log($"[{CatMonstAltar.PluginName}] 替换 {info.mockPrefab.name} 时出错：{ex.Message}");
+                        Debug.Log($"[{CatManagerPlugin.PluginName}] 替换 {info.mockPrefab.name} 时出错：{ex.Message}");
                     }
                 }
                 else if (!string.IsNullOrEmpty(info.ShaderName))
@@ -285,7 +285,7 @@ namespace ValheimCatManager.Mock
                     var shader = CatToolManager.GetShader(info.ShaderName);
                     if (shader == null)
                     {
-                        Debug.Log($"[{CatMonstAltar.PluginName}] 执行ReplaceMockShaders时 找不到着色器：{info.ShaderName}");
+                        Debug.Log($"[{CatManagerPlugin.PluginName}] 执行ReplaceMockShaders时 找不到着色器：{info.ShaderName}");
                     }
 
                     try
@@ -295,7 +295,7 @@ namespace ValheimCatManager.Mock
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log($"[{CatMonstAltar.PluginName}] 替换着色器 {info.MockShader.name} 失败：{ex.Message}");
+                        Debug.Log($"[{CatManagerPlugin.PluginName}] 替换着色器 {info.MockShader.name} 失败：{ex.Message}");
                     }
                 }
             }
@@ -308,7 +308,7 @@ namespace ValheimCatManager.Mock
         {
             if (info.ParentObject == null || info.TargetField == null)
             {
-                Debug.Log($"[{CatMonstAltar.PluginName}] 替换失败：ParentObject或TargetField为null");
+                Debug.Log($"[{CatManagerPlugin.PluginName}] 替换失败：ParentObject或TargetField为null");
                 return;
             }
 
@@ -316,7 +316,7 @@ namespace ValheimCatManager.Mock
             // 验证字段所属关系，避免类型不匹配
             if (!info.TargetField.DeclaringType.IsAssignableFrom(targetType))
             {
-                Debug.Log($"[{CatMonstAltar.PluginName}] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
+                Debug.Log($"[{CatManagerPlugin.PluginName}] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
                 return;
             }
 
@@ -327,7 +327,7 @@ namespace ValheimCatManager.Mock
             object valueToSet = GetValueForFieldType(info.TargetField.FieldType, realPrefab);
             if (valueToSet == null)
             {
-                Debug.LogError($"[{CatMonstAltar.PluginName}] 预制件 {realPrefab.name} 不包含字段所需的组件类型 {info.TargetField.FieldType.Name}");
+                Debug.LogError($"[{CatManagerPlugin.PluginName}] 预制件 {realPrefab.name} 不包含字段所需的组件类型 {info.TargetField.FieldType.Name}");
                 return;
             }
 
