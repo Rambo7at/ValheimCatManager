@@ -9,8 +9,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using ValheimCatManager.Data;
 using ValheimCatManager.Tool;
+using static DropTable;
 using static ValheimCatManager.Data.CatModData;
 using Component = UnityEngine.Component;
+using ValheimCatManager;
 
 namespace ValheimCatManager.Mock
 {
@@ -24,10 +26,14 @@ namespace ValheimCatManager.Mock
         /// </summary>
         public readonly Dictionary<int, string> mockPrefabDict = new Dictionary<int, string>();
 
+        private int mockNum = 0;
+
+
         /// <summary>
         /// 注：存储需要替换的预制件信息列表
         /// </summary>
         private readonly List<MockObjectInfo> MockObjectInfoList = new List<MockObjectInfo>();
+
 
         private static MockSystem _instance;
 
@@ -44,17 +50,16 @@ namespace ValheimCatManager.Mock
                 // 仅在主场景（"main"）执行
                 if (SceneManager.GetActiveScene().name == "main")
                 {
-                    Instance.StartMockPrefab(); 
-                    CatModData.m_PrefabCache.Clear(); 
+                    Instance.StartMockPrefab();
+                    CatModData.m_PrefabCache.Clear();
                 }
             }
-
         }
 
         /// <summary>
         /// 需求组件的列表信息（用于收集需处理的组件）
         /// </summary>
-        private  readonly List<Component> ComponentsList = new List<Component>();
+        private readonly List<Component> ComponentsList = new List<Component>();
 
         /// <summary>
         /// 启用 MockSystem（执行预制件和着色器的替换流程）<br></br>
@@ -67,8 +72,11 @@ namespace ValheimCatManager.Mock
             CollectMockPrefab();       // 收集信息
             ReplacePlaceholders();     // 原有：替换预制件
             var elapsed1 = DateTime.Now - startTime1; // 计算耗时
-            Debug.Log($"[{CatManagerPlugin.PluginName}] Mock完成-处理数量:[{MockObjectInfoList.Count}]-耗时: {elapsed1.TotalMilliseconds / 1000}秒 ");
+
+            int indx = MockObjectInfoList.Count + mockNum;
+            Debug.Log($"[{CatManagerPlugin.PluginName}] Mock完成-处理数量:[{indx}]-耗时: {elapsed1.TotalMilliseconds / 1000}秒 ");
             Cleanup();
+            mockNum = 0;
         }
 
         /// <summary>
@@ -81,13 +89,11 @@ namespace ValheimCatManager.Mock
             {
                 GameObject prefab = CatToolManager.GetGameObject(item.Key);
 
-                if (!prefab){ Debug.LogError($"执行CollectMockPrefab方法时，获取预制件:[{item.Value}]是空");continue;}
+                if (!prefab) { Debug.LogError($"执行CollectMockPrefab方法时，获取预制件:[{item.Value}]是空"); continue; }
 
                 if (prefab.name == item.Value) CollectComponents(prefab);
             }
         }
-
-
 
         /// <summary>
         /// [2-收集阶段]<br></br>
@@ -95,16 +101,24 @@ namespace ValheimCatManager.Mock
         /// </summary>
         private void CollectComponents(GameObject prefab)
         {
-            //获取所有组件（包括禁用状态的和所有子对象）
-            Component[] allComponents = prefab.GetComponentsInChildren<Component>(true);
+            // 首先，主动查找所有Renderer组件（包括子预制件中的）
+            Renderer[] allRenderers = prefab.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer renderer in allRenderers)
+            {
+                SaveMockShaderInfo(renderer);
+            }
 
+            // 然后，获取所有组件继续原有的字段检查逻辑
+            Component[] allComponents = prefab.GetComponentsInChildren<Component>(true);
             foreach (Component component in allComponents)
             {
                 if (!component) continue;
-                CheckComponentFields(component); // 检查组件字段（预制件替换）
-            }
-        }
 
+                CheckComponentFields(component); // 检查组件字段（预制件替换）
+                
+            }
+
+        }
 
         /// <summary>
         /// [3-收集阶段]<br></br>
@@ -122,8 +136,11 @@ namespace ValheimCatManager.Mock
                     if (field.IsPrivate) continue;
                     object fieldValue = field.GetValue(component);
                     if (fieldValue == null) continue;
-
-                    CheckFieldOrElement(component, field, fieldValue, component, -1);
+                    if (field.Name == "m_defaultItems")
+                    {
+                        DefaultItemsReplace(component, field, fieldValue, component);
+                    }
+                        CheckFieldOrElement(component, field, fieldValue, component, -1);
 
                 }
                 catch (Exception ex)
@@ -132,6 +149,93 @@ namespace ValheimCatManager.Mock
                 }
             }
         }
+
+        /// <summary>
+        /// 注：特殊处理方法，针对Container组件
+        /// </summary>
+        /// <param name="component"></param>
+        private void CheckContainerFields(Component component)
+        {
+            Type compType = component.GetType();
+            FieldInfo[] fields = compType.GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (FieldInfo field in fields)
+            {
+                try
+                {
+                    if (field.IsPrivate) continue;
+                    // 只处理 GameObject 类型字段和 m_defaultItems 字段
+                    if (field.FieldType != typeof(GameObject) && field.Name != "m_defaultItems") continue;
+
+                    object fieldValue = field.GetValue(component);
+                    if (fieldValue == null) continue;
+
+                    // 处理 GameObject 字段
+                    if (fieldValue is GameObject gameObjectValue)
+                    {
+                        SaveMockPrefabInfo(component, field, gameObjectValue, component, -1);
+                    }
+                    else if (field.Name == "m_defaultItems")
+                    {
+                        DefaultItemsReplace(component, field, fieldValue, component);
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    Debug.Log($"[{CatManagerPlugin.PluginName}] 处理字段 {field.Name} 时出错：{ex.Message}");
+                }
+            }
+        }
+
+
+        private void DefaultItemsReplace(Component rootComponent, FieldInfo field, object dropTable, object parentObject)
+        {
+
+            Type parentType = parentObject.GetType();
+
+            if (!field.DeclaringType.IsAssignableFrom(parentType))
+            {
+                Debug.LogWarning($"[{CatManagerPlugin.PluginName}]：字段：【{field.Name}】不属于对象 类型：【{parentType.Name}】 跳过");
+                return;
+            }
+
+            var dropTableObj = (DropTable)dropTable;
+            ReplaceGameobject(dropTableObj.m_drops);
+        }
+
+
+        /// <summary>
+        /// 注：特殊处理针对 DropTable 进行处理
+        /// </summary>
+        /// <param name="dropDatas"></param>
+        private void ReplaceGameobject(List<DropTable.DropData> dropDatas)
+        {
+            for (int i = 0; i < dropDatas.Count; i++)
+            {
+                if (dropDatas[i].m_item.name.StartsWith("JVLmock_"))
+                {
+                    var itemNmae = dropDatas[i].m_item.name.Substring("JVLmock_".Length);
+                    var gameObject = CatToolManager.GetGameObject(itemNmae);
+
+
+                    DropTable.DropData newDropData = new DropTable.DropData() 
+                    {
+                      m_item = gameObject,
+                        m_stackMin = dropDatas[i].m_stackMin,
+                        m_stackMax = dropDatas[i].m_stackMax,
+                        m_weight = dropDatas[i].m_weight,
+                        m_dontScale = dropDatas[i].m_dontScale
+
+                    };
+                    dropDatas[i] = newDropData;
+                    mockNum = mockNum + 1;
+                }
+            }
+        }
+
+
+        /// <summary>
         /// [3-收集阶段]<br></br>
         /// 注：递归检查自定义对象的内部字段，收集嵌套结构中的占位预制件信息
         /// </summary> 
@@ -170,15 +274,12 @@ namespace ValheimCatManager.Mock
         {
             // 处理直接的GameObject引用
             if (value is GameObject prefab) SaveMockPrefabInfo(rootComponent, field, prefab, parentObject, index);
-            // 处理Renderer（着色器）
-            else if (value is Renderer renderer) SaveMockShaderInfo(renderer);
             // 处理Component引用（取其GameObject）
             else if (value is Component componentValue) SaveMockPrefabInfo(rootComponent, field, componentValue.gameObject, parentObject, index);
             // 处理集合类型（遍历元素）
             else if (value is IEnumerable enumerable) HandleEnumerable(rootComponent, field, enumerable, parentObject);
             // 处理自定义对象（递归检查内部字段）
             else if (value.GetType().IsClass) CheckObjectFields(rootComponent, field, value, parentObject);
-
         }
 
         /// <summary>
@@ -191,6 +292,7 @@ namespace ValheimCatManager.Mock
             if (!prefab || !prefab.name.StartsWith("JVLmock_")) return;
 
             Type parentType = parentObject.GetType();
+           
             // 验证字段所属关系，避免类型不匹配
             if (!targetField.DeclaringType.IsAssignableFrom(parentType))
             {
@@ -200,6 +302,7 @@ namespace ValheimCatManager.Mock
 
             // 去除JVLmock_前缀，获取真实预制件名称
             string oPrefabName = prefab.name.Substring("JVLmock_".Length);
+
             MockObjectInfoList.Add(new MockObjectInfo
             {
                 RootComponent = rootComponent,
@@ -210,9 +313,10 @@ namespace ValheimCatManager.Mock
                 ArrayIndex = arrayIndex
             });
         }
+
         /// <summary>
         /// [1-存储阶段]<br></br>
-        /// 注：存储带有占位信息的预制件
+        /// 注：存储带有占位信息的着色器
         /// </summary>
         private void SaveMockShaderInfo(Renderer renderer)
         {
@@ -251,12 +355,6 @@ namespace ValheimCatManager.Mock
             {
                 try
                 {
-                    // 新增：跳过 null 元素，避免空引用
-                    if (item == null)
-                    {
-                        index++;
-                        continue;
-                    }
                     CheckFieldOrElement(rootComponent, rootField, item, parentObject, index);
                 }
                 catch (Exception ex)
@@ -279,19 +377,11 @@ namespace ValheimCatManager.Mock
                 {
                     try
                     {
-                        GameObject realPrefab = CatToolManager.GetGameObject(info.prefabName);
-                        // 新增：检查真实预制件是否存在
-                        if (realPrefab == null)
-                        {
-                            Debug.LogError($"[{CatManagerPlugin.PluginName}] 替换失败：未找到真实预制件 {info.prefabName}（对应占位预制件 {info.mockPrefab.name}）");
-                            continue;
-                        }
-                        ReplaceFieldValue(info, realPrefab);
+                        ReplaceFieldValue(info, CatToolManager.GetGameObject(info.prefabName));
                     }
                     catch (Exception ex)
                     {
-                        // 新增：输出详细错误信息（包含字段类型和预制件名称）
-                        Debug.LogError($"[{CatManagerPlugin.PluginName}] 替换 {info.mockPrefab.name} 时出错：字段类型 {info.TargetField.FieldType.Name}，错误：{ex.Message}");
+                        Debug.Log($"[{CatManagerPlugin.PluginName}] 替换 {info.mockPrefab.name} 时出错：{ex.Message}");
                     }
                 }
                 else if (!string.IsNullOrEmpty(info.ShaderName))
@@ -314,6 +404,7 @@ namespace ValheimCatManager.Mock
                 }
             }
         }
+
         /// <summary>
         /// [2-处理阶段]<br></br>
         /// 注：根据字段类型和索引，更新占位预制件引用为真实预制件
@@ -327,62 +418,40 @@ namespace ValheimCatManager.Mock
             }
 
             Type targetType = info.ParentObject.GetType();
-            Type fieldType = info.TargetField.FieldType;
+            // 验证字段所属关系，避免类型不匹配
+            if (!info.TargetField.DeclaringType.IsAssignableFrom(targetType))
+            {
+                Debug.Log($"[{CatManagerPlugin.PluginName}] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
+                return;
+            }
 
             object fieldValue = info.TargetField.GetValue(info.ParentObject);
-            if (fieldValue == null)
-            {
-                Debug.Log($"[{CatManagerPlugin.PluginName}] 字段值为null：{info.TargetField.Name}");
-                return;
-            }
+            if (fieldValue == null) return;
 
-            object valueToSet = GetValueForFieldType(fieldType, realPrefab);
+            // 根据目标字段类型获取正确的赋值对象
+            object valueToSet = GetValueForFieldType(info.TargetField.FieldType, realPrefab);
             if (valueToSet == null)
             {
-                Debug.LogError($"[{CatManagerPlugin.PluginName}] 无法获取替换值，字段类型：{fieldType.Name}，预制件：{realPrefab?.name}");
+                Debug.LogError($"[{CatManagerPlugin.PluginName}] 预制件 {realPrefab.name} 不包含字段所需的组件类型 {info.TargetField.FieldType.Name}");
                 return;
             }
 
-            // 检查替换值与字段类型是否匹配（关键验证）
-            if (!fieldType.IsInstanceOfType(valueToSet))
+            // 处理数组/列表元素
+            if (info.ArrayIndex != -1)
             {
-                Debug.LogError($"[{CatManagerPlugin.PluginName}] 类型不匹配：字段类型 {fieldType.Name}，替换值类型 {valueToSet.GetType().Name}");
-                return;
-            }
-
-            try
-            {
-                // 处理数组/列表元素
-                if (info.ArrayIndex != -1)
+                if (fieldValue is Array array && info.ArrayIndex >= 0 && info.ArrayIndex < array.Length)
                 {
-                    // 数组处理（针对单元素替换，而非整个数组替换）
-                    if (fieldValue is GameObject[] gameObjectArray)
-                    {
-                        if (info.ArrayIndex >= 0 && info.ArrayIndex < gameObjectArray.Length)
-                        {
-                            // 若字段是GameObject[]数组，直接替换指定索引的元素为真实预制件
-                            gameObjectArray[info.ArrayIndex] = realPrefab;
-                        }
-                        else
-                        {
-                            Debug.LogError($"[{CatManagerPlugin.PluginName}] 数组索引越界：{info.ArrayIndex}（数组长度：{gameObjectArray.Length}）");
-                        }
-                    }
-                    else if (fieldValue is IList list)
-                    {
-                        list[info.ArrayIndex] = valueToSet;
-                    }
+                    array.SetValue(valueToSet, info.ArrayIndex);
                 }
-                // 处理整个数组替换（直接赋值新数组）
-                else
+                else if (fieldValue is IList list && info.ArrayIndex >= 0 && info.ArrayIndex < list.Count)
                 {
-                    info.TargetField.SetValue(info.ParentObject, valueToSet);
+                    list[info.ArrayIndex] = valueToSet;
                 }
             }
-            catch (Exception ex)
+            // 处理直接引用
+            else
             {
-                // 输出完整异常信息（包括堆栈跟踪）
-                Debug.LogError($"[{CatManagerPlugin.PluginName}] 赋值时出错：字段 {info.TargetField.Name}，类型 {fieldType.Name}，错误：{ex.Message}\n堆栈：{ex.StackTrace}");
+                info.TargetField.SetValue(info.ParentObject, valueToSet);
             }
         }
 
@@ -394,50 +463,23 @@ namespace ValheimCatManager.Mock
         /// </summary>
         private object GetValueForFieldType(Type fieldType, GameObject realPrefab)
         {
-            // 处理 GameObject 直接引用
+            // 字段类型是GameObject，直接返回
             if (fieldType == typeof(GameObject))
             {
                 return realPrefab;
             }
-            // 处理 GameObject[] 数组
-            else if (fieldType == typeof(GameObject[]))
-            {
-                if (realPrefab == null)
-                {
-                    Debug.LogError($"[{CatManagerPlugin.PluginName}] 真实预制件为null，无法创建GameObject[]");
-                    return null;
-                }
-                // 返回包含真实预制件的单元素数组（根据实际需求调整长度）
-                var result = new GameObject[] { realPrefab };
-                return result;
-            }
-            // 处理 Component 引用（原有逻辑）
+            // 字段类型是Component或其派生类，获取组件
             else if (typeof(Component).IsAssignableFrom(fieldType))
             {
-                Component comp = realPrefab.GetComponent(fieldType);
-                if (comp == null)
-                {
-                    Debug.LogWarning($"[{CatManagerPlugin.PluginName}] 预制件 {realPrefab.name} 缺少组件 {fieldType.Name}");
-                }
-                return comp;
+                return realPrefab.GetComponent(fieldType);
             }
-            // 处理其他数组类型（如 Component[]）
-            else if (fieldType.IsArray)
-            {
-                Type elementType = fieldType.GetElementType();
-                Debug.LogWarning($"[{CatManagerPlugin.PluginName}] 暂不支持数组类型 {fieldType.Name}（元素类型：{elementType.Name}）");
-                return null;
-            }
-            // 其他不支持的类型
-            else
-            {
-                Debug.LogWarning($"[{CatManagerPlugin.PluginName}] 不支持的字段类型：{fieldType.FullName}");
-                return null;
-            }
+            // 不支持的类型
+            return null;
         }
+
         /// <summary>
         /// 注：清空预制件和着色器的替换列表，释放资源）
         /// </summary>
-        private  void Cleanup() => MockObjectInfoList.Clear();
+        private void Cleanup() => MockObjectInfoList.Clear();
     }
 }

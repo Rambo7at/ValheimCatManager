@@ -98,7 +98,7 @@ namespace ValheimCatManager.Managers
             foreach (var item in itemDictionary)
             {
                 // 避免重复注册（已存在该哈希的预制件则跳过）
-                if (ZNetScene.instance.m_namedPrefabs.ContainsKey(item.Key)) continue;
+                if (instance.m_namedPrefabs.ContainsKey(item.Key)) continue;
 
                 // 获取预制件的ZNetView组件（判断是否需要网络同步）
                 var view = item.Value.GetComponent<ZNetView>();
@@ -119,39 +119,41 @@ namespace ValheimCatManager.Managers
         }
 
 
+        // 缓存已处理的预制件，避免重复注册
+        private Dictionary<GameObject, bool> processedPrefabsCache = new Dictionary<GameObject, bool>();
+
         private void RegisterLocationToZNetScene(ZNetScene instance, Dictionary<int, GameObject> locationDictionary)
         {
             // 验证输入参数有效性
-            if (instance == null || locationDictionary == null || locationDictionary.Count == 0)
-            {
-                Debug.LogWarning("注册失败：ZNetScene实例为空或地点预制件字典为空");
-                return;
-            }
+            if (instance == null || locationDictionary.Count == 0) return;
 
             foreach (var locationEntry in locationDictionary)
             {
                 int locationHash = locationEntry.Key;
                 GameObject locationPrefab = locationEntry.Value;
 
-                if (locationPrefab == null)
+                // 检查是否已处理过此预制件
+                if (instance.m_namedPrefabs.ContainsKey(locationEntry.Key))
                 {
-                    Debug.LogError($"地点预制件哈希 {locationHash} 对应的预制件为空，已跳过");
+                    Debug.Log($"预制件 {locationPrefab.name} 已注册过，跳过重复处理");
                     continue;
                 }
 
                 // 1. 处理地点根预制件本身
-                ProcessLocationObject(instance, locationPrefab);
+                Instance.ProcessLocationObject(instance, locationPrefab);
 
-                // 2. 递归处理所有子物体（核心：确保所有子物体的ZNetView都被注册）
-                var allChildTransforms = locationPrefab.GetComponentsInChildren<Transform>(true);
-                foreach (var childTransform in allChildTransforms)
+                // 2. 只处理带有 ZNetView 的子物体，提高效率
+                ZNetView[] childNetViews = locationPrefab.GetComponentsInChildren<ZNetView>(true);
+
+                foreach (ZNetView netView in childNetViews)
                 {
                     // 跳过根对象，避免重复处理
-                    if (childTransform.gameObject == locationPrefab)
-                        continue;
+                    if (netView.gameObject == locationPrefab) continue;
 
-                    ProcessLocationObject(instance, childTransform.gameObject);
+                    Instance.ProcessLocationObject(instance, netView.gameObject);
                 }
+
+
             }
         }
 
@@ -176,7 +178,7 @@ namespace ValheimCatManager.Managers
 
             // 获取ZNetView组件判断是否需要网络同步
             ZNetView netView = locationObject.GetComponent<ZNetView>();
-
+            
             if (netView != null)
             {
                 // 有ZNetView的对象添加到网络预制件列表
@@ -190,6 +192,8 @@ namespace ValheimCatManager.Managers
 
             // 注册到名称-预制件映射表
             instance.m_namedPrefabs[hashKey] = locationObject;
+
+            Debug.Log($"已注册预制件: {prefabName}, Hash: {hashKey}");
         }
 
 

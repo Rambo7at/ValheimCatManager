@@ -292,7 +292,7 @@ namespace ValheimCatManager.Tool
         /// 注：将自定义地区图标加入游戏
         /// </summary>
         /// <param name="iconName">图标名</param>
-        public void AddLocationIcon(string iconName)
+        public void AddLocationIcon(string iconName,string locationIconName)
         {
             Texture2D texture2D = catAsset.LoadAsset<Texture2D>(iconName);
             if (!texture2D) Debug.Log($"AddLocationIcon,执行时未有找到对应图片！");
@@ -300,7 +300,7 @@ namespace ValheimCatManager.Tool
             var sprite = Sprite.Create(texture2D, new Rect(0, 0, 64, 64), Vector2.zero);
             if (!sprite) Debug.Log($"AddLocationIcon,执行 Sprite.Create 对象为空！");
 
-            LocationIconManager.Instance.customLocationIconDict.Add(iconName, sprite);
+            LocationIconManager.Instance.customLocationIconDict.Add(locationIconName, sprite);
 
         }
 

@@ -221,7 +221,7 @@ namespace ValheimCatManager.Config
 
             var prefab = CatToolManager.GetGameObject(预制件);
             if (!prefab) return null;
-
+            
             名字 = $"Veg_{prefab.name}";
             var biome = CatToolManager.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace ValheimCatManager.Data
 
 
         /// <summary>
-        /// 模拟预制件信息（用于存储占位预制件及其替换目标的关联数据）
+        /// Mock对象信息类
         /// </summary>
         public class MockObjectInfo
         {

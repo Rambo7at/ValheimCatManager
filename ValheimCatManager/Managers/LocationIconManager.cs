@@ -37,10 +37,10 @@ namespace ValheimCatManager.Managers
 
             foreach (var icon in Instance.customLocationIconDict)
             {
-                if (!String.IsNullOrEmpty(icon.Key)) continue;
+                if (String.IsNullOrEmpty(icon.Key)) continue;
                 if (!icon.Value) continue;
 
-
+                
                 minimap.m_locationIcons.Add(new LocationSpriteData() { m_name = icon.Key, m_icon = icon.Value });
             }
 

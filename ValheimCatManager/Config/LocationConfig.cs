@@ -185,7 +185,7 @@ namespace ValheimCatManager.Config
 
             return new ZoneLocation
             {
-                m_name = 预制件.name,
+                m_prefabName = 预制件.name,
                 m_enable = 启用,
                 m_biome = biome,
                 m_biomeArea = 区域范围,
