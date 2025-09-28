@@ -212,7 +212,6 @@ namespace ValheimCatManager.Config
 
             return new SpawnSystem.SpawnData
             {
-                m_name = prefab.name,
                 m_prefab = prefab,
                 m_enabled = 启用,
                 m_biome = biome,

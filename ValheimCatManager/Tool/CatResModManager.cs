@@ -55,7 +55,7 @@ namespace ValheimCatManager.Tool
         /// 注：加载资源包（传入已加载的AssetBundle实例，初始化资源包）
         /// </summary>
         /// <param name="assetBundle"></param>
-        public void LoadAssetBundle(string assetName)
+        public void LoadAssetBundle(string assetName,string PluginName)
         {
             if (catAsset != null)
             {
@@ -65,6 +65,7 @@ namespace ValheimCatManager.Tool
             }
 
             catAsset = LoadAssetBundleToCatAsset(assetName);
+            MockSystem.Instance.LoadmockDebugName(PluginName);
         }
 
 

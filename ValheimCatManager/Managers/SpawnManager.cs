@@ -61,7 +61,11 @@ namespace ValheimCatManager.Managers
             }
 
             // 生成系统实例为空或无生成数据时直接返回
-            if (!instance || Instance.customSpawnSystem.m_spawners.Count == 0) return;
+            if (!instance || Instance.customSpawnSystem.m_spawners.Count == 0)
+            {
+                return;
+
+            }
 
             // 将自定义生成列表添加到游戏生成系统
             instance.m_spawnLists.Add(Instance.customSpawnSystem);
