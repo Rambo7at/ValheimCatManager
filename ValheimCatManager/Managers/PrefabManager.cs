@@ -193,7 +193,6 @@ namespace ValheimCatManager.Managers
             // 注册到名称-预制件映射表
             instance.m_namedPrefabs[hashKey] = locationObject;
 
-            Debug.Log($"已注册预制件: {prefabName}, Hash: {hashKey}");
         }
 
 

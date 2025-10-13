@@ -148,6 +148,7 @@
   
   <ItemGroup>
     <Folder Include="Asset\" />
+    <Folder Include="Patch\" />
   </ItemGroup>
 
   <!-- 自动复制到Valheim插件目录 -->

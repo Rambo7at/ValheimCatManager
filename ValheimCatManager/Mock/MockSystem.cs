@@ -136,7 +136,7 @@ namespace ValheimCatManager.Mock
                     object fieldValue = field.GetValue(component);
                     if (fieldValue == null) continue;
 
-                    if (field.Name == "m_defaultItems" && field.FieldType == typeof(DropTable))
+                    if (field.FieldType == typeof(DropTable))
                     {
                         DefaultItemsReplace(component, field, fieldValue, component);
                     }
@@ -377,14 +377,13 @@ namespace ValheimCatManager.Mock
         /// </summary>
         private void ReplaceFieldValue(MockObjectInfo info, GameObject realPrefab)
         {
-            if (info.ParentObject == null || info.TargetField == null)
+            if (info.ParentObject == null || info.TargetField == null || realPrefab == null)
             {
-                Debug.Log($"[{mockDebugName}] 替换失败：ParentObject或TargetField为null");
+                Debug.Log($"[{mockDebugName}] 替换失败：ParentObject、TargetField或realPrefab为null");
                 return;
             }
 
             Type targetType = info.ParentObject.GetType();
-            // 验证字段所属关系，避免类型不匹配
             if (!info.TargetField.DeclaringType.IsAssignableFrom(targetType))
             {
                 Debug.Log($"[{mockDebugName}] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
@@ -394,25 +393,36 @@ namespace ValheimCatManager.Mock
             object fieldValue = info.TargetField.GetValue(info.ParentObject);
             if (fieldValue == null) return;
 
+            // 判断目标字段是否为 Component 类型
+            object valueToSet = realPrefab;
+            if (typeof(Component).IsAssignableFrom(info.TargetField.FieldType))
+            {
+                // 从真实预制件上获取目标组件
+                Component targetComponent = realPrefab.GetComponent(info.TargetField.FieldType);
+                if (targetComponent == null)
+                {
+                    Debug.LogError($"[{mockDebugName}] 真实预制件 {realPrefab.name} 上找不到 {info.TargetField.FieldType.Name} 组件");
+                    return;
+                }
+                valueToSet = targetComponent; // 替换为组件引用
+            }
+
             // 处理数组/列表元素
             if (info.ArrayIndex != -1)
             {
                 if (fieldValue is Array array && info.ArrayIndex >= 0 && info.ArrayIndex < array.Length)
                 {
-                    array.SetValue(realPrefab, info.ArrayIndex);
+                    array.SetValue(valueToSet, info.ArrayIndex);
                 }
                 else if (fieldValue is IList list && info.ArrayIndex >= 0 && info.ArrayIndex < list.Count)
                 {
-                    list[info.ArrayIndex] = realPrefab;
+                    list[info.ArrayIndex] = valueToSet;
                 }
             }
             // 处理直接引用
             else
             {
-                if (fieldValue is GameObject || fieldValue is Component)
-                {
-                    info.TargetField.SetValue(info.ParentObject, realPrefab);
-                }
+                info.TargetField.SetValue(info.ParentObject, valueToSet);
             }
         }
 
