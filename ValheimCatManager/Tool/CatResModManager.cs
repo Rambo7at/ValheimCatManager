@@ -48,18 +48,19 @@ namespace ValheimCatManager.Tool
 
         }
 
-        // 你原有的资源包字段（保留，改为私有更安全）
+        // 资源包字段
         private AssetBundle catAsset;
 
         /// <summary>
-        /// 注：加载资源包（传入已加载的AssetBundle实例，初始化资源包）
+        /// 注：（必要步骤）资源包加载 与 mock系统命名
         /// </summary>
-        /// <param name="assetBundle"></param>
-        public void LoadAssetBundle(string assetName,string PluginName)
+        /// <param name="assetName">AB包名称</param>
+        /// <param name="PluginName">mod名</param>
+        public void LoadAssetBundle(string assetName, string PluginName)
         {
             if (catAsset != null)
             {
-          
+
                 Debug.LogError("CatResModManager内的资源包已经有内容，返回。");
                 return;
             }
@@ -93,7 +94,7 @@ namespace ValheimCatManager.Tool
                 Debug.LogError($"Dll 中未有找到 {AssetName} 资源包");
                 return null;
             }
-            
+
             // 读取资源流并加载AssetBundle
             using (Stream stream = resourceAssembly.GetManifestResourceStream(resourceName))
             {
@@ -150,7 +151,7 @@ namespace ValheimCatManager.Tool
             if (monsterConfig.食谱.Length > 0)
             {
                 // 将怪物配置加入自定义怪物列表
-               MonsterManager.Instance.customMonsterSet.Add(monsterConfig);
+                MonsterManager.Instance.customMonsterSet.Add(monsterConfig);
             }
 
         }
@@ -200,6 +201,10 @@ namespace ValheimCatManager.Tool
             if (mock) if (!MockSystem.Instance.mockPrefabDict.ContainsKey(hash)) MockSystem.Instance.mockPrefabDict.Add(hash, itemPrefab.name);
         }
 
+        /// <summary>
+        /// 辅助方法：针对地点预制件注册
+        /// </summary>
+        /// <param name="gameObject"></param>
         private void AddPrefab(GameObject gameObject)
         {
 
@@ -270,7 +275,7 @@ namespace ValheimCatManager.Tool
             int hash = piecePrefab.name.GetStableHashCode();
 
             if (!PrefabManager.Instance.customPrefabDict.ContainsKey(hash)) PrefabManager.Instance.customPrefabDict.Add(hash, piecePrefab);
-           
+
             if (!PieceManager.Instance.customPieceDict.ContainsKey(hash)) PieceManager.Instance.customPieceDict.Add(hash, pieceConfig);
 
             if (mockCheck) if (!MockSystem.Instance.mockPrefabDict.ContainsKey(hash)) MockSystem.Instance.mockPrefabDict.Add(hash, piecePrefab.name);
@@ -288,25 +293,11 @@ namespace ValheimCatManager.Tool
         /// <param name="smeltersConfig">炼制站配置实例（包含炼制站类型、可炼制物品、炼制时间等信息）</param>
         public void AddSmelters(SmeltersConfig smeltersConfig) => SmeltersManger.Instance.customSmelters.Add(smeltersConfig);
 
-
         /// <summary>
-        /// 注：将自定义地区图标加入游戏
+        /// 注：给游戏添加自定义地点
         /// </summary>
-        /// <param name="iconName">图标名</param>
-        public void AddLocationIcon(string iconName,string locationIconName)
-        {
-            Texture2D texture2D = catAsset.LoadAsset<Texture2D>(iconName);
-            if (!texture2D) Debug.Log($"AddLocationIcon,执行时未有找到对应图片！");
-
-            var sprite = Sprite.Create(texture2D, new Rect(0, 0, 64, 64), Vector2.zero);
-            if (!sprite) Debug.Log($"AddLocationIcon,执行 Sprite.Create 对象为空！");
-
-            LocationIconManager.Instance.customLocationIconDict.Add(locationIconName, sprite);
-
-        }
-
-
-
+        /// <param name="LocationName">地点名</param>
+        /// <param name="locationConfig">设置地点生成</param>
         public void AddLocation(string LocationName, LocationConfig locationConfig)
         {
 
@@ -323,9 +314,58 @@ namespace ValheimCatManager.Tool
             LocationManager.Instance.customLocationList.Add(locationConfig);
         }
 
+        /// <summary>
+        /// 注：将自定义地区图标加入游戏
+        /// </summary>
+        /// <param name="iconName">图标名</param>
+        public void AddLocationIcon(string iconName, string locationIconName)
+        {
+            Texture2D texture2D = catAsset.LoadAsset<Texture2D>(iconName);
+            if (!texture2D) Debug.Log($"AddLocationIcon,执行时未有找到对应图片！");
+
+            var sprite = Sprite.Create(texture2D, new Rect(0, 0, 64, 64), Vector2.zero);
+            if (!sprite) Debug.Log($"AddLocationIcon,执行 Sprite.Create 对象为空！");
+
+            LocationIconManager.Instance.customLocationIconDict.Add(locationIconName, sprite);
+
+        }
+
+
+        /// <summary>
+        /// 注：给游戏添加动作
+        /// </summary>
+        /// <param name="animationName"></param>
+        public void AddAnimation(string animationName1, string animationName2 = null, string animationName3 = null)
+        {
+            AnimationClip attack1 = catAsset.LoadAsset<AnimationClip>(animationName1);
+            AnimationManager.Instance.animationDict.Add(animationName1, attack1);
+
+            List<string> attacklist = new List<string>() {animationName1};
+
+            if (animationName2 != null)
+            {
+                AnimationClip attack2 = catAsset.LoadAsset<AnimationClip>(animationName2);
+                attacklist.Add(animationName2);
+                AnimationManager.Instance.animationDict.Add (animationName2, attack2);
+            }
+            if (animationName3 != null) 
+            {
+                AnimationClip attack3 = catAsset.LoadAsset<AnimationClip>(animationName3);
+                attacklist.Add(animationName3);
+                AnimationManager.Instance.animationDict.Add(animationName3, attack3);
+            }
+
+            AnimationManager.Instance.animationList.Add(attacklist);
+        }
+
+
+
+
+
+
         public GameObject GetAssetBundleGameObject(string name)
         {
-            var asset =  catAsset.LoadAsset<GameObject>(name);
+            var asset = catAsset.LoadAsset<GameObject>(name);
             if (asset == null)
             {
                 Debug.LogError($"GetAssetBundleGameObject 执行时未有找到对应预制件：【{name}】");
@@ -357,12 +397,12 @@ namespace ValheimCatManager.Tool
             }
             Debug.LogError($"AddStatusEffect,执行时发现重复效果：[{seName}]");
 
-            
+
         }
 
 
 
-        public void EnableVersionCheck(string version,string rpcName) => RpcVersionCheckManager.Instance.EnableVersionCheck(version, rpcName);
+        public void EnableVersionCheck(string version, string rpcName) => RpcVersionCheckManager.Instance.EnableVersionCheck(version, rpcName);
 
     }
 

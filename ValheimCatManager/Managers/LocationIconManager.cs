@@ -43,10 +43,6 @@ namespace ValheimCatManager.Managers
                 
                 minimap.m_locationIcons.Add(new LocationSpriteData() { m_name = icon.Key, m_icon = icon.Value });
             }
-
-
-
-
         }
 
 
