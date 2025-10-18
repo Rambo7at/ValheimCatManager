@@ -44,33 +44,50 @@ namespace ValheimCatManager.Config
             {
                 Debug.LogError($"添加{itemName}配方错误，捕获异常：{ex} ");
             }
+        }
 
+        /// <summary>
+        /// (重载)构造函数 增加配方名选项
+        /// </summary>
+        /// <param name="itemName"></param>
+        /// <param name="station"></param>
+        /// <param name="stationLevel"></param>
+        /// <param name="amount"></param>
+        /// <param name="resItemList"></param>
+        public RecipeConfig(string itemName, string recipeName, string station, int stationLevel, int amount, params (string resItem, int resAmount, int levelAmount)[] resItemList)
+        {
+            try
+            {
+                物品 = itemName;
+                配方名 = recipeName;
+                制作工作台 = station;
+                最低工作台等级 = stationLevel;
+                产量 = amount;
+
+                foreach (var resItem in resItemList)
+                {
+                    增加材料(resItem.resItem, resItem.resAmount, resItem.levelAmount);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"添加{itemName}配方错误，捕获异常：{ex} ");
+            }
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         /// <summary>
-        /// 注：制作目标的预制件名
+        /// 注：(重载)构造函数 仅传入必要物品名
         /// </summary>
-        /// <param name="Name"></param>
-        public RecipeConfig(string Name) => 物品 = Name;
+        /// <param name="name"></param>
+        public RecipeConfig(string name) => 物品 = name;
 
 
         /// <summary>
         /// 注：这是配方的名字(非必填)
         /// </summary>
-        public string 名字 { get; set; } = string.Empty;
+        public string 配方名 { get; set; } = string.Empty;
 
         /// <summary>
         /// 注：配方制作的目标物品.
@@ -118,19 +135,21 @@ namespace ValheimCatManager.Config
         /// </summary>
         public bool 只需要一种成分 { get; set; } = false;
 
-
+        /// <summary>
+        /// 注：配方列表
+        /// </summary>
         private readonly List<RequirementConfig> requirementConfigs = new List<RequirementConfig>();
 
 
 
         /// <summary>
-        /// 注：给配方 添加需求物品的方法
+        /// 工具函数：给配方列表添加材料
         /// </summary>
         /// <param name="item">注：配方需求材料</param>
         /// <param name="indx">注：材料需求数量</param>
         /// <param name="level">注：升级需求的材料</param>
         /// <param name="recover">注：拆除物品后是否返还</param>
-        public void 增加材料(string item, int indx, int level) => requirementConfigs.Add(new RequirementConfig(item)
+        private void 增加材料(string item, int indx, int level) => requirementConfigs.Add(new RequirementConfig(item)
         {
             数量 = indx,
             升级数量 = level,
@@ -160,10 +179,19 @@ namespace ValheimCatManager.Config
                 GameObject gameobjetc = CatToolManager.GetGameObject(requirementConfigs[i].GetPrefabName());
 
 
-                if (gameobjetc == null) return null;
+                if (gameobjetc == null)
+                {
+                    Debug.LogError($"[GetRequirements]执行失败，原因：材料预制件为空");
+                    break;
+                }
 
                 var itemdrop = gameobjetc.GetComponent<ItemDrop>();
-                if (itemdrop == null) return null;
+
+                if (itemdrop == null)
+                {
+                    Debug.LogError($"[GetRequirements]执行失败，原因：材料预制件没有 itemdrop 组件");
+                    break;
+                }
 
                 requirements[i] = new Piece.Requirement();
                 requirements[i].m_resItem = itemdrop;
@@ -177,7 +205,10 @@ namespace ValheimCatManager.Config
         }
 
 
-
+        /// <summary>
+        /// 注：获取存储的信息，输出成配方脚本。
+        /// </summary>
+        /// <returns>配方脚本</returns>
         public Recipe GetRecipe()
         {
 
@@ -185,12 +216,13 @@ namespace ValheimCatManager.Config
 
             if (string.IsNullOrEmpty(物品))
             {
-                Debug.LogError("配方的目标物品不能为空！");
+                Debug.LogError($"[GetRecipe]执行失败，原因：配方目标预制名为空");
                 return null;
             }
-            if (string.IsNullOrEmpty(名字)) 名字 = $"Recipe_{物品}";
 
-            recipe.name = 名字;
+            if (string.IsNullOrEmpty(配方名)) 配方名 = $"Recipe_{物品}";
+
+            recipe.name = 配方名;
 
             GameObject prefab = CatToolManager.GetGameObject(物品);
 
@@ -198,8 +230,8 @@ namespace ValheimCatManager.Config
             {
                 Debug.LogError($"未找到对应预制件{物品}");
                 return null;
-
             }
+
             var itemDrop = prefab.GetComponent<ItemDrop>();
 
 
@@ -223,11 +255,6 @@ namespace ValheimCatManager.Config
 
             recipe.m_craftingStation = Station1;
             recipe.m_repairStation = Station2 ?? Station1;
-
-
-
-
-
 
             recipe.m_minStationLevel = 最低工作台等级;
             recipe.m_requireOnlyOneIngredient = 只需要一种成分;

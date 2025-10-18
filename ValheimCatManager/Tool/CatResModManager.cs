@@ -134,10 +134,21 @@ namespace ValheimCatManager.Tool
         }
 
         /// <summary>
-        /// 注：给游戏添加自定义配方（将配方配置注册到配方字典）
+        /// 注：添加游戏自定义配方（将配方配置注册到配方字典）
         /// </summary>
         /// <param name="recipeConfig">配方配置实例（包含物品、材料需求、制作条件等信息）</param>
         public void AddRecipe(RecipeConfig recipeConfig) => RecipeManager.Instance.customRecipeDict.Add(recipeConfig.物品, recipeConfig);
+
+        /// <summary>
+        /// 注：(重载)添加游戏自定义配方，简化：步骤实例化
+        /// </summary>
+        /// <param name="recipeConfig">配方配置实例（包含物品、材料需求、制作条件等信息）</param>
+        public void AddRecipe(string itemName, string station, int stationLevel, int amount, params (string resItem, int resAmount, int levelAmount)[] resItemList)
+        {
+            RecipeConfig recipeConfig = new RecipeConfig(itemName, station, stationLevel, amount, resItemList);
+
+            RecipeManager.Instance.customRecipeDict.Add(recipeConfig.物品, recipeConfig);
+        }
 
         /// <summary>
         /// 注：给游戏添加自定义怪物（先注册怪物预制件，再将怪物配置加入怪物列表）
@@ -337,43 +348,68 @@ namespace ValheimCatManager.Tool
         /// <param name="animationName"></param>
         public void AddAnimation(string animationName1, string animationName2 = null, string animationName3 = null)
         {
-            AnimationClip attack1 = catAsset.LoadAsset<AnimationClip>(animationName1);
-            AnimationManager.Instance.animationDict.Add(animationName1, attack1);
+            List<string> attacklist = new List<string>();
 
-            List<string> attacklist = new List<string>() {animationName1};
+            AnimationClip attack1 = catAsset.LoadAsset<AnimationClip>(animationName1);
+            if (attack1 == null)
+            {
+                Debug.LogError($"[CatResModManager.AddAnimation] 执行失败：未有找找到动画 [{animationName1}]（检查资源）");
+                return;
+            }
+            if (AnimationManager.Instance.animationDict.ContainsKey(animationName1))
+            {
+                Debug.LogWarning($"动画 {animationName1} 已存在，将覆盖原有片段");
+                AnimationManager.Instance.animationDict[animationName1] = attack1;
+            }
+            else
+            {
+                AnimationManager.Instance.animationDict.Add(animationName1, attack1);
+                attacklist.Add(animationName1);
+            }
 
             if (animationName2 != null)
             {
                 AnimationClip attack2 = catAsset.LoadAsset<AnimationClip>(animationName2);
+                if (attack2 == null)
+                {
+                    Debug.LogError($"[CatResModManager.AddAnimation] 执行失败：未有找找到动画 [{animationName2}]（检查资源）");
+                    return; // 若需要允许部分失败，可改为continue，但建议严格校验
+                }
+                if (AnimationManager.Instance.animationDict.ContainsKey(animationName2))
+                {
+                    Debug.LogWarning($"动画 {animationName2} 已存在，将覆盖原有片段");
+                    AnimationManager.Instance.animationDict[animationName2] = attack2;
+                }
+                else
+                {
+                    AnimationManager.Instance.animationDict.Add(animationName2, attack2);
+                }
                 attacklist.Add(animationName2);
-                AnimationManager.Instance.animationDict.Add (animationName2, attack2);
             }
-            if (animationName3 != null) 
+
+            if (animationName3 != null)
             {
                 AnimationClip attack3 = catAsset.LoadAsset<AnimationClip>(animationName3);
+                if (attack3 == null)
+                {
+                    Debug.LogError($"[CatResModManager.AddAnimation] 执行失败：未有找找到动画 [{animationName3}]（检查资源）");
+                    return; 
+                }
+                if (AnimationManager.Instance.animationDict.ContainsKey(animationName3))
+                {
+                    Debug.LogWarning($"动画 {animationName3} 已存在，将覆盖原有片段");
+                    AnimationManager.Instance.animationDict[animationName3] = attack3;
+                }
+                else
+                {
+                    AnimationManager.Instance.animationDict.Add(animationName3, attack3);
+                }
                 attacklist.Add(animationName3);
-                AnimationManager.Instance.animationDict.Add(animationName3, attack3);
             }
 
             AnimationManager.Instance.animationList.Add(attacklist);
         }
 
-
-
-
-
-
-        public GameObject GetAssetBundleGameObject(string name)
-        {
-            var asset = catAsset.LoadAsset<GameObject>(name);
-            if (asset == null)
-            {
-                Debug.LogError($"GetAssetBundleGameObject 执行时未有找到对应预制件：【{name}】");
-                return null;
-            }
-
-            return asset;
-        }
 
 
 
@@ -401,7 +437,11 @@ namespace ValheimCatManager.Tool
         }
 
 
-
+        /// <summary>
+        /// 注：RPC网络版本检测
+        /// </summary>
+        /// <param name="version"></param>
+        /// <param name="rpcName"></param>
         public void EnableVersionCheck(string version, string rpcName) => RpcVersionCheckManager.Instance.EnableVersionCheck(version, rpcName);
 
     }

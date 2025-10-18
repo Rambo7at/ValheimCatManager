@@ -118,12 +118,11 @@ namespace ValheimCatManager.Tool
             // 缓存中已有则直接返回（优先使用缓存）
             if (CatModData.m_PrefabCache.ContainsKey(name)) return CatModData.m_PrefabCache[name];
 
-            // 按优先级查找预制件：ZNetScene → ObjectDB → Resources兜底
+            // 查找预制件：ZNetScene → ObjectDB → Resources兜底
             GameObject itemPrefab = ZNetScene.instance.GetPrefab(name)
                                  ?? ObjectDB.instance.GetItemPrefab(name)
                                  ?? ResourcesGetGameObject(name);
 
-            // 未找到预制件时打印错误
             if (itemPrefab == null)
             {
                 Debug.LogError($"未查询到注册 预制件[{name}]");

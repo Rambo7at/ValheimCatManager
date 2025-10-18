@@ -64,7 +64,7 @@ namespace ValheimCatManager.Managers
                     continue;
                 }
 
-                // 避免重复注册
+                // 查重
                 if (!instance.m_recipes.Contains(recipe)) instance.m_recipes.Add(recipe);
             }
         }
