@@ -326,6 +326,27 @@ namespace ValheimCatManager.Tool
         }
 
         /// <summary>
+        /// 注：给游戏添加地下城房间
+        /// </summary>
+        public void AddRoom(string roomName,RoomConfig roomConfig)
+        {
+            GameObject roomPrefab = catAsset.LoadAsset<GameObject>(roomName);
+            if (!roomPrefab)
+            {
+                Debug.LogError($"执行AddRoom方法执行时：未找到预制件：[{roomName}] ");
+                return;
+            }
+
+            Instance.AddPrefab(roomPrefab);
+
+            roomConfig.预制件 = roomPrefab;
+
+            DungeonManager.Instance.roomList.Add(roomConfig);
+
+        }
+
+
+        /// <summary>
         /// 注：将自定义地区图标加入游戏
         /// </summary>
         /// <param name="iconName">图标名</param>
@@ -340,6 +361,9 @@ namespace ValheimCatManager.Tool
             LocationIconManager.Instance.customLocationIconDict.Add(locationIconName, sprite);
 
         }
+
+
+
 
 
         /// <summary>

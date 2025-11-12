@@ -1,9 +1,14 @@
 ﻿using HarmonyLib;
+using SoftReferenceableAssets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
+using ValheimCatManager.Config;
+using ValheimCatManager.Tool;
+using static DungeonDB;
 
 namespace ValheimCatManager.Managers
 {
@@ -19,29 +24,68 @@ namespace ValheimCatManager.Managers
         private  DungeonManager() => new Harmony("DungeonManager").PatchAll(typeof(DungeonPatch));
 
 
+        public readonly List<RoomConfig> roomList = new ();
+
+        public readonly List<DungeonConfig> customDungeonList = new();
+
+
+
 
         private class DungeonPatch
-        { 
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        {
+            [HarmonyPatch(typeof(DungeonDB), nameof(DungeonDB.Start)), HarmonyPostfix, HarmonyPriority(0)]
+            static void RegisterDungeonRooms(DungeonDB __instance) => Instance.RegisterDungeonRooms(__instance, Instance.customDungeonRoomList);
+
+
+            [HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.SetupLocations)), HarmonyPostfix, HarmonyPriority(0)]
+            static void RegisterDungeons(ZoneSystem __instance) => Instance.RegisterDungeons(__instance, Instance.customDungeonList);
+
+
         }
 
+        // 缓存软引用
+        private Dictionary<RoomConfig, SoftReference<GameObject>> roomSoftReferences;
+        private void RegisterDungeonRooms(DungeonDB instance, List<RoomConfig> roomConfigs)
+        {
+
+            Instance.roomSoftReferences ??= new Dictionary<RoomConfig, SoftReference<GameObject>>();
+
+            foreach (var roomConfig in roomConfigs)
+            {
+                DungeonDB.RoomData roomData = roomConfig.GetRoomData();
+
+                if (roomConfig == null)
+                {
+                    Debug.LogError($"执行RegisterDungeonRooms时 [{roomConfig.预制件.name}] 有问题，执行跳过");
+                    continue;
+                }
+
+                // 获取或创建软引用
+                if (!Instance.roomSoftReferences.TryGetValue(roomConfig, out var softRef))
+                {
+                    softRef = CatToolManager.AddLoadedSoftReferenceAsset(roomConfig.预制件);
+                    Instance.roomSoftReferences[roomConfig] = softRef;
+                }
+
+                // 设置软引用
+                roomData.m_prefab = softRef;
+                // 添加到DungeonDB的m_rooms列表
+                instance.m_rooms.Add(roomData);
+
+                // 重新生成哈希列表以确保新房间被正确索引
+                instance.m_roomByHash.Clear();
+                foreach (var roomDataS in instance.m_rooms)
+                {
+                    instance.m_roomByHash[roomDataS.Hash] = roomDataS;
+                }
+            }
 
 
 
 
 
 
-
-
-
+        }
 
     }
 }
