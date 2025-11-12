@@ -78,6 +78,59 @@ namespace ValheimCatManager.Tool
             return null;
         }
 
+
+        /// <summary>
+        /// 注：按名称获取已加载的材质，并缓存到CatModData.m_materialCache（避免重复查询）
+        /// 逻辑复用 GetShader 方法，保持一致性
+        /// </summary>
+        /// <param name="name">真实材质名称（不含JVLmock_前缀）</param>
+        /// <returns>找到的材质，未找到返回null</returns>
+        public static Material GetMaterial(string name)
+        {
+            // 1. 空值校验（和GetShader逻辑一致）
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.LogError("获取材质名时，传入了空字符");
+                return null;
+            }
+
+            // 2. 先查缓存，命中直接返回（避免重复查找，提升性能）
+            if (CatModData.m_materialCache.ContainsKey(name))
+            {
+                return CatModData.m_materialCache[name];
+            }
+
+            // 3. 全局查找所有已加载的材质（复用GetShader的Resources.FindObjectsOfTypeAll逻辑）
+            List<Material> materialList = new List<Material>();
+            var allMaterials = Resources.FindObjectsOfTypeAll<Material>();
+            foreach (var material in allMaterials)
+            {
+                if (material == null) continue;
+
+                // 精确匹配材质名称（和Shader查找逻辑一致，避免模糊匹配错误）
+                if (material.name == name)
+                {
+                    materialList.Add(material);
+                }
+            }
+
+            // 4. 处理查找结果：有匹配项则缓存并返回，无则返回null
+            if (materialList.Count > 0)
+            {
+                // 缓存最后一个匹配项（和GetShader的缓存逻辑保持一致，兼容你的设计）
+                var targetMaterial = materialList[materialList.Count - 1];
+                CatModData.m_materialCache.Add(targetMaterial.name, targetMaterial);
+                // 返回第一个匹配项（和GetShader返回逻辑一致，保持统一）
+                return materialList[0];
+            }
+
+            // 未找到材质时输出日志（方便调试，和GetShader的错误反馈一致）
+            Debug.LogWarning($"CatToolManager.GetMaterial：未找到名称为「{name}」的材质");
+            return null;
+        }
+
+
+
         /// <summary>
         /// 注：调试工具方法，通过反射打印Piece.PieceCategory枚举的所有名称和对应值
         /// 用途：验证枚举反射结果是否正确，排查分类相关问题
