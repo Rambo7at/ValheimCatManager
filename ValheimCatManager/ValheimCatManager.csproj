@@ -46,8 +46,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="assembly_valheim">
-      <HintPath>Libs\assembly_valheim_publicized.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>D:\英灵神殿项目\ValheimCatManager\ValheimCatManager\Libs\assembly_valheim_publicized.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx">
       <HintPath>Libs\BepInEx.dll</HintPath>
@@ -91,6 +90,9 @@
     </Reference>
     <Reference Include="SoftReferenceableAssets">
       <HintPath>Libs\SoftReferenceableAssets_publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="SoftReferenceableAssets">
+      <HintPath>D:\英灵神殿项目\ValheimCatManager\ValheimCatManager\Libs\SoftReferenceableAssets_publicized.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>Libs\Unity.TextMeshPro.dll</HintPath>

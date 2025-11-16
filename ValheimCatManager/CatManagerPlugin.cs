@@ -7,10 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using ValheimCatManager.Config;
-using ValheimCatManager.Data;
-using ValheimCatManager.Managers;
-using ValheimCatManager.Tool;
+using ValheimCatManager.ValheimCatManager.Config;
+using ValheimCatManager.ValheimCatManager.Tool;
 
 namespace ValheimCatManager
 {
