@@ -12,6 +12,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using ValheimCatManager.Config;
 using ValheimCatManager.Data;
+using static Heightmap;
 using Object = UnityEngine.Object;
 
 namespace ValheimCatManager.Tool
@@ -33,6 +34,7 @@ namespace ValheimCatManager.Tool
             // 遍历Biome枚举，匹配名称
             foreach (Heightmap.Biome biome in Enum.GetValues(typeof(Heightmap.Biome)))
             {
+       
                 if (Enum.GetName(typeof(Heightmap.Biome), biome) == biomeName)
                 {
                     return biome;
@@ -43,6 +45,60 @@ namespace ValheimCatManager.Tool
             Debug.LogError($"未找到自定义区域：{biomeName}检查一下");
             return Heightmap.Biome.None;
         }
+
+
+
+        public static Room.Theme GetTheme(string themeName)
+        {
+            // 使用已经被补丁的 GetNames 和 GetValues
+            string[] names = Enum.GetNames(typeof(Room.Theme));
+            Array values = Enum.GetValues(typeof(Room.Theme));
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                if (names[i] == themeName)
+                {
+                    Debug.LogError($"成功返回了主题：{themeName}");
+                    return (Room.Theme)values.GetValue(i);
+                }
+
+            }
+
+            Debug.LogError($"未找到自定义区域：{themeName}检查一下");
+            return Room.Theme.None;
+        }
+
+
+
+        public static void GetEunmInfo<T>() where T : Enum
+        {
+            // 使用已经被补丁的 GetNames 和 GetValues
+            string[] names = Enum.GetNames(typeof(Room.Theme));
+            Array values = Enum.GetValues(typeof(Room.Theme));
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                object value = values.GetValue(i);
+                int intValue = Convert.ToInt32(value);
+                Debug.LogError($"找到的枚举名是：[{names[i]}], 枚举整数值是：[{intValue}], 转换为枚举类型是：[{(Room.Theme)value}]");
+            }
+        }
+
+
+
+        public static bool CheckEunm<T>(string EnumName) where T : Enum
+        {
+            foreach (var Eunm in Enum.GetValues(typeof(T))) if (Enum.GetName(typeof(T), Eunm) == EnumName) return true;
+
+            return false;
+        }
+
+
+
+        public static int GetEnumLength<T>() where T : Enum => Enum.GetValues(typeof(T)).Length;
+
+
+
 
         /// <summary>
         /// 注：按名称获取已注册的着色器，并缓存到CatModData.m_haderCache（避免重复查询）

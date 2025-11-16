@@ -328,7 +328,7 @@ namespace ValheimCatManager.Tool
         /// <summary>
         /// 注：给游戏添加地下城房间
         /// </summary>
-        public void AddRoom(string roomName,RoomConfig roomConfig)
+        public void AddRoom(string roomName,string themeName)
         {
             GameObject roomPrefab = catAsset.LoadAsset<GameObject>(roomName);
             if (!roomPrefab)
@@ -337,9 +337,18 @@ namespace ValheimCatManager.Tool
                 return;
             }
 
+            RoomConfig roomConfig = new();
+
             Instance.AddPrefab(roomPrefab);
 
             roomConfig.预制件 = roomPrefab;
+
+          
+            roomConfig.主题 = themeName;
+
+
+            if (!RoomThemeManger.Instance.roomThemeList.Contains(themeName)) RoomThemeManger.Instance.roomThemeList.Add(themeName);
+
 
             DungeonManager.Instance.roomList.Add(roomConfig);
 

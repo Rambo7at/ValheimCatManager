@@ -21,24 +21,20 @@ namespace ValheimCatManager.Managers
         public static DungeonManager Instance => _instance ?? (_instance = new DungeonManager());
 
 
-        private  DungeonManager() => new Harmony("DungeonManager").PatchAll(typeof(DungeonPatch));
+        private DungeonManager() => new Harmony("DungeonManager").PatchAll(typeof(DungeonPatch));
 
 
         public readonly List<RoomConfig> roomList = new ();
 
-        public readonly List<DungeonConfig> customDungeonList = new();
 
 
 
 
         private class DungeonPatch
         {
-            [HarmonyPatch(typeof(DungeonDB), nameof(DungeonDB.Start)), HarmonyPostfix, HarmonyPriority(0)]
-            static void RegisterDungeonRooms(DungeonDB __instance) => Instance.RegisterDungeonRooms(__instance, Instance.customDungeonRoomList);
+            [HarmonyPatch(typeof(DungeonDB), nameof(DungeonDB.Start)), HarmonyPostfix, HarmonyPriority(1000)]
+            static void RegisterDungeonRooms(DungeonDB __instance) => Instance.RegisterDungeonRooms(__instance, Instance.roomList);
 
-
-            [HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.SetupLocations)), HarmonyPostfix, HarmonyPriority(0)]
-            static void RegisterDungeons(ZoneSystem __instance) => Instance.RegisterDungeons(__instance, Instance.customDungeonList);
 
 
         }
@@ -52,13 +48,23 @@ namespace ValheimCatManager.Managers
 
             foreach (var roomConfig in roomConfigs)
             {
-                DungeonDB.RoomData roomData = roomConfig.GetRoomData();
 
                 if (roomConfig == null)
                 {
                     Debug.LogError($"执行RegisterDungeonRooms时 [{roomConfig.预制件.name}] 有问题，执行跳过");
                     continue;
                 }
+
+                roomConfig.预制件.GetComponent<Room>().m_theme = CatToolManager.GetTheme(roomConfig.主题);
+
+
+
+
+
+                DungeonDB.RoomData roomData = roomConfig.GetRoomData();
+
+
+
 
                 // 获取或创建软引用
                 if (!Instance.roomSoftReferences.TryGetValue(roomConfig, out var softRef))
@@ -79,11 +85,6 @@ namespace ValheimCatManager.Managers
                     instance.m_roomByHash[roomDataS.Hash] = roomDataS;
                 }
             }
-
-
-
-
-
 
         }
 

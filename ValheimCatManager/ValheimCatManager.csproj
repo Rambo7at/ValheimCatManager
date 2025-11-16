@@ -148,11 +148,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Asset\" />
-    <Folder Include="Patch\" />
-  </ItemGroup>
 
   <!-- 自动复制到Valheim插件目录 -->
   <Target Name="CopyToValheimPlugins" AfterTargets="Build">
