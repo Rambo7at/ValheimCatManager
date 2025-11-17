@@ -30,6 +30,10 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 	  <WarningLevel>0</WarningLevel>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="ValheimCatManager\Deprecated\RoomThemeMangerDeprecated.cs" />
+	</ItemGroup>
   
   <ItemGroup>
     <!-- 第三方引用 -->

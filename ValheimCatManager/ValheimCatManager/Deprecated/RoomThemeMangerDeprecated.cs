@@ -8,14 +8,15 @@ using ValheimCatManager.ValheimCatManager.Managers;
 
 
 
-namespace ValheimCatManager.ValheimCatManager.Managers
+namespace ValheimCatManager.ValheimCatManager.Deprecated
 {
-    public class RoomThemeManger
+    [Obsolete("这是EW和我折中的枚举扩展", false)]
+    public class RoomThemeMangerDeprecated
     {
-        private static RoomThemeManger _instance;
-        public static RoomThemeManger Instance => _instance ?? (_instance = new RoomThemeManger());
+        private static RoomThemeMangerDeprecated _instance;
+        public static RoomThemeMangerDeprecated Instance => _instance ?? (_instance = new RoomThemeMangerDeprecated());
 
-        private RoomThemeManger() => new Harmony("RoomThemeManger").PatchAll(typeof(RoomThemeMangerPatch));
+        private RoomThemeMangerDeprecated() => new Harmony("RoomThemeManger").PatchAll(typeof(RoomThemeMangerPatch));
 
         private Dictionary<string, Room.Theme> roomThemeDict = new();
         public List<string> roomThemeList = new();

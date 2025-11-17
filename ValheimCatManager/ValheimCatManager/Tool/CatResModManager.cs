@@ -367,7 +367,7 @@ namespace ValheimCatManager.ValheimCatManager.Tool
                 return;
             }
 
-            DungeonManager.Instance.RegisterDungeonTheme(LocationPrefab, dungeonTheme);
+            DungeonManager.Instance.RegisterDungeonTheme(LocationPrefab,dungeonTheme);
 
 
             Instance.AddPrefab(LocationPrefab);

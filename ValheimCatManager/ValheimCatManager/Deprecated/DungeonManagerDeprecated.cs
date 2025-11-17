@@ -14,14 +14,15 @@ using ValheimCatManager.ValheimCatManager.Managers;
 using ValheimCatManager.ValheimCatManager.Tool;
 using static DungeonDB;
 
-namespace ValheimCatManager.ValheimCatManager.Managers
+namespace ValheimCatManager.ValheimCatManager.Deprecated
 {
-    public class DungeonManager
+    [Obsolete("这是jotuun的房间建立方式", false)]
+    public class DungeonManagerDeprecated
     {
-        private static DungeonManager _instance;
-        public static DungeonManager Instance => _instance ?? (_instance = new DungeonManager());
+        private static DungeonManagerDeprecated _instance;
+        public static DungeonManagerDeprecated Instance => _instance ?? (_instance = new DungeonManagerDeprecated());
 
-        private DungeonManager() => new Harmony("DungeonManager").PatchAll(typeof(DungeonPatch));
+        private DungeonManagerDeprecated() => new Harmony("DungeonManager").PatchAll(typeof(DungeonPatch));
 
         /// <summary>
         /// 注：待注册的房间列表
@@ -110,7 +111,7 @@ namespace ValheimCatManager.ValheimCatManager.Managers
                     themeRoomsDict[roomConfig.主题] = new List<RoomData>();
                     themeRoomsDict[roomConfig.主题].Add(roomData);
                 }
-
+                
 
                 // 添加到DungeonDB
                 instance.m_rooms.Add(roomData);
