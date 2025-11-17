@@ -24,24 +24,14 @@ namespace ValheimCatManager.ValheimCatManager.Config
 
             if (string.IsNullOrEmpty(主题))
             {
-                Debug.LogError($"执行GetRoomData方法时出错，输入的主题名为空！");
+                Debug.LogError($"执行RoomConfig.GetRoomData方法时出错，房间：[{预制件.name}]的主题名为空");
                 return null;
             }
 
 
-
-            
-
-
-
             return new DungeonDB.RoomData()
             {
-
-                m_theme = CatToolManager.GetTheme(主题),
-
-
                 m_enabled = 启用
-
             };
         }
 

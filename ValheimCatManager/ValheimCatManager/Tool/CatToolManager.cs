@@ -64,8 +64,6 @@ namespace ValheimCatManager.ValheimCatManager.Tool
                 }
 
             }
-
-            Debug.LogError($"未找到自定义区域：{themeName}检查一下");
             return Room.Theme.None;
         }
 

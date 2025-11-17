@@ -24,7 +24,7 @@ namespace ValheimCatManager.ValheimCatManager.Data
         public static readonly Dictionary<string, PieceTable> m_PieceTableCache = new Dictionary<string, PieceTable>();
 
         /// <summary>
-        /// 材质缓存（key：材质名称）【新增】
+        /// 材质缓存（key：材质名称）
         /// </summary>
         public static readonly Dictionary<string, Material> m_materialCache = new Dictionary<string, Material>();
 

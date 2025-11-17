@@ -355,6 +355,38 @@ namespace ValheimCatManager.ValheimCatManager.Tool
         }
 
 
+
+        /// <summary>
+        /// 注：添加自定义地下城
+        /// </summary>
+        public void AddDungeon(string locationName,string dungeonTheme,LocationConfig locationConfig)
+        {
+            GameObject LocationPrefab = catAsset.LoadAsset<GameObject>(locationName);
+            if (!LocationPrefab)
+            {
+                Debug.LogError($"执行AddDungeon方法执行时：未找到预制件：[{locationName}] ");
+                return;
+            }
+            if (string.IsNullOrEmpty(dungeonTheme))
+            {
+                Debug.LogError($"执行AddDungeon方法执行时地下城主题名为空！ ");
+                return;
+            }
+
+            DungeonManager.Instance.RegisterDungeonTheme(LocationPrefab, dungeonTheme);
+
+
+            Instance.AddPrefab(LocationPrefab);
+            locationConfig.预制件 = LocationPrefab;
+
+            LocationManager.Instance.customLocationList.Add(locationConfig);
+        }
+
+
+
+
+
+
         /// <summary>
         /// 注：将自定义地区图标加入游戏
         /// </summary>
@@ -370,8 +402,6 @@ namespace ValheimCatManager.ValheimCatManager.Tool
             LocationIconManager.Instance.customLocationIconDict.Add(locationIconName, sprite);
 
         }
-
-
 
 
 
