@@ -121,7 +121,7 @@ namespace ValheimCatManager.ValheimCatManager.Config
             for (int i = 0; i < resList.Count; i++)
             {
                 string itemName = resList[i].GetPrefabName();
-                var prefab = CatToolManager.GetGameObject(itemName);
+                var prefab = CatToolManagerOld.GetGameObject(itemName);
                 if (prefab == null) return null;
 
                 ItemDrop itemdrop = prefab.GetComponent<ItemDrop>();
@@ -147,7 +147,7 @@ namespace ValheimCatManager.ValheimCatManager.Config
         {
             if (CatModData.m_PieceTableCache.ContainsKey(制作工具)) return CatModData.m_PieceTableCache[制作工具];
 
-            var prefab = CatToolManager.GetGameObject(制作工具);
+            var prefab = CatToolManagerOld.GetGameObject(制作工具);
             if (prefab == null) return null;
 
             PieceTable pieceTable = prefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_buildPieces;

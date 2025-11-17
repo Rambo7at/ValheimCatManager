@@ -31,7 +31,9 @@ namespace ValheimCatManager.ValheimCatManager.Config
 
             return new DungeonDB.RoomData()
             {
+                m_theme = CatToolManager.Instance.GetRoomTheme(主题),
                 m_enabled = 启用
+               
             };
         }
 

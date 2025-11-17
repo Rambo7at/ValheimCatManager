@@ -49,9 +49,9 @@ namespace ValheimCatManager.ValheimCatManager.Managers
             foreach (var item in smeltersConfigs)
             {
                 // 加载炼制站、输入物品、输出物品的预制件
-                GameObject prefabSmelters = CatToolManager.GetGameObject(item.预制名);
-                GameObject prefabInputItem = CatToolManager.GetGameObject(item.输入);
-                GameObject prefabOutputItem = CatToolManager.GetGameObject(item.输出);
+                GameObject prefabSmelters = CatToolManagerOld.GetGameObject(item.预制名);
+                GameObject prefabInputItem = CatToolManagerOld.GetGameObject(item.输入);
+                GameObject prefabOutputItem = CatToolManagerOld.GetGameObject(item.输出);
 
                 // 任一预制件为空时打印错误并跳过
                 if (prefabSmelters == null || prefabInputItem == null || prefabOutputItem == null)

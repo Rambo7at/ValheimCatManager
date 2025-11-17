@@ -182,7 +182,7 @@ namespace ValheimCatManager.ValheimCatManager.Config
             }
 
 
-            var biome = CatToolManager.GetBiome(生态区域);
+            var biome = CatToolManagerOld.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;
 
             return new ZoneLocation

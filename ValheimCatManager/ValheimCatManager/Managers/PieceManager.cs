@@ -176,7 +176,7 @@ namespace ValheimCatManager.ValheimCatManager.Managers
                 string pieceName = pieceConfig.Value.GetPrefabName();
                 string categoryName = pieceConfig.Value.目录;
                 PieceTable pieceTable = pieceConfig.Value.GetPieceTable();
-                GameObject piecePrefab = CatToolManager.GetGameObject(pieceConfig.Key);
+                GameObject piecePrefab = CatToolManagerOld.GetGameObject(pieceConfig.Key);
 
                 if (piecePrefab == null)
                 {

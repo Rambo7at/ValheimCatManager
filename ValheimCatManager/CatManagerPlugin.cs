@@ -18,7 +18,7 @@ namespace ValheimCatManager
 
         public const string PluginGUID = "com.rambo7at.CatManager";
         public const string PluginName = "猫咪：Mod管理";
-        public const string PluginVersion = "0.1.5.7";
+        public const string PluginVersion = "0.1.5.9";
 
         public static AssetBundle assetBundle;
         ConfigEntry<bool> ConfigEntry;

@@ -83,7 +83,7 @@ namespace ValheimCatManager.ValheimCatManager.Mock
         {
             foreach (var item in Instance.mockPrefabDict)
             {
-                GameObject prefab = CatToolManager.GetGameObject(item.Key);
+                GameObject prefab = CatToolManagerOld.GetGameObject(item.Key);
                 if (!prefab)
                 {
                     Debug.LogError($"执行CollectMockPrefab方法时，获取预制件:[{item.Value}]是空");
@@ -173,7 +173,7 @@ namespace ValheimCatManager.ValheimCatManager.Mock
                 if (dropDatas[i].m_item.name.StartsWith("JVLmock_"))
                 {
                     var itemName = dropDatas[i].m_item.name.Substring("JVLmock_".Length);
-                    var gameObject = CatToolManager.GetGameObject(itemName);
+                    var gameObject = CatToolManagerOld.GetGameObject(itemName);
 
                     DropTable.DropData newDropData = new DropTable.DropData()
                     {
@@ -352,7 +352,7 @@ namespace ValheimCatManager.ValheimCatManager.Mock
                 {
                     try
                     {
-                        ReplaceFieldValue(info, CatToolManager.GetGameObject(info.prefabName));
+                        ReplaceFieldValue(info, CatToolManagerOld.GetGameObject(info.prefabName));
                     }
                     catch (Exception ex)
                     {
@@ -362,7 +362,7 @@ namespace ValheimCatManager.ValheimCatManager.Mock
                 // 替换着色器
                 else if (!string.IsNullOrEmpty(info.ShaderName))
                 {
-                    var shader = CatToolManager.GetShader(info.ShaderName);
+                    var shader = CatToolManagerOld.GetShader(info.ShaderName);
                     if (shader == null)
                     {
                         Debug.Log($"[{mockDebugName}] 找不到着色器：{info.ShaderName}");
@@ -381,7 +381,7 @@ namespace ValheimCatManager.ValheimCatManager.Mock
                 // 替换材质【新增】
                 else if (!string.IsNullOrEmpty(info.MaterialName))
                 {
-                    Material realMaterial = CatToolManager.GetMaterial(info.MaterialName);
+                    Material realMaterial = CatToolManagerOld.GetMaterial(info.MaterialName);
                     if (realMaterial == null)
                     {
                         Debug.LogWarning($"[{mockDebugName}] 未找到真实材质：{info.MaterialName}（占位材质：{info.TargetMaterial?.name}）");

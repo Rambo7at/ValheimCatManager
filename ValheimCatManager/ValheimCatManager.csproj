@@ -150,10 +150,6 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="ValheimCatManager\新文件夹\" />
-  </ItemGroup>
 
   <!-- 自动复制到Valheim插件目录 -->
   <Target Name="CopyToValheimPlugins" AfterTargets="Build">

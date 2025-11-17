@@ -158,7 +158,7 @@ namespace ValheimCatManager.ValheimCatManager.Config
 
         private CraftingStation GetStation(string name)
         {
-            var prefab = CatToolManager.GetGameObject(name);
+            var prefab = CatToolManagerOld.GetGameObject(name);
             if (prefab == null) return null;
 
             var Station = prefab.GetComponent<CraftingStation>();
@@ -175,7 +175,7 @@ namespace ValheimCatManager.ValheimCatManager.Config
             for (int i = 0; i < requirementConfigs.Count; i++)
             {
 
-                GameObject gameobjetc = CatToolManager.GetGameObject(requirementConfigs[i].GetPrefabName());
+                GameObject gameobjetc = CatToolManagerOld.GetGameObject(requirementConfigs[i].GetPrefabName());
 
 
                 if (gameobjetc == null)
@@ -223,7 +223,7 @@ namespace ValheimCatManager.ValheimCatManager.Config
 
             recipe.name = 配方名;
 
-            GameObject prefab = CatToolManager.GetGameObject(物品);
+            GameObject prefab = CatToolManagerOld.GetGameObject(物品);
 
             if (prefab == null)
             {

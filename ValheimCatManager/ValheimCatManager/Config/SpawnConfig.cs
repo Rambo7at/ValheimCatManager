@@ -202,10 +202,10 @@ namespace ValheimCatManager.ValheimCatManager.Config
                 Debug.LogError("预制件生成传入了 【空字符串】");
                 return null;
             }
-            var prefab = CatToolManager.GetGameObject(预制件);
+            var prefab = CatToolManagerOld.GetGameObject(预制件);
             if (!prefab) return null;
 
-            var biome = CatToolManager.GetBiome(生态区域);
+            var biome = CatToolManagerOld.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;
 
 

@@ -342,13 +342,7 @@ namespace ValheimCatManager.ValheimCatManager.Tool
             Instance.AddPrefab(roomPrefab);
 
             roomConfig.预制件 = roomPrefab;
-
-          
             roomConfig.主题 = themeName;
-
-
-            if (!RoomThemeManger.Instance.roomThemeList.Contains(themeName)) RoomThemeManger.Instance.roomThemeList.Add(themeName);
-
 
             DungeonManager.Instance.roomList.Add(roomConfig);
 

@@ -48,7 +48,7 @@ namespace ValheimCatManager.ValheimCatManager.Managers
             foreach (var monster in monsterConfigs)
             {
                 // 加载怪物预制件，为空则跳过
-                GameObject monsterPrefab = CatToolManager.GetGameObject(monster.预制名);
+                GameObject monsterPrefab = CatToolManagerOld.GetGameObject(monster.预制名);
 
                 if (monsterPrefab == null)
                 {
@@ -72,7 +72,7 @@ namespace ValheimCatManager.ValheimCatManager.Managers
                 foreach (var item in monster.食谱)
                 {
                     // 加载食谱物品预制件，为空则跳过
-                    GameObject itemPrefab = CatToolManager.GetGameObject(item);
+                    GameObject itemPrefab = CatToolManagerOld.GetGameObject(item);
                     if (itemPrefab == null)
                     {
                         Debug.LogError($"执行RegisterMonsterConfig遍历食谱时，预制件：[{item}]是空，对应生物[{monster.预制名}]，已跳过");

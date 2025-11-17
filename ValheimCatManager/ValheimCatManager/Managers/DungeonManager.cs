@@ -18,39 +18,29 @@ namespace ValheimCatManager.ValheimCatManager.Managers
 {
     public class DungeonManager
     {
-
         private static DungeonManager _instance;
-
-
         public static DungeonManager Instance => _instance ?? (_instance = new DungeonManager());
-
 
         private DungeonManager() => new Harmony("DungeonManager").PatchAll(typeof(DungeonPatch));
 
-
         /// <summary>
-        /// 注：自定义房间的列表
+        /// 注：待注册的房间列表
         /// </summary>
         public readonly List<RoomConfig> roomList = new();
-
         /// <summary>
-        /// 注：自定义主题的列表
+        /// 注：自定义主题列表
         /// </summary>
         private readonly List<string> customThemeList = new();
-
         /// <summary>
-        /// 注：针对房间相同的主题分类
+        /// 注：房间对应的主题字典
         /// </summary>
         private readonly Dictionary<string, List<RoomData>> themeRoomsDict = new();
-
-
-
         /// <summary>
-        /// 注：存储房间配置到RoomData的映射
+        /// 注：地牢房间的软引用
         /// </summary>
-        private readonly Dictionary<RoomConfig, RoomData> roomConfigToData = new();
+        private Dictionary<RoomConfig, SoftReference<GameObject>> roomSoftReferences;
 
-
+        // Harmony补丁
         private class DungeonPatch
         {
             [HarmonyPatch(typeof(DungeonDB), nameof(DungeonDB.Start)), HarmonyPostfix, HarmonyPriority(1000)]
@@ -60,132 +50,191 @@ namespace ValheimCatManager.ValheimCatManager.Managers
             static void ApplyCustomTheme(DungeonGenerator __instance) => Instance.ApplyCustomTheme(__instance);
         }
 
-        // 缓存软引用
-        private Dictionary<RoomConfig, SoftReference<GameObject>> roomSoftReferences;
-
-
         /// <summary>
-        /// 注：注册地下城房间
+        /// 注：注册地下城房间到DungeonDB
         /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="roomConfigs"></param>
         private void RegisterDungeonRooms(DungeonDB instance, List<RoomConfig> roomConfigs)
         {
-            Instance.roomSoftReferences ??= new Dictionary<RoomConfig, SoftReference<GameObject>>();
+            if (roomConfigs.Count == 0) return;
+            roomSoftReferences ??= new Dictionary<RoomConfig, SoftReference<GameObject>>();
 
-            if (!(roomConfigs.Count > 0)) return;   
+
+            Debug.Log($"[DungeonManager] 开始注册 {roomConfigs.Count} 个房间");
 
             foreach (var roomConfig in roomConfigs)
             {
+                if (roomConfig == null) continue;
 
-                DungeonDB.RoomData roomData = roomConfig.GetRoomData();
-                if (roomData == null) continue;
-
-                Room room = roomConfig.预制件.GetComponent<Room>();
-                if (room == null)
+                // 获取RoomData
+                RoomData roomData = roomConfig.GetRoomData();
+                if (roomData == null)
                 {
-                    Debug.LogError($"执行[RegisterDungeonRooms]时出错，预制件：[{roomConfig.预制件.name}] 没有Room组件！");
+                    Debug.LogError($"执行[RegisterDungeonRooms]方法出错原因：GetRoomData返回null: {roomConfig.预制件?.name}");
                     continue;
                 }
 
-
-                if (!Instance.ValidateRoomTheme(roomConfig.主题))
+                // 验证Room组件
+                Room roomComponent = roomConfig.预制件.GetComponent<Room>();
+                if (roomComponent == null)
                 {
-                    Debug.LogError($"执行[RegisterDungeonRooms]时出错，原因：房间主题是原版 或 内容不在自定义主题列表内");
+                    Debug.LogError($"执行[RegisterDungeonRooms]方法出错原因：预制件[{roomConfig.预制件.name}]缺少Room组件");
                     continue;
                 }
 
-
-                // 获取或创建软引用
-                if (!Instance.roomSoftReferences.TryGetValue(roomConfig, out var softRef))
+                // 验证主题
+                if (!CheckRoomTheme(roomConfig.主题))
                 {
-                    softRef = CatToolManager.AddLoadedSoftReferenceAsset(roomConfig.预制件);
-                    Instance.roomSoftReferences[roomConfig] = softRef;
+                    Debug.LogError($"执行[RegisterDungeonRooms]方法出错原因：预制件：[{roomConfig.预制件.name}]对应主题：[{roomConfig.主题}]");
+                    continue;
                 }
-                // 设置软引用
+
+                roomData.m_loadedRoom = roomComponent;
+
+                // 处理软引用
+                if (!roomSoftReferences.TryGetValue(roomConfig, out var softRef))
+                {
+                    softRef = CatToolManagerOld.AddLoadedSoftReferenceAsset(roomConfig.预制件);
+                    roomSoftReferences[roomConfig] = softRef;
+                }
+
+                // 设置RoomData
                 roomData.m_prefab = softRef;
 
 
-                if (!Instance.themeRoomsDict.ContainsKey(roomConfig.主题)) Instance.themeRoomsDict[roomConfig.主题] = new List<RoomData>();
-                Instance.themeRoomsDict[roomConfig.主题].Add(roomData);
-                Instance.roomConfigToData.Add(roomConfig, roomData);
+                if (themeRoomsDict.ContainsKey(roomConfig.主题))
+                {
+                    themeRoomsDict[roomConfig.主题].Add(roomData);
+                }
+                else
+                {
+                    themeRoomsDict[roomConfig.主题] = new List<RoomData>();
+                    themeRoomsDict[roomConfig.主题].Add(roomData);
+                }
+                
 
-
-
-
-
-                // 添加到DungeonDB的m_rooms列表
+                // 添加到DungeonDB
                 instance.m_rooms.Add(roomData);
 
-                // 重新生成哈希列表以确保新房间被正确索引
-                instance.m_roomByHash.Clear();
-                foreach (var roomDataS in instance.m_rooms)
-                {
-                    instance.m_roomByHash[roomDataS.Hash] = roomDataS;
-                }
+                Debug.Log($"[DungeonManager] 成功注册房间: {roomConfig.预制件.name} -> 主题: {roomConfig.主题}");
             }
 
+            // 重建哈希表
+            RebuildRoomHash(instance);
+            Debug.Log($"[DungeonManager] 房间注册完成，总房间数: {instance.m_rooms.Count}");
         }
 
-
+        /// <summary>
+        /// 注册自定义主题
+        /// </summary>
         public void RegisterDungeonTheme(GameObject prefab, string customTheme)
         {
             DungeonGenerator dungeonGenerator = prefab.GetComponentInChildren<DungeonGenerator>();
             if (dungeonGenerator == null)
             {
-                Debug.LogError($"执行[RegisterDungeonTheme]时出错，预制件：[{prefab.name}] 没有[DungeonGenerator]组件！");
+                Debug.LogError($"[DungeonManager] 预制件缺少DungeonGenerator组件: {prefab.name}");
                 return;
             }
-            prefab.AddComponent<CustomTheme>().customTheme = customTheme;
-            if (!customThemeList.Contains(customTheme)) Instance.customThemeList.Add(customTheme);
+
+            // 添加自定义主题组件
+            dungeonGenerator.gameObject.AddComponent<CustomTheme>().customTheme = customTheme;
+
+            // 添加到主题列表
+            if (!customThemeList.Contains(customTheme))
+                customThemeList.Add(customTheme);
+
+            Debug.Log($"[DungeonManager] 成功注册主题: {customTheme} -> 生成器: {prefab.name}");
         }
 
-
-
-
-
-
+        /// <summary>
+        /// 应用自定义主题到地下城生成器
+        /// </summary>
         private void ApplyCustomTheme(DungeonGenerator dungeonGenerator)
         {
-            CustomTheme customTheme = dungeonGenerator.gameObject.GetComponent<CustomTheme>();
-            if (customTheme == null) return;
+            // 关键修改：在父级对象中查找CustomTheme组件
+            CustomTheme customTheme = dungeonGenerator.gameObject.GetComponentInParent<CustomTheme>();
 
-            if (DungeonGenerator.m_availableRooms != null)
+            if (customTheme == null)
             {
-                if (Instance.themeRoomsDict.TryGetValue(customTheme.customTheme, out var rooms))
+                Debug.Log($"[DungeonManager] 生成器及其父级没有CustomTheme组件: {dungeonGenerator.name}");
+
+                // 调试：打印生成器的层级结构
+                Transform current = dungeonGenerator.transform;
+                string path = current.name;
+                while (current.parent != null)
                 {
-                    foreach (var roomData in rooms)
+                    current = current.parent;
+                    path = current.name + "/" + path;
+                }
+                Debug.Log($"[DungeonManager] 生成器完整路径: {path}");
+
+                return;
+            }
+
+            if (DungeonGenerator.m_availableRooms == null)
+            {
+                Debug.LogWarning($"[DungeonManager] m_availableRooms为null");
+                return;
+            }
+
+            Debug.Log($"[DungeonManager] 为生成器应用主题: {dungeonGenerator.name} -> {customTheme.customTheme}");
+
+            // 获取该主题对应的房间
+            if (themeRoomsDict.TryGetValue(customTheme.customTheme, out var rooms))
+            {
+                int addedCount = 0;
+                foreach (var roomData in rooms)
+                {
+                    // 检查房间是否启用
+                    if (roomData.m_enabled)
                     {
-                        // 现在可以正确使用 m_enabled 字段
-                        if (roomData.m_enabled == true)
-                        {
-                            DungeonGenerator.m_availableRooms.Add(roomData);
-
-                            // 获取房间名称的几种方式：
-                            string roomName = roomData.m_prefab.Name; // 软引用名称
-                                                                      // 或者：string roomName = roomData.RoomInPrefab?.name ?? "Unknown";
-
-                            Debug.Log($"[DungeonManager] 为生成器 '{dungeonGenerator.name}' 添加房间 '{roomName}'");
-                        }
+                        DungeonGenerator.m_availableRooms.Add(roomData);
+                        addedCount++;
+                        Debug.Log($"[DungeonManager] 添加房间: {roomData.m_prefab.Name}");
                     }
                 }
-                else
+                Debug.Log($"[DungeonManager] 为生成器添加了 {addedCount} 个房间");
+            }
+            else
+            {
+                Debug.LogWarning($"[DungeonManager] 未找到主题对应的房间: {customTheme.customTheme}");
+                Debug.Log($"[DungeonManager] 可用主题: {string.Join(", ", themeRoomsDict.Keys)}");
+            }
+        }
+
+        /// <summary>
+        /// 工具方法：检测主题是否是已有原版或自定主题对应
+        /// </summary>
+        private bool CheckRoomTheme(string themeName)
+        {
+            if (Enum.TryParse<Room.Theme>(themeName, out _)) return true;
+            return customThemeList.Contains(themeName);
+        }
+
+        /// <summary>
+        /// 重建房间哈希表
+        /// </summary>
+        private void RebuildRoomHash(DungeonDB instance)
+        {
+            instance.m_roomByHash.Clear();
+            foreach (var roomData in instance.m_rooms)
+            {
+                if (roomData != null)
                 {
-                    Debug.LogWarning($"[DungeonManager] 未找到主题 '{customTheme.customTheme}' 对应的房间");
+                    instance.m_roomByHash[roomData.Hash] = roomData;
                 }
             }
         }
 
-
-        // 在注册房间时验证主题是否存在
-        private bool ValidateRoomTheme(string themeName)
+        /// <summary>
+        /// 添加房间到注册列表
+        /// </summary>
+        public void AddRoom(RoomConfig roomConfig)
         {
-            // 检查是否是原版主题
-            if (Enum.TryParse<Room.Theme>(themeName, out _))
-                return false;
-
-            // 检查是否是已注册的自定义主题
-            return customThemeList.Contains(themeName);
+            if (roomConfig != null && !roomList.Contains(roomConfig))
+            {
+                roomList.Add(roomConfig);
+                Debug.Log($"[DungeonManager] 添加到注册列表: {roomConfig.预制件.name}");
+            }
         }
     }
 }
