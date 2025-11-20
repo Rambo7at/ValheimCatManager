@@ -59,7 +59,7 @@ namespace ValheimCatManager.ValheimCatManager.Managers
             roomSoftReferences ??= new Dictionary<RoomConfig, SoftReference<GameObject>>();
 
 
-            Debug.Log($"[DungeonManager] 开始注册 {roomConfigs.Count} 个房间");
+            //Debug.Log($"[DungeonManager] 开始注册 {roomConfigs.Count} 个房间");
 
             foreach (var roomConfig in roomConfigs)
             {
@@ -115,12 +115,12 @@ namespace ValheimCatManager.ValheimCatManager.Managers
                 // 添加到DungeonDB
                 instance.m_rooms.Add(roomData);
 
-                Debug.Log($"[DungeonManager] 成功注册房间: {roomConfig.预制件.name} -> 主题: {roomConfig.主题}");
+                //Debug.Log($"[DungeonManager] 成功注册房间: {roomConfig.预制件.name} -> 主题: {roomConfig.主题}");
             }
 
             // 重建哈希表
             RebuildRoomHash(instance);
-            Debug.Log($"[DungeonManager] 房间注册完成，总房间数: {instance.m_rooms.Count}");
+            //Debug.Log($"[DungeonManager] 房间注册完成，总房间数: {instance.m_rooms.Count}");
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace ValheimCatManager.ValheimCatManager.Managers
             if (!customThemeList.Contains(customTheme))
                 customThemeList.Add(customTheme);
 
-            Debug.Log($"[DungeonManager] 成功注册主题: {customTheme} -> 生成器: {prefab.name}");
+            //Debug.Log($"[DungeonManager] 成功注册主题: {customTheme} -> 生成器: {prefab.name}");
         }
 
         /// <summary>
@@ -155,17 +155,7 @@ namespace ValheimCatManager.ValheimCatManager.Managers
 
             if (customTheme == null)
             {
-                Debug.Log($"[DungeonManager] 生成器及其父级没有CustomTheme组件: {dungeonGenerator.name}");
 
-                // 调试：打印生成器的层级结构
-                Transform current = dungeonGenerator.transform;
-                string path = current.name;
-                while (current.parent != null)
-                {
-                    current = current.parent;
-                    path = current.name + "/" + path;
-                }
-                Debug.Log($"[DungeonManager] 生成器完整路径: {path}");
 
                 return;
             }
@@ -176,23 +166,20 @@ namespace ValheimCatManager.ValheimCatManager.Managers
                 return;
             }
 
-            Debug.Log($"[DungeonManager] 为生成器应用主题: {dungeonGenerator.name} -> {customTheme.customTheme}");
+            //Debug.Log($"[DungeonManager] 为生成器应用主题: {dungeonGenerator.name} -> {customTheme.customTheme}");
 
             // 获取该主题对应的房间
             if (themeRoomsDict.TryGetValue(customTheme.customTheme, out var rooms))
             {
-                int addedCount = 0;
+
                 foreach (var roomData in rooms)
                 {
                     // 检查房间是否启用
                     if (roomData.m_enabled)
                     {
                         DungeonGenerator.m_availableRooms.Add(roomData);
-                        addedCount++;
-                        Debug.Log($"[DungeonManager] 添加房间: {roomData.m_prefab.Name}");
                     }
                 }
-                Debug.Log($"[DungeonManager] 为生成器添加了 {addedCount} 个房间");
             }
             else
             {
