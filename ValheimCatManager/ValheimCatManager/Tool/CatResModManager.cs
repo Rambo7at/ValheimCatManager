@@ -353,34 +353,26 @@ namespace ValheimCatManager.ValheimCatManager.Tool
         /// <summary>
         /// 注：添加自定义地下城
         /// </summary>
-        public void AddDungeon(string locationName, string dungeonTheme, LocationConfig locationConfig)
+        public void AddDungeon(string locationName,string dungeonTheme,LocationConfig locationConfig)
         {
             GameObject LocationPrefab = catAsset.LoadAsset<GameObject>(locationName);
-            int lochash = locationName.GetStableHashCode();
-            if (LocationPrefab == null)
+            if (!LocationPrefab)
             {
-                Debug.LogError($"执行[AddDungeon]方法执行时：未找到预制件：[{locationName}] ");
+                Debug.LogError($"执行AddDungeon方法执行时：未找到预制件：[{locationName}] ");
                 return;
             }
             if (string.IsNullOrEmpty(dungeonTheme))
             {
-                Debug.LogError($"执行[AddDungeon]方法执行时地下城主题名为空！ ");
+                Debug.LogError($"执行AddDungeon方法执行时地下城主题名为空！ ");
                 return;
             }
-            var loc = LocationPrefab.GetComponent<Location>();
-            if (loc == null)
-            {
-                Debug.LogError($"执行[AddDungeon]方法执行时错误：预制件：[{locationName}] 没有Location组件");
-                return;
-            }
-            // 添加自定义主题名
-            DungeonManager.Instance.RegisterDungeonTheme(LocationPrefab, dungeonTheme);
 
-            if (!PrefabManager.Instance.customPrefabDict.ContainsKey(lochash)) PrefabManager.Instance.customPrefabDict.Add(lochash, LocationPrefab);
+            DungeonManager.Instance.RegisterDungeonTheme(LocationPrefab,dungeonTheme);
 
 
-            // 这里是地点的注册，预制件注册已在上方代码完成
+            Instance.AddPrefab(LocationPrefab);
             locationConfig.预制件 = LocationPrefab;
+
             LocationManager.Instance.customLocationList.Add(locationConfig);
         }
 

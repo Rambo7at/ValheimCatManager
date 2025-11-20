@@ -35,11 +35,6 @@ namespace ValheimCatManager.ValheimCatManager.Managers
         /// 注：房间对应的主题字典
         /// </summary>
         private readonly Dictionary<string, List<RoomData>> themeRoomsDict = new();
-
-        private readonly Dictionary<int, string> hashToName = new();
-
-        private readonly Dictionary<string, RoomData> stringToRoomData = new();
-
         /// <summary>
         /// 注：地牢房间的软引用
         /// </summary>
@@ -53,20 +48,6 @@ namespace ValheimCatManager.ValheimCatManager.Managers
 
             [HarmonyPatch(typeof(DungeonGenerator), nameof(DungeonGenerator.SetupAvailableRooms)), HarmonyPostfix]
             static void ApplyCustomTheme(DungeonGenerator __instance) => Instance.ApplyCustomTheme(__instance);
-
-            [HarmonyPatch(typeof(DungeonDB), nameof(DungeonDB.GetRoom)), HarmonyPrefix]
-            private static bool OnDungeonDBGetRoom(int hash, ref DungeonDB.RoomData __result)
-            {
-                DungeonDB.RoomData result = Instance.OnDungeonDBGetRoom(hash);
-
-                if (result != null)
-                {
-                    __result = result;
-                    return false;
-                }
-
-                return true;
-            }
         }
 
         /// <summary>
@@ -79,7 +60,6 @@ namespace ValheimCatManager.ValheimCatManager.Managers
 
 
             Debug.Log($"[DungeonManager] 开始注册 {roomConfigs.Count} 个房间");
-
 
             foreach (var roomConfig in roomConfigs)
             {
@@ -100,9 +80,6 @@ namespace ValheimCatManager.ValheimCatManager.Managers
                     Debug.LogError($"执行[RegisterDungeonRooms]方法出错原因：预制件[{roomConfig.预制件.name}]缺少Room组件");
                     continue;
                 }
-                string roomPrefabName = roomConfig.预制件.name;
-                int roomPrefabHash = roomPrefabName.GetStableHashCode();
-
 
                 // 验证主题
                 if (!CheckRoomTheme(roomConfig.主题))
@@ -124,42 +101,26 @@ namespace ValheimCatManager.ValheimCatManager.Managers
                 roomData.m_prefab = softRef;
 
 
-                if (!themeRoomsDict.TryGetValue(roomConfig.主题, out var roomList))
+                if (themeRoomsDict.ContainsKey(roomConfig.主题))
                 {
-                    roomList = new List<RoomData>();
-                    themeRoomsDict[roomConfig.主题] = roomList;
+                    themeRoomsDict[roomConfig.主题].Add(roomData);
                 }
-                roomList.Add(roomData);
+                else
+                {
+                    themeRoomsDict[roomConfig.主题] = new List<RoomData>();
+                    themeRoomsDict[roomConfig.主题].Add(roomData);
+                }
 
 
                 // 添加到DungeonDB
                 instance.m_rooms.Add(roomData);
 
-
-
-                if (!hashToName.ContainsKey(roomPrefabHash))
-                {
-                    Instance.hashToName.Add(roomPrefabHash, roomPrefabName);
-                }
-                else
-                {
-                    Debug.LogError($"执行[RegisterDungeonRooms]发现重复哈希值！房间名：[{roomPrefabName}]");
-                }
-
-                if (!stringToRoomData.ContainsKey(roomPrefabName))
-                {
-                    stringToRoomData.Add(roomPrefabName, roomData);
-                }
-                else
-                {
-                    Debug.LogError($"执行[RegisterDungeonRooms]发现[stringToRoomData]重复！房间名：[{roomPrefabName}]");
-
-                }
-
+                Debug.Log($"[DungeonManager] 成功注册房间: {roomConfig.预制件.name} -> 主题: {roomConfig.主题}");
             }
-            instance.GenerateHashList();
 
-
+            // 重建哈希表
+            RebuildRoomHash(instance);
+            Debug.Log($"[DungeonManager] 房间注册完成，总房间数: {instance.m_rooms.Count}");
         }
 
         /// <summary>
@@ -168,13 +129,20 @@ namespace ValheimCatManager.ValheimCatManager.Managers
         public void RegisterDungeonTheme(GameObject prefab, string customTheme)
         {
             DungeonGenerator dungeonGenerator = prefab.GetComponentInChildren<DungeonGenerator>();
-            if (dungeonGenerator == null) return;
+            if (dungeonGenerator == null)
+            {
+                Debug.LogError($"[DungeonManager] 预制件缺少DungeonGenerator组件: {prefab.name}");
+                return;
+            }
 
             // 添加自定义主题组件
             dungeonGenerator.gameObject.AddComponent<CustomTheme>().customTheme = customTheme;
 
             // 添加到主题列表
-            if (!customThemeList.Contains(customTheme)) customThemeList.Add(customTheme);
+            if (!customThemeList.Contains(customTheme))
+                customThemeList.Add(customTheme);
+
+            Debug.Log($"[DungeonManager] 成功注册主题: {customTheme} -> 生成器: {prefab.name}");
         }
 
         /// <summary>
@@ -183,7 +151,7 @@ namespace ValheimCatManager.ValheimCatManager.Managers
         private void ApplyCustomTheme(DungeonGenerator dungeonGenerator)
         {
             // 关键修改：在父级对象中查找CustomTheme组件
-            CustomTheme customTheme = dungeonGenerator.gameObject.GetComponentInParent<CustomTheme>();
+            CustomTheme customTheme = dungeonGenerator.gameObject.GetComponent<CustomTheme>();
 
             if (customTheme == null)
             {
@@ -242,16 +210,31 @@ namespace ValheimCatManager.ValheimCatManager.Managers
             return customThemeList.Contains(themeName);
         }
 
-
-        private DungeonDB.RoomData OnDungeonDBGetRoom(int hash)
+        /// <summary>
+        /// 重建房间哈希表
+        /// </summary>
+        private void RebuildRoomHash(DungeonDB instance)
         {
-            if (hashToName.TryGetValue(hash, out var roomName) && stringToRoomData.TryGetValue(roomName, out var room))
+            instance.m_roomByHash.Clear();
+            foreach (var roomData in instance.m_rooms)
             {
-                return room;
+                if (roomData != null)
+                {
+                    instance.m_roomByHash[roomData.Hash] = roomData;
+                }
             }
-
-            return null;
         }
 
+        /// <summary>
+        /// 添加房间到注册列表
+        /// </summary>
+        public void AddRoom(RoomConfig roomConfig)
+        {
+            if (roomConfig != null && !roomList.Contains(roomConfig))
+            {
+                roomList.Add(roomConfig);
+                Debug.Log($"[DungeonManager] 添加到注册列表: {roomConfig.预制件.name}");
+            }
+        }
     }
 }
