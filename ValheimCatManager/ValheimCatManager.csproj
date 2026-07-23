@@ -13,15 +13,15 @@
 
 <PropertyGroup>
   <!-- 程序集版本（.NET 内部版本号，4段格式） -->
-  <Version>0.1.1.0</Version>          
+  <Version>0.1.6.0</Version>          
   <!-- 文件版本（Windows 文件属性 → 详细信息 → 文件版本） -->
-  <FileVersion>0.1.1.0</FileVersion>      
+  <FileVersion>0.1.6.0</FileVersion>      
   <!-- 产品版本（Windows 文件属性 → 详细信息 → 产品版本） -->
-  <InformationalVersion>0.1.4.0</InformationalVersion>  
+  <InformationalVersion>0.1.6.0</InformationalVersion>  
   <!-- 文件说明（Windows 文件属性 → 详细信息 → 文件说明） -->
-  <AssemblyTitle>猫咪：Mod管理</AssemblyTitle>
+  <AssemblyTitle>ValheimCatManager</AssemblyTitle>
   <!-- 产品名称（Windows 文件属性 → 详细信息 → 产品名称） -->
-  <AssemblyProduct>猫咪：Mod管理</AssemblyProduct>
+  <AssemblyProduct>ValheimCatManager</AssemblyProduct>
 
   <!-- 关键：关闭 Git 自动注入版本哈希（如果项目用了 GitInfo/SourceLink 包） -->
   <DisableGitVersioning>true</DisableGitVersioning>
