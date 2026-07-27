@@ -15,6 +15,10 @@ public static class HarmonyPatchManager
     internal static event Action<ObjectDB> OnObjectDBAwakeRegister;
     internal static event Action<ZNetScene> OnZNetSceneAwakeRegister;
     internal static event Action<ObjectDB, ObjectDB> OnObjectDBCopyRegister;
+    internal static event Action<ZNetPeer> OnZNetRpcRegister;
+    internal static event Action OnServerPeerReady;
+    internal static event Action<ZNetPeer> OnCallRpcNewConnection;
+
 
     // ---- 内部修改事件（在 Register 之后、Patch 之前触发） ----
     internal static event Action<ObjectDB> OnObjectDBAwakeModify;
@@ -47,5 +51,13 @@ public static class HarmonyPatchManager
         OnObjectDBCopyRegister?.Invoke(__instance, other);
         OnObjectDBCopyPatch?.Invoke(__instance, other);
     }
+
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.OnNewConnection)), HarmonyPrefix, HarmonyPriority(0)]
+    static void ZNet_OnNewConnection_Prefix(ZNetPeer peer)
+    {
+        OnZNetRpcRegister?.Invoke(peer);
+        OnCallRpcNewConnection?.Invoke(peer);
+    }
+
 
 }

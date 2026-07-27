@@ -12,9 +12,6 @@ namespace ValheimCatManager.Managers
     /// <summary>
     /// 动画管理器：负责创建动画覆盖控制器、管理动画片段替换
     /// </summary>
-    /// <summary>
-    /// 动画管理器：负责创建动画覆盖控制器、管理动画片段替换
-    /// </summary>
     public class AnimationManager
     {
         // 单例保持简洁

@@ -59,7 +59,6 @@ namespace ValheimCatManager.Tool
             if (AssetBundleDict.TryGetValue(modName, out var _)) return;
 
             AssetBundleDict[modName] = LoadAssetBundleToCatAsset(assetName, mod);
-            MockSystem.Instance.LoadmockDebugName(mod.GetName().Name);
         }
 
         /// <summary>

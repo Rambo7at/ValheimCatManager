@@ -25,6 +25,7 @@
 
   <!-- 关键：关闭 Git 自动注入版本哈希（如果项目用了 GitInfo/SourceLink 包） -->
   <DisableGitVersioning>true</DisableGitVersioning>
+  <GenerateDocumentationFile>True</GenerateDocumentationFile>
 </PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

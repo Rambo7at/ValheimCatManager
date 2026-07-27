@@ -22,6 +22,8 @@ namespace ValheimCatManager
         public void Awake()
         {
             new Harmony("ValheimCatManagerPatch").PatchAll(typeof(HarmonyPatchManager));
+
+
         }
 
 

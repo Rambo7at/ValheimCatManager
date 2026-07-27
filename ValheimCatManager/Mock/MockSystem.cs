@@ -24,7 +24,6 @@ namespace ValheimCatManager.Mock
         public readonly Dictionary<int, string> mockPrefabDict = new Dictionary<int, string>();
 
         private int mockNum = 0;
-        private string mockDebugName;
 
         /// <summary>
         /// 存储需要替换的预制件/着色器/材质信息列表
@@ -54,11 +53,6 @@ namespace ValheimCatManager.Mock
         }
 
         /// <summary>
-        /// 设置调试名称（用于日志区分）
-        /// </summary>
-        public void LoadmockDebugName(string name) => mockDebugName = name;
-
-        /// <summary>
         /// 启用 MockSystem（执行预制件、着色器、材质的替换流程）<br></br>
         /// 流程：清理原有数据 → 收集信息 → 替换资源 → 清理缓存
         /// </summary>
@@ -71,7 +65,7 @@ namespace ValheimCatManager.Mock
             var elapsed1 = DateTime.Now - startTime1;
 
             int totalCount = MockObjectInfoList.Count + mockNum;
-            Debug.Log($"[{mockDebugName}] Mock完成-处理数量:[{totalCount}]-耗时: {elapsed1.TotalMilliseconds / 1000}秒 ");
+            Debug.Log($"[ValheimCatManager] Mock完成-处理数量:[{totalCount}]-耗时: {elapsed1.TotalMilliseconds / 1000}秒 ");
             Cleanup();
             mockNum = 0;
         }
@@ -142,7 +136,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.Log($"[{mockDebugName}] 处理字段 {field.Name} 时出错：{ex.Message}");
+                    Debug.Log($"[ValheimCatManager] 处理字段 {field.Name} 时出错：{ex.Message}");
                 }
             }
         }
@@ -155,7 +149,7 @@ namespace ValheimCatManager.Mock
             Type parentType = parentObject.GetType();
             if (!field.DeclaringType.IsAssignableFrom(parentType))
             {
-                Debug.LogWarning($"[{mockDebugName}]：字段：【{field.Name}】不属于对象 类型：【{parentType.Name}】 跳过");
+                Debug.LogWarning($"[ValheimCatManager]：字段：【{field.Name}】不属于对象 类型：【{parentType.Name}】 跳过");
                 return;
             }
 
@@ -212,7 +206,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.Log($"[{mockDebugName}] 处理对象 {objType.Name} 的字段 {field.Name} 时出错：{ex.Message}");
+                    Debug.Log($"[ValheimCatManager] 处理对象 {objType.Name} 的字段 {field.Name} 时出错：{ex.Message}");
                 }
             }
         }
@@ -246,7 +240,7 @@ namespace ValheimCatManager.Mock
             Type parentType = parentObject.GetType();
             if (!targetField.DeclaringType.IsAssignableFrom(parentType))
             {
-                Debug.LogWarning($"[{mockDebugName}]：字段：【{targetField.Name}】不属于对象 类型：【{parentType.Name}】 跳过");
+                Debug.LogWarning($"[ValheimCatManager]：字段：【{targetField.Name}】不属于对象 类型：【{parentType.Name}】 跳过");
                 return;
             }
 
@@ -334,7 +328,7 @@ namespace ValheimCatManager.Mock
                 }
                 catch (Exception ex)
                 {
-                    Debug.Log($"[{mockDebugName}] 处理列表元素（索引：{index}）时出错：{ex.Message}");
+                    Debug.Log($"[ValheimCatManager] 处理列表元素（索引：{index}）时出错：{ex.Message}");
                 }
                 index++;
             }
@@ -356,7 +350,7 @@ namespace ValheimCatManager.Mock
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log($"[{mockDebugName}] 替换预制件 {info.mockPrefab.name} 时出错：{ex.Message}");
+                        Debug.Log($"[ValheimCatManager] 替换预制件 {info.mockPrefab.name} 时出错：{ex.Message}");
                     }
                 }
                 // 替换着色器
@@ -365,7 +359,7 @@ namespace ValheimCatManager.Mock
                     var shader = CatToolManagerOld.GetShader(info.ShaderName);
                     if (shader == null)
                     {
-                        Debug.Log($"[{mockDebugName}] 找不到着色器：{info.ShaderName}");
+                        Debug.Log($"[ValheimCatManager] 找不到着色器：{info.ShaderName}");
                         continue;
                     }
 
@@ -375,7 +369,7 @@ namespace ValheimCatManager.Mock
                     }
                     catch (Exception ex)
                     {
-                        Debug.Log($"[{mockDebugName}] 替换着色器 {info.MockShader.name} 失败：{ex.Message}");
+                        Debug.Log($"[ValheimCatManager] 替换着色器 {info.MockShader.name} 失败：{ex.Message}");
                     }
                 }
                 // 替换材质【新增】
@@ -384,7 +378,7 @@ namespace ValheimCatManager.Mock
                     Material realMaterial = CatToolManagerOld.GetMaterial(info.MaterialName);
                     if (realMaterial == null)
                     {
-                        Debug.LogWarning($"[{mockDebugName}] 未找到真实材质：{info.MaterialName}（占位材质：{info.TargetMaterial?.name}）");
+                        Debug.LogWarning($"[ValheimCatManager] 未找到真实材质：{info.MaterialName}（占位材质：{info.TargetMaterial?.name}）");
                         continue;
                     }
 
@@ -393,7 +387,7 @@ namespace ValheimCatManager.Mock
                         Renderer targetRenderer = info.RootComponent as Renderer;
                         if (targetRenderer == null)
                         {
-                            Debug.LogWarning($"[{mockDebugName}] 材质替换失败：关联组件不是Renderer");
+                            Debug.LogWarning($"[ValheimCatManager] 材质替换失败：关联组件不是Renderer");
                             continue;
                         }
 
@@ -404,7 +398,7 @@ namespace ValheimCatManager.Mock
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError($"[{mockDebugName}] 材质替换失败：{info.TargetMaterial?.name} → {info.MaterialName}，错误：{ex.Message}");
+                        Debug.LogError($"[ValheimCatManager] 材质替换失败：{info.TargetMaterial?.name} → {info.MaterialName}，错误：{ex.Message}");
                     }
                 }
             }
@@ -417,14 +411,14 @@ namespace ValheimCatManager.Mock
         {
             if (info.ParentObject == null || info.TargetField == null || realPrefab == null)
             {
-                Debug.Log($"[{mockDebugName}] 预制件替换失败：ParentObject、TargetField或realPrefab为null");
+                Debug.Log($"[ValheimCatManager] 预制件替换失败：ParentObject、TargetField或realPrefab为null");
                 return;
             }
 
             Type targetType = info.ParentObject.GetType();
             if (!info.TargetField.DeclaringType.IsAssignableFrom(targetType))
             {
-                Debug.Log($"[{mockDebugName}] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
+                Debug.Log($"[ValheimCatManager] 字段 {info.TargetField.Name} 不属于对象类型 {targetType.Name}");
                 return;
             }
 
@@ -438,7 +432,7 @@ namespace ValheimCatManager.Mock
                 Component targetComponent = realPrefab.GetComponent(info.TargetField.FieldType);
                 if (targetComponent == null)
                 {
-                    Debug.LogError($"[{mockDebugName}] 真实预制件 {realPrefab.name} 上找不到 {info.TargetField.FieldType.Name} 组件");
+                    Debug.LogError($"[ValheimCatManager] 真实预制件 {realPrefab.name} 上找不到 {info.TargetField.FieldType.Name} 组件");
                     return;
                 }
                 valueToSet = targetComponent;
