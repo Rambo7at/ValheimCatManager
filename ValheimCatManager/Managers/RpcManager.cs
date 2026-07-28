@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using ValheimCatManager.Data;
+using static MonoMod.Cil.RuntimeILReferenceBag.FastDelegateInvokers;
 using static ZRpc;
 
 namespace ValheimCatManager.Managers
@@ -13,32 +15,113 @@ namespace ValheimCatManager.Managers
     public class RpcManager
     {
         private static RpcManager _instance;
-
         public static RpcManager Instance => _instance ?? (_instance = new RpcManager());
-
         private RpcManager() { }
+
+        List<string> VersionList = [];
+
+        bool Check = true;
+
+        private const string Rpc_ModVersionPush = "com.rambo7at.CatManager_ModVersionPush";
+        private const string Rpc_ModVersionReply = "com.rambo7at.CatManager_ModVersionReply";
 
 
         /// <summary>注：注册 数据同步RPC 接收回调</summary>
-        public void RpcRegister(string rpcName, Action<ZRpc, ZPackage> action)
+        public void RpcRegister(string rpcName, System.Action<ZRpc, ZPackage> action) => HarmonyPatchManager.OnZNetRpcRegister += (peer) => peer.m_rpc.Register(rpcName, action);
+
+        /// <summary>注：登记新连接自动推送RPC，执行于 ZNet.OnNewConnection 阶段触发</summary>
+        public void RegisterAutoPushRpc(string rpcName, LazySyncPackage syncPackage)  =>  HarmonyPatchManager.OnCallRpcNewConnection += (peer) => peer.m_rpc.Invoke(rpcName, syncPackage.ZPackage);
+
+
+        /// <summary>注：登记模组，用于联机版本校验</summary>
+        public void RegisterModVersion()
+        {
+            Assembly mod = Assembly.GetCallingAssembly();
+            string modName = mod.GetName().Name;
+            if (!VersionList.Contains(modName)) VersionList.Add(modName);
+
+            if (Check)
+            {
+                SetupVersionCheckRpc();
+                Check = false;
+            }
+
+        }
+
+        /// <summary>注：构建版本同步容器，注册整套版本校验RPC</summary>
+        private void SetupVersionCheckRpc()
         {
             HarmonyPatchManager.OnZNetRpcRegister += (peer) =>
             {
-                peer.m_rpc.Register(rpcName, action);
-                Debug.LogError($"[RpcManager.RpcRegister]：已完成 RPC 注册 + {rpcName} ，是否是服务器 :{peer.m_server}");
+                peer.m_rpc.Register(Rpc_ModVersionPush, new System.Action<ZRpc, List<string>>(OnReceiveServerModVersion));
+                peer.m_rpc.Register(Rpc_ModVersionReply, new System.Action<ZRpc, List<string>>(OnReceiveClientModVersionReply));
             };
-        }
 
-        /// <summary>注：登记新连接自动推送RPC，执行节点位于 ZNet.OnNewConnection 触发阶段</summary>
-        public void RegisterAutoPushRpc(string rpcName, LazySyncPackage syncPackage)
-        {
             HarmonyPatchManager.OnCallRpcNewConnection += (peer) =>
             {
-                peer.m_rpc.Invoke(rpcName, syncPackage.ZPackage);
-                Debug.LogError($"[RpcManager.CallRpc]：新连接自动推送RPC + {rpcName} ，是否是服务器 :{peer.m_server}");
+                if (ZNet.instance.IsServer())
+                {
+                    peer.m_rpc.Invoke(Rpc_ModVersionPush, VersionList);
+                }
             };
         }
 
+
+        /// <summary>注：客户端接收服务端推送的模组版本列表并校验</summary>
+        private void OnReceiveServerModVersion(ZRpc zRpc, List<string> serverModList)
+        {
+            if (ZNet.instance.IsServer()) return;
+
+            bool mismatch = false;
+            if (serverModList.Count != VersionList.Count) mismatch = true;
+
+            else
+            {
+                foreach (var mod in serverModList)
+                {
+                    if (!VersionList.Contains(mod))
+                    {
+                        mismatch = true;
+                        break;
+                    }
+                }
+            }
+
+            if (mismatch)
+            {
+                // 断开逻辑 zRpc.GetSocket().Close();
+                return;
+            }
+
+            // 校验通过，向服务端回传自身模组清单
+            zRpc.Invoke(Rpc_ModVersionReply, VersionList);
+        }
+
+        /// <summary>注：服务端接收客户端回传的模组版本列表并二次校验</summary>
+        private void OnReceiveClientModVersionReply(ZRpc zRpc, List<string> clientModList)
+        {
+            if (!ZNet.instance.IsServer()) return;
+
+            bool mismatch = false;
+            if (clientModList.Count != VersionList.Count)
+                mismatch = true;
+            else
+            {
+                foreach (var mod in clientModList)
+                {
+                    if (!VersionList.Contains(mod))
+                    {
+                        mismatch = true;
+                        break;
+                    }
+                }
+            }
+
+            if (mismatch)
+            {
+                // 断开逻辑 zRpc.GetSocket().Close();
+            }
+        }
 
 
         /// <summary>注：将业务对象序列化并封装为全新ZPackage</summary>
