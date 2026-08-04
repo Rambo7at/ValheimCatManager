@@ -12,15 +12,14 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using ValheimCatManager;
 using ValheimCatManager.Data;
-using ValheimCatManager.Tool;
 using static Heightmap;
 using Object = UnityEngine.Object;
 
 
-namespace ValheimCatManager.Utils;
+namespace ValheimCatManager.CatUtils;
 
 /// <summary>注：通用工具静态类</summary>
-public static class CatUtil
+public static class Tool
 {
     /// <summary>注：根据生物群系名称获取Heightmap.Biome枚举</summary>
     public static Heightmap.Biome GetBiome(string biomeName)

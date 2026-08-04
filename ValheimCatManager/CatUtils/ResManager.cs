@@ -19,7 +19,7 @@ using ValheimCatManager.Managers;
 using ValheimCatManager.Mock;
 using Debug = UnityEngine.Debug;
 
-namespace ValheimCatManager.Utils;
+namespace ValheimCatManager.CatUtils;
 
 /// <summary>注：资源模块管理器，统一加载AB资源并注册自定义物品、怪物、建筑、配方等游戏资源</summary>
 public class ResManager

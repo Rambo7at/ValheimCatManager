@@ -10,7 +10,7 @@ using UnityEngine;
 using ValheimCatManager;
 using ValheimCatManager.Config;
 using ValheimCatManager.Managers;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 using Debug = UnityEngine.Debug;
 
 namespace ValheimCatManager.Managers
@@ -61,7 +61,7 @@ namespace ValheimCatManager.Managers
                 // 获取或创建软引用
                 if (!Instance.locationSoftReferences.TryGetValue(locationConfig, out var softRef))
                 {
-                    softRef = CatToolManagerOld.AddLoadedSoftReferenceAsset(locationConfig.预制件);
+                    softRef = Tool.AddLoadedSoftReferenceAsset(locationConfig.预制件);
                     Instance.locationSoftReferences[locationConfig] = softRef;
                 }
 

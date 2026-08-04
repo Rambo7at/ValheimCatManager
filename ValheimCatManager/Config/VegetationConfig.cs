@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using ValheimCatManager;
 using ValheimCatManager.Config;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 using static ZoneSystem;
 
 namespace ValheimCatManager.Config
@@ -218,11 +218,11 @@ namespace ValheimCatManager.Config
                 return null;
             }
 
-            var prefab = CatToolManagerOld.GetGameObject(预制件);
+            var prefab = Tool.GetGameObject(预制件);
             if (!prefab) return null;
             
             名字 = $"Veg_{prefab.name}";
-            var biome = CatToolManagerOld.GetBiome(生态区域);
+            var biome = Tool.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;
 
             return new ZoneVegetation

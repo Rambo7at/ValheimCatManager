@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 using ValheimCatManager;
 using ValheimCatManager.Config;
 using ValheimCatManager.Managers;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 
 namespace ValheimCatManager.Managers
 {
@@ -42,9 +42,9 @@ namespace ValheimCatManager.Managers
             foreach (var item in smeltersConfigs)
             {
                 // 加载炼制站、输入物品、输出物品的预制件
-                GameObject prefabSmelters = CatToolManagerOld.GetGameObject(item.预制名);
-                GameObject prefabInputItem = CatToolManagerOld.GetGameObject(item.输入);
-                GameObject prefabOutputItem = CatToolManagerOld.GetGameObject(item.输出);
+                GameObject prefabSmelters = Tool.GetGameObject(item.预制名);
+                GameObject prefabInputItem = Tool.GetGameObject(item.输入);
+                GameObject prefabOutputItem = Tool.GetGameObject(item.输出);
 
                 // 任一预制件为空时打印错误并跳过
                 if (prefabSmelters == null || prefabInputItem == null || prefabOutputItem == null)

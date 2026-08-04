@@ -9,7 +9,7 @@ using UnityEngine;
 using ValheimCatManager;
 using ValheimCatManager.Config;
 using ValheimCatManager.Deprecated;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 using static DungeonDB;
 
 namespace ValheimCatManager.Deprecated
@@ -200,7 +200,7 @@ namespace ValheimCatManager.Deprecated
                 // 处理软引用
                 if (!roomSoftReferences.TryGetValue(roomConfig, out var softRef))
                 {
-                    softRef = CatToolManagerOld.AddLoadedSoftReferenceAsset(roomConfig.预制件);
+                    softRef = Tool.AddLoadedSoftReferenceAsset(roomConfig.预制件);
                     roomSoftReferences[roomConfig] = softRef;
                 }
 
@@ -238,7 +238,7 @@ namespace ValheimCatManager.Deprecated
                 Debug.Log($"[DungeonManager] 映射自定义主题到枚举: {customTheme} -> {themeEnum}");
             }
 
-            dungeonGenerator.m_themes = CatToolManagerOld.GetTheme(customTheme);
+            dungeonGenerator.m_themes = Tool.GetTheme(customTheme);
 
 
             Debug.Log($"[DungeonManager] 成功注册主题: {customTheme} -> 生成器: {prefab.name}");

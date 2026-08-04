@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using ValheimCatManager;
 using ValheimCatManager.Config;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 
 namespace ValheimCatManager.Config
 {
@@ -202,10 +202,10 @@ namespace ValheimCatManager.Config
                 Debug.LogError("预制件生成传入了 【空字符串】");
                 return null;
             }
-            var prefab = CatToolManagerOld.GetGameObject(预制件);
+            var prefab = Tool.GetGameObject(预制件);
             if (!prefab) return null;
 
-            var biome = CatToolManagerOld.GetBiome(生态区域);
+            var biome = Tool.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;
 
 

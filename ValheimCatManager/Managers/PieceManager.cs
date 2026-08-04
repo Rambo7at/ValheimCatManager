@@ -14,7 +14,7 @@ using ValheimCatManager;
 using ValheimCatManager.Config;
 using ValheimCatManager.Data;
 using ValheimCatManager.Managers;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 using static Player;
 
 namespace ValheimCatManager.Managers
@@ -176,7 +176,7 @@ namespace ValheimCatManager.Managers
                 string pieceName = pieceConfig.Value.GetPrefabName();
                 string categoryName = pieceConfig.Value.目录;
                 PieceTable pieceTable = pieceConfig.Value.GetPieceTable();
-                GameObject piecePrefab = CatToolManagerOld.GetGameObject(pieceConfig.Key);
+                GameObject piecePrefab = Tool.GetGameObject(pieceConfig.Key);
 
                 if (piecePrefab == null)
                 {

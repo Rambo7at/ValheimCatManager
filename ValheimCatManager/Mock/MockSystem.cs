@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 using ValheimCatManager;
 using ValheimCatManager.Data;
 using ValheimCatManager.Mock;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 using static ValheimCatManager.Data.CatModData;
 
 namespace ValheimCatManager.Mock
@@ -77,7 +77,7 @@ namespace ValheimCatManager.Mock
         {
             foreach (var item in Instance.mockPrefabDict)
             {
-                GameObject prefab = CatToolManagerOld.GetGameObject(item.Key);
+                GameObject prefab = Tool.GetGameObject(item.Key);
                 if (!prefab)
                 {
                     Debug.LogError($"执行CollectMockPrefab方法时，获取预制件:[{item.Value}]是空");
@@ -167,7 +167,7 @@ namespace ValheimCatManager.Mock
                 if (dropDatas[i].m_item.name.StartsWith("JVLmock_"))
                 {
                     var itemName = dropDatas[i].m_item.name.Substring("JVLmock_".Length);
-                    var gameObject = CatToolManagerOld.GetGameObject(itemName);
+                    var gameObject = Tool.GetGameObject(itemName);
 
                     DropTable.DropData newDropData = new DropTable.DropData()
                     {
@@ -346,7 +346,7 @@ namespace ValheimCatManager.Mock
                 {
                     try
                     {
-                        ReplaceFieldValue(info, CatToolManagerOld.GetGameObject(info.prefabName));
+                        ReplaceFieldValue(info, Tool.GetGameObject(info.prefabName));
                     }
                     catch (Exception ex)
                     {
@@ -356,7 +356,7 @@ namespace ValheimCatManager.Mock
                 // 替换着色器
                 else if (!string.IsNullOrEmpty(info.ShaderName))
                 {
-                    var shader = CatToolManagerOld.GetShader(info.ShaderName);
+                    var shader = Tool.GetShader(info.ShaderName);
                     if (shader == null)
                     {
                         Debug.Log($"[ValheimCatManager] 找不到着色器：{info.ShaderName}");
@@ -375,7 +375,7 @@ namespace ValheimCatManager.Mock
                 // 替换材质【新增】
                 else if (!string.IsNullOrEmpty(info.MaterialName))
                 {
-                    Material realMaterial = CatToolManagerOld.GetMaterial(info.MaterialName);
+                    Material realMaterial = Tool.GetMaterial(info.MaterialName);
                     if (realMaterial == null)
                     {
                         Debug.LogWarning($"[ValheimCatManager] 未找到真实材质：{info.MaterialName}（占位材质：{info.TargetMaterial?.name}）");

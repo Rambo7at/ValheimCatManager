@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using ValheimCatManager;
 using ValheimCatManager.Config;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 using static ZoneSystem;
 
 namespace ValheimCatManager.Config
@@ -182,7 +182,7 @@ namespace ValheimCatManager.Config
             }
 
 
-            var biome = CatToolManagerOld.GetBiome(生态区域);
+            var biome = Tool.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;
 
             return new ZoneLocation

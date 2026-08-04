@@ -11,7 +11,7 @@ using ValheimCatManager;
 using ValheimCatManager.Config;
 using ValheimCatManager.Data;
 using ValheimCatManager.Managers;
-using ValheimCatManager.Tool;
+using ValheimCatManager.CatUtils;
 using static DungeonDB;
 
 namespace ValheimCatManager.Managers
@@ -93,7 +93,7 @@ namespace ValheimCatManager.Managers
                 // 处理软引用
                 if (!roomSoftReferences.TryGetValue(roomConfig, out var softRef))
                 {
-                    softRef = CatToolManagerOld.AddLoadedSoftReferenceAsset(roomConfig.预制件);
+                    softRef = Tool.AddLoadedSoftReferenceAsset(roomConfig.预制件);
                     roomSoftReferences[roomConfig] = softRef;
                 }
 

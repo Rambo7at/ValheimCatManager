@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ValheimCatManager;
 using ValheimCatManager.Managers;
-using ValheimCatManager.Tool;
 
 namespace ValheimCatManager.Managers
 {
