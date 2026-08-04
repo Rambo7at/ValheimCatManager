@@ -218,11 +218,11 @@ namespace ValheimCatManager.Config
                 return null;
             }
 
-            var prefab = Tool.GetGameObject(预制件);
+            var prefab = CatTool.GetGameObject(预制件);
             if (!prefab) return null;
             
             名字 = $"Veg_{prefab.name}";
-            var biome = Tool.GetBiome(生态区域);
+            var biome = CatTool.GetBiome(生态区域);
             if (biome == Heightmap.Biome.None) return null;
 
             return new ZoneVegetation

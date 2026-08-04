@@ -93,7 +93,7 @@ namespace ValheimCatManager.Managers
                 // 处理软引用
                 if (!roomSoftReferences.TryGetValue(roomConfig, out var softRef))
                 {
-                    softRef = Tool.AddLoadedSoftReferenceAsset(roomConfig.预制件);
+                    softRef = CatTool.AddLoadedSoftReferenceAsset(roomConfig.预制件);
                     roomSoftReferences[roomConfig] = softRef;
                 }
 
@@ -153,12 +153,7 @@ namespace ValheimCatManager.Managers
             // 关键修改：在父级对象中查找CustomTheme组件
             CustomTheme customTheme = dungeonGenerator.gameObject.GetComponent<CustomTheme>();
 
-            if (customTheme == null)
-            {
-
-
-                return;
-            }
+            if (customTheme == null) return;
 
             if (DungeonGenerator.m_availableRooms == null)
             {

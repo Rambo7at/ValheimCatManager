@@ -28,13 +28,15 @@ namespace ValheimCatManager.Config
                 return null;
             }
 
-
             return new DungeonDB.RoomData()
             {
-                m_theme = Tool.GetRoomTheme(主题),
+                // m_theme 传 None 是有意为之：
+                // 自定义房间不依赖原版位掩码筛选，实际主题匹配由 ApplyCustomTheme 补丁
+                // 通过 themeRoomsDict 按字符串主题控制，此字段仅作合法占位。
+                m_theme = Room.Theme.None,  
                 m_enabled = 启用
-               
             };
+
         }
 
     }

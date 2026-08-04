@@ -61,7 +61,7 @@ namespace ValheimCatManager.Managers
                 // 获取或创建软引用
                 if (!Instance.locationSoftReferences.TryGetValue(locationConfig, out var softRef))
                 {
-                    softRef = Tool.AddLoadedSoftReferenceAsset(locationConfig.预制件);
+                    softRef = CatTool.AddLoadedSoftReferenceAsset(locationConfig.预制件);
                     Instance.locationSoftReferences[locationConfig] = softRef;
                 }
 

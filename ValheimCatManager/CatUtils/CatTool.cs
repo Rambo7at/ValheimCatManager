@@ -19,7 +19,7 @@ using Object = UnityEngine.Object;
 namespace ValheimCatManager.CatUtils;
 
 /// <summary>注：通用工具静态类</summary>
-public static class Tool
+public static class CatTool
 {
     /// <summary>注：根据生物群系名称获取Heightmap.Biome枚举</summary>
     public static Heightmap.Biome GetBiome(string biomeName)
@@ -54,18 +54,6 @@ public static class Tool
         Debug.LogError($"[CatUtil.GetTheme] 未匹配主题枚举：{themeName}");
         return Room.Theme.None;
     }
-
-
-    /// <summary>注：根据名称解析获取Room.Theme枚举</summary>
-    public static Room.Theme GetRoomTheme(string themeName)
-    {
-        if (Enum.TryParse(themeName, false, out Room.Theme theme))
-            return theme;
-
-        Debug.LogError($"[CatUtil.GetRoomTheme] 主题名称解析失败：{themeName}");
-        return Room.Theme.None;
-    }
-
 
     /// <summary>注：打印指定枚举全部名称与数值信息</summary>
     public static void GetEnumInfo<T>() where T : Enum
@@ -148,10 +136,10 @@ public static class Tool
 
         foreach (var materialData in allMaterials)
         {
-            if (material == null) continue;
-            if (material.name == name)
+            if (materialData == null) continue;
+            if (materialData.name == name)
             {
-                materialList.Add(material);
+                materialList.Add(materialData);
             }
         }
 

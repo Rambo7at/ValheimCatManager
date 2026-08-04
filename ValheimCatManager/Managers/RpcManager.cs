@@ -20,11 +20,14 @@ public class RpcManager
 
     List<string> VersionList = [];
 
+    Dictionary<string, ZPackage> DataSyncDict = [];
+
     bool Check = true;
 
     public bool IsServer => ZNet.instance != null && ZNet.instance.IsServer();
 
     private const string RpcName = "com.rambo7at.CatManager_RPC_CheckClientModList";
+    private const string Rpcdatysync = "com.rambo7at.CatManager_RPC_CheckClientModList";
 
     /// <summary>注：存放已经完成模组版本校验客户端ZRpc </summary>
     private readonly List<ZRpc> _validatedPeers = new List<ZRpc>();
@@ -109,6 +112,37 @@ public class RpcManager
     }
     #endregion
 
+    #region 数据同步 封装
+
+    public void RegisterDataSync(ZPackage zPackage)
+    {
+        Assembly mod = Assembly.GetCallingAssembly();
+        string modFullName = Assembly.GetCallingAssembly().FullName;
+
+        if (DataSyncDict.TryGetValue(modFullName, out var _))
+        {
+            Debug.LogWarning("检测到......");
+            return;
+        }
+
+
+
+    }
+
+    public void InitDataSync()
+    {
+        PatchManager.OnNewConnectionRegister += (peer) =>
+        {
+            peer.m_rpc.Register(RpcName, new System.Action<ZRpc, List<string>>(RPC_CheckClientModList));
+        };
+
+
+    }
+
+
+
+
+    #endregion
 
     #region 序列化工具
     /// <summary>注：将业务对象序列化并封装为全新ZPackage</summary>

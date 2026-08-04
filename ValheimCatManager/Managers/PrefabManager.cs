@@ -149,7 +149,7 @@ public class PrefabManager
     // 辅助方法：处理单个地点对象（包括根对象和子对象）
     private void ProcessLocationObject(ZNetScene instance, GameObject locationObject)
     {
-        string prefabName = locationObject != null ? locationObject.name : string.Empty;
+        string prefabName = Utils.GetPrefabName(locationObject);
         int hashKey = prefabName.GetStableHashCode();
 
         // 检查是否已注册该哈希
