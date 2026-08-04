@@ -24,7 +24,7 @@ namespace ValheimCatManager.Managers
 
         public static SmeltersManger Instance => _instance ?? (_instance = new SmeltersManger());
 
-        private SmeltersManger() => HarmonyPatchManager.OnObjectDBAwakeModify += RegisterSmeltersConfig;
+        private SmeltersManger() => PatchManager.OnObjectDBAwakeModify += RegisterSmeltersConfig;
 
         private void RegisterSmeltersConfig(ObjectDB objectDB)
         {

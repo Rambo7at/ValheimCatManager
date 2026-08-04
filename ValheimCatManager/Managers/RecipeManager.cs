@@ -23,7 +23,7 @@ namespace ValheimCatManager.Managers
 
         public static RecipeManager Instance => _instance ?? (_instance = new RecipeManager());
 
-        private RecipeManager() => HarmonyPatchManager.OnObjectDBAwakeModify += RegisterRecipe;
+        private RecipeManager() => PatchManager.OnObjectDBAwakeModify += RegisterRecipe;
 
 
         private void RegisterRecipe(ObjectDB objectDB)

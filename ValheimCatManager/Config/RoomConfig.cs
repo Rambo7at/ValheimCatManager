@@ -7,6 +7,7 @@ using UnityEngine;
 using ValheimCatManager;
 using ValheimCatManager.Config;
 using ValheimCatManager.Tool;
+using ValheimCatManager.Utils;
 using static Room;
 
 namespace ValheimCatManager.Config
@@ -31,7 +32,7 @@ namespace ValheimCatManager.Config
 
             return new DungeonDB.RoomData()
             {
-                m_theme = CatToolManager.Instance.GetRoomTheme(主题),
+                m_theme = CatUtil.GetRoomTheme(主题),
                 m_enabled = 启用
                
             };

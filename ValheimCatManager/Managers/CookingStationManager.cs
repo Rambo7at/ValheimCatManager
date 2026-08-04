@@ -21,7 +21,7 @@ namespace ValheimCatManager.Managers
 
         public static CookingStationManager Instance => _instance ?? (_instance = new CookingStationManager ());
 
-        private CookingStationManager() => HarmonyPatchManager.OnObjectDBAwakeModify += RegisterCookingStationConfig;
+        private CookingStationManager() => PatchManager.OnObjectDBAwakeModify += RegisterCookingStationConfig;
 
         private void RegisterCookingStationConfig(ObjectDB objectDB)
         {

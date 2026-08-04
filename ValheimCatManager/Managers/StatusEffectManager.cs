@@ -16,7 +16,7 @@ namespace ValheimCatManager.Managers
 
         public static StatusEffectManager Instance => _instance ?? (_instance = new StatusEffectManager());
 
-        private StatusEffectManager() => HarmonyPatchManager.OnObjectDBAwakeModify += RegisterStatusEffectPatch;
+        private StatusEffectManager() => PatchManager.OnObjectDBAwakeModify += RegisterStatusEffectPatch;
 
         /// <summary>
         /// 注：自定义效果的字典

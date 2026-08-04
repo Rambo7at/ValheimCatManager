@@ -17,13 +17,11 @@ namespace ValheimCatManager
 
         public const string PluginGUID = "com.rambo7at.CatManager";
         public const string PluginName = "ValheimCatManager";
-        public const string PluginVersion = "0.1.6.0";
+        public const string PluginVersion = "0.1.6.3";
 
         public void Awake()
         {
-            new Harmony("ValheimCatManagerPatch").PatchAll(typeof(HarmonyPatchManager));
-
-
+            new Harmony("ValheimCatManagerPatch").PatchAll(typeof(PatchManager));
         }
 
 

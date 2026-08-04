@@ -20,9 +20,9 @@ public class PrefabManager
 
     private PrefabManager()
     {
-        HarmonyPatchManager.OnObjectDBAwakeRegister += RegisterItemPatch;
-        HarmonyPatchManager.OnZNetSceneAwakeRegister += RegisterGameObjectPatch;
-        HarmonyPatchManager.OnObjectDBCopyRegister += CopyOtherDBPatch;
+        PatchManager.OnObjectDBAwakeRegister += RegisterItemPatch;
+        PatchManager.OnZNetSceneAwakeRegister += RegisterGameObjectPatch;
+        PatchManager.OnObjectDBCopyRegister += CopyOtherDBPatch;
     }
 
 

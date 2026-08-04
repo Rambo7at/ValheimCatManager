@@ -24,7 +24,7 @@ namespace ValheimCatManager.Managers
 
         public static MonsterManager Instance => _instance ?? (_instance = new MonsterManager());
 
-        private MonsterManager() => HarmonyPatchManager.OnObjectDBAwakeModify += SetMonster;
+        private MonsterManager() => PatchManager.OnObjectDBAwakeModify += SetMonster;
 
 
         private void SetMonster(ObjectDB objectDB)
