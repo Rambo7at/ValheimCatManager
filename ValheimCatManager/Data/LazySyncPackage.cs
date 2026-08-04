@@ -9,9 +9,10 @@ using ValheimCatManager.Data;
 
 namespace ValheimCatManager.Data
 {
-    public class LazySyncPackage
+    public class SyncPackage
     {
         public ZPackage ZPackage { get; set; }
+
 
     }
 }

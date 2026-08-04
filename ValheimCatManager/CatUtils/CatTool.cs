@@ -111,7 +111,7 @@ public static class CatTool
             CatModData.m_shaderCache.Add(shaderList[shaderList.Count - 1].name, shaderList[shaderList.Count - 1]);
             return shaderList[0];
         }
-        Debug.LogError($"[CatUtil.GetShader] 未找到着色器：{name}");
+        Debug.LogWarning($"[CatUtil.GetShader] 未找到着色器，如是专用服务器，请忽略：{name}");
         return null;
     }
 

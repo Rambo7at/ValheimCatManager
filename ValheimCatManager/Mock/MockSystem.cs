@@ -357,11 +357,7 @@ namespace ValheimCatManager.Mock
                 else if (!string.IsNullOrEmpty(info.ShaderName))
                 {
                     var shader = CatTool.GetShader(info.ShaderName);
-                    if (shader == null)
-                    {
-                        Debug.Log($"[ValheimCatManager] 找不到着色器：{info.ShaderName}");
-                        continue;
-                    }
+                    if (shader == null) continue;
 
                     try
                     {
