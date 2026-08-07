@@ -435,5 +435,12 @@ public class ResManager
         }
         Debug.LogError($"AddStatusEffect,执行时发现重复效果：[{seName}]");
     }
+
+    /// <summary>注：修改攻击速度（累加增量，正数加速，负数减速），第一个float为主要攻击速度增量，第二个为次要攻击速度增量</summary>
+    public void ModifyAttackSpeed(string itemName, float s1, float s2)
+    {
+        AttackSpeedManager.Instance.ModifyAttackSpeed(itemName, new AttackSpeedConfig(s1, s2));
+    }
+
 }
 

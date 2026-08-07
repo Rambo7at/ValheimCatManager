@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using ValheimCatManager.Config;
 using ValheimCatManager.Managers;
 
 namespace ValheimCatManager
@@ -17,12 +18,9 @@ namespace ValheimCatManager
 
         public const string PluginGUID = "com.rambo7at.CatManager";
         public const string PluginName = "ValheimCatManager";
-        public const string PluginVersion = "0.1.6.3";
+        public const string PluginVersion = "0.1.6.5";
 
-        public void Awake()
-        {
-            new Harmony("ValheimCatManagerPatch").PatchAll(typeof(PatchManager));
-        }
+        public void Awake() => new Harmony("ValheimCatManagerPatch").PatchAll(typeof(PatchManager));
 
 
     }

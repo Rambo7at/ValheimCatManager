@@ -1,0 +1,1399 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ValheimCatManager</name>
+    </assembly>
+    <members>
+        <member name="T:ValheimCatManager.CatUtils.CatTool">
+            <summary>注：通用工具静态类</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetBiome(System.String)">
+            <summary>注：根据生物群系名称获取Heightmap.Biome枚举</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetTheme(System.String)">
+            <summary>注：根据名称匹配获取Room.Theme枚举</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetEnumInfo``1">
+            <summary>注：打印指定枚举全部名称与数值信息</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.CheckEunm``1(System.String)">
+            <summary>注：检测字符串是否为目标枚举合法名称</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetEnumLength``1">
+            <summary>注：获取枚举成员总数量</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetShader(System.String)">
+            <summary>注：按名称查找着色器并写入缓存，重复查询直接读取缓存</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetMaterial(System.String)">
+            <summary>注：按名称查找材质并缓存，逻辑与着色器查询保持统一</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetPieceCategory">
+            <summary>注：打印Piece.PieceCategory枚举全部键值，用于调试校验</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetGameObject(System.String)">
+            <summary>注：按名称分级查找预制件并缓存，优先级ZNetScene→ObjectDB→Resources兜底</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetGameObject(System.Int32)">
+            <summary>注：按哈希值查找预制件并缓存，优先级ZNetScene→ObjectDB</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.ResourcesGetGameObject(System.String)">
+            <summary>注：Resources兜底全局查找GameObject</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.AssetIDFromObject(UnityEngine.Object)">
+            <summary>注：根据对象实例ID生成AssetID</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.AddLoadedSoftReferenceAsset``1(``0)">
+            <summary>注：注册外部加载对象到AssetBundleLoader，生成可用软引用</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetOrAddComponent``1(UnityEngine.GameObject)">
+            <summary>注：获取组件，不存在则自动添加</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.CatTool.GetVegetationInfo(ZoneSystem)">
+            <summary>注：批量打印植被生成全部配置参数，调试用</summary>
+        </member>
+        <member name="T:ValheimCatManager.CatUtils.ResManager">
+            <summary>注：资源模块管理器，统一加载AB资源并注册自定义物品、怪物、建筑、配方等游戏资源</summary>
+        </member>
+        <member name="P:ValheimCatManager.CatUtils.ResManager.Instance">
+            <summary>注：单例全局实例，懒加载模式</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.LoadAssetBundle(System.String)">
+            <summary>注：加载模组AB资源包，建立模组与资源包映射</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.LoadAssetBundleToCatAsset(System.String,System.Reflection.Assembly)">
+            <summary>注：从嵌入程序流读取并加载AB包</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.GetAssetBundle(System.String)">
+            <summary>注：根据模组名读取已缓存的AB包</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddItem(System.String,System.Boolean)">
+            <summary>注：加载物品预制件，注册至自定义物品字典，可选加入模拟替换字典</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddRecipe(ValheimCatManager.Config.RecipeConfig)">
+            <summary>注：注册自定义配方配置</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddRecipe(System.String,System.String,System.Int32,System.Int32,System.ValueTuple{System.String,System.Int32,System.Int32}[])">
+            <summary>注：重载快速构建配方并注册</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddMonster(ValheimCatManager.Config.MonsterConfig,System.Boolean)">
+            <summary>注：加载怪物预制件，注册怪物预制件与怪物配置，可选开启模拟</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddVegetation(ValheimCatManager.Config.VegetationConfig,System.Boolean)">
+            <summary>注：加载植被预制件，注册植被与预制字典，可选加入模拟字典</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddPrefab(System.String,System.Boolean)">
+            <summary>注：加载预制件并注册到预制字典，可选择加入模拟字典</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddPrefab(UnityEngine.GameObject)">
+            <summary>注：直接传入GameObject对象快速注册预制件</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddSpawn(ValheimCatManager.Config.SpawnConfig)">
+            <summary>注：注册自定义生物生成配置</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddFood(System.String,System.String,System.Boolean)">
+            <summary>注：加载摆放食物预制件，自动配置建造属性并注册相关字典</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddPiece(ValheimCatManager.Config.PieceConfig,System.Boolean)">
+            <summary>注：根据配置加载建筑预制件，注册建筑与预制字典，可选开启模拟</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddCookingStation(ValheimCatManager.Config.CookingStationConfig)">
+            <summary>注：注册自定义烹饪站配置</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddSmelters(ValheimCatManager.Config.SmeltersConfig)">
+            <summary>注：注册自定义炼制站配置</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddLocation(System.String,ValheimCatManager.Config.LocationConfig)">
+            <summary>注：加载地点预制件，注册地点配置与预制件</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddRoom(System.String,System.String)">
+            <summary>注：加载房间预制件，注册地下城房间配置</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddDungeon(System.String,System.String,ValheimCatManager.Config.LocationConfig)">
+            <summary>注：加载地牢预制件，注册地牢主题与野外地点配置</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddLocationIcon(System.String,System.String)">
+            <summary>注：加载图标贴图，创建精灵并注册地图地点图标</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddAnimation(System.String,System.String,System.String)">
+            <summary>注：加载动画片段，注册多段动画并加入动画组列表</summary>
+        </member>
+        <member name="M:ValheimCatManager.CatUtils.ResManager.AddStatusEffect(System.String)">
+            <summary>注：加载状态效果资源，注册自定义buff效果</summary>
+        </member>
+        <member name="T:ValheimCatManager.Config.CookingStationConfig">
+            <summary>
+            烹饪站配置类，用于定义烹饪站的参数设置
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Config.CookingStationConfig.#ctor(System.String,System.String,System.String,System.Int32)">
+            <summary>
+            注：使用构造函数，直接设置，CookingStation组件的配置 (完整)
+            </summary>
+            <param name="name">目标烹饪站的预制体名称</param>
+            <param name="input">需要进行烹饪处理的对象（食材）</param>
+            <param name="delete">烹饪完成后输出的产物</param>
+            <param name="time">完成烹饪所需的时间（单位：秒）</param>
+        </member>
+        <member name="M:ValheimCatManager.Config.CookingStationConfig.#ctor(System.String,System.String,System.String)">
+            <summary>
+            注：使用构造函数，直接设置，CookingStation组件的配置 (默认时间)
+            </summary>
+            <param name="name">目标烹饪站的预制体名称</param>
+            <param name="input">需要进行烹饪处理的对象（食材）</param>
+            <param name="delete">烹饪完成后输出的产物</param>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.预制件">
+            <summary>
+            注：位置的预制件名(必填项)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.名字">
+            <summary>
+            注：指的是 ZoneLocation 的名字
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.启用">
+            <summary>
+            注：是否启用
+            <br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.生态区域">
+            <summary>
+            注：生态区域(必填项) <br>(默认值：None)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.区域范围">
+            <summary>
+            注：区域范围<br>(默认值：Everything)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.最大数量">
+            <summary>
+            注：生成数量<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.优先处理">
+            <summary>
+            注：首先生成，尝试次数更多<br>(默认值：false)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.优先中心">
+            <summary>
+            注：优先尝试在世界中心生成，并逐渐向世界边缘移动
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.唯一">
+            <summary>
+            注：保证只有一个实例。
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.组">
+            <summary>
+            注：用于minDistanceFromSimilar的组名称
+            <br>(默认值：空字符串)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.同类最小距离">
+            <summary>
+            注：相同位置之间或指定组内位置之间的最小距离。
+            <br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.始终显示图标">
+            <summary>
+            注：始终显示的位置图标。
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.生成显示图标">
+            <summary>
+            注：位置生成时显示的图标
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.随机旋转">
+            <summary>
+            注：随机旋转位置（不受世界种子影响）。
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.坡度旋转">
+            <summary>
+            注：根据地形角度旋转。例如适用于山坡上的位置。
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.吸附水面">
+            <summary>
+            注：放置在水位处而非地形上。
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.内部半径">
+            <summary>
+            注：与位置相连的内部半径
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.外部半径">
+            <summary>
+            注：最大建议值为 32 米。较高的值会超出区域边界，并可能导致问题。
+            <br>(默认值：10f)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.清理区域">
+            <summary>
+            注：是否清理区域
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.最小地形偏差">
+            <summary>
+            注：最小地形偏差
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.最大地形偏差">
+            <summary>
+            注：最大地形偏差
+            <br>(默认值：2f)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.森林内生成">
+            <summary>
+            注：是否在森林中分形（0-1为森林内部）
+            <br>(默认值：false)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.森林最小阈值">
+            <summary>
+            注：森林阈值最小值
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.森林最大阈值">
+            <summary>
+            注：森林阈值最大值
+            <br>(默认值：1f)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.最小距离">
+            <summary>
+            注：距世界中心的最小距离
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.最大距离">
+            <summary>
+            注：距世界中心的最大距离
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.最低高度">
+            <summary>
+            注：最低高度
+            <br>(默认值：-1000f)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.LocationConfig.最高高度">
+            <summary>
+            注：最高高度
+            <br>(默认值：1000f)</br>
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Config.LocationConfig.GetZoneLocation">
+            <summary>
+            转换为ZoneLocation对象
+            </summary>
+            <returns>生成的ZoneLocation实例</returns>
+        </member>
+        <member name="M:ValheimCatManager.Config.PieceConfig.#ctor(System.String,System.String,System.String,System.ValueTuple{System.String,System.Int32,System.Boolean}[])">
+            <summary>
+            
+            </summary>
+            <param name="name"></param>
+            <param name="category"></param>
+            <param name="tool"></param>
+            <param name="resItemList"></param>
+        </member>
+        <member name="M:ValheimCatManager.Config.PieceConfig.#ctor(System.String)">
+            <summary>
+            注：填写预制件名
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="P:ValheimCatManager.Config.PieceConfig.预制件">
+            <summary>
+            注：这是需要获取对应组件的预制件名
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.PieceConfig.制作工具">
+            <summary>
+            注：制作所用的工具
+            <br></br>原版：Cultivator(耕地耙)，Feaster(餐盘)，Hammer(锤子)，Hoe(锄头)
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Config.PieceConfig.制作材料">
+            <summary>
+            注：制作材料
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.PieceConfig.目录">
+            <summary>
+            注：制作的分组标签
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Config.PieceConfig.AddRequirement(System.String,System.Int32,System.Boolean)">
+            <summary>
+            注：添加 Piece 材料需求
+            </summary>
+            <param name="name">材料名</param>
+            <param name="amount">需求数量</param>
+            <param name="check">物件拆除破坏是否返还</param>
+        </member>
+        <member name="M:ValheimCatManager.Config.PieceConfig.GetRequirementArr">
+            <summary>
+            注：从 列表：resList 获取 Piece.Requirement[]
+            </summary>
+            <returns>Piece.Requirement[]</returns>
+        </member>
+        <member name="M:ValheimCatManager.Config.PieceConfig.GetPieceTable">
+            <summary>
+            注：获取制作工具 PieceTable 组件
+            </summary>
+            <returns>PieceTable</returns>
+        </member>
+        <member name="M:ValheimCatManager.Config.PieceConfig.GetPrefabName">
+            <summary>
+            注：获取预制名
+            </summary>
+            <returns>Piece的预制件名</returns>
+        </member>
+        <member name="M:ValheimCatManager.Config.RecipeConfig.#ctor(System.String,System.String,System.Int32,System.Int32,System.ValueTuple{System.String,System.Int32,System.Int32}[])">
+            <summary>
+            注：构造函数，传入制作目标的预制件名、工作台、工作台等级、产量和需求材料列表
+            </summary>
+            <param name="itemName"></param>
+            <param name="station"></param>
+            <param name="stationLevel"></param>
+            <param name="amount"></param>
+            <param name="resItemList"></param>
+        </member>
+        <member name="M:ValheimCatManager.Config.RecipeConfig.#ctor(System.String,System.String,System.String,System.Int32,System.Int32,System.ValueTuple{System.String,System.Int32,System.Int32}[])">
+            <summary>
+            (重载)构造函数 增加配方名选项
+            </summary>
+            <param name="itemName"></param>
+            <param name="station"></param>
+            <param name="stationLevel"></param>
+            <param name="amount"></param>
+            <param name="resItemList"></param>
+        </member>
+        <member name="M:ValheimCatManager.Config.RecipeConfig.#ctor(System.String)">
+            <summary>
+            注：(重载)构造函数 仅传入必要物品名
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.配方名">
+            <summary>
+            注：这是配方的名字(非必填)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.物品">
+            <summary>
+            注：配方制作的目标物品.
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.产量">
+            <summary>
+            注：物品的产量<br/>(默认值：1)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.启用">
+            <summary>
+            注：是否启用<br/>(默认值：true)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.品质产出数量乘数">
+            <summary>
+            注：一个 “乘数”，用来根据制作材料的 “品质”，调整配方最终产出的物品数量<br/>(默认值：1)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.显示顺序">
+            <summary>
+            注：可能是 物品在制作界面的排序<br/>(默认值：100)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.制作工作台">
+            <summary>
+            注：制作的工作台<br/>(默认值：空)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.维修工作台">
+            <summary>
+            注：维修的工作台<br/>(默认值：空)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.最低工作台等级">
+            <summary>
+            注：需求的工作台等级<br/>(默认值：1)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RecipeConfig.只需要一种成分">
+            <summary>
+            注：只需要一种成分(默认-false)<br/>(默认值：false)
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Config.RecipeConfig.requirementConfigs">
+            <summary>
+            注：配方列表
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Config.RecipeConfig.增加材料(System.String,System.Int32,System.Int32)">
+            <summary>
+            工具函数：给配方列表添加材料
+            </summary>
+            <param name="item">注：配方需求材料</param>
+            <param name="indx">注：材料需求数量</param>
+            <param name="level">注：升级需求的材料</param>
+            <param name="recover">注：拆除物品后是否返还</param>
+        </member>
+        <member name="M:ValheimCatManager.Config.RecipeConfig.GetRecipe">
+            <summary>
+            注：获取存储的信息，输出成配方脚本。
+            </summary>
+            <returns>配方脚本</returns>
+        </member>
+        <member name="F:ValheimCatManager.Config.RequirementConfig.预制名">
+            <summary>
+            注：需求材料<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RequirementConfig.数量">
+            <summary>
+            注：材料需求数量<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RequirementConfig.升级数量">
+            <summary>
+            注：升级需求的材料<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.RequirementConfig.恢复">
+            <summary>
+            注：拆除物品后是否返还<br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Config.RequirementConfig.GetPrefabName">
+            <summary>
+            注：获取预制名
+            </summary>
+            <returns>Requirement的材料名</returns>
+        </member>
+        <member name="T:ValheimCatManager.Config.SmeltersConfig">
+            <summary>
+            炼制站配置类，用于定义炼制站的参数设置
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Config.SmeltersConfig.#ctor(System.String,System.String,System.String)">
+            <summary>
+            初始化炼制站配置实例
+            </summary>
+            <param name="prefabName">目标炼制站的预制体名称</param>
+            <param name="inputItem">需要炼制的物品</param>
+            <param name="outputItem">炼制完成后输出的产物</param>
+        </member>
+        <member name="M:ValheimCatManager.Config.SpawnConfig.#ctor(System.String)">
+            <summary>
+            注：构造函数！名字一定要填！必填项！
+            </summary>
+            <param name="Name"></param>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.名字">
+            <summary>
+            注：这个是生成的名字，不是怪物的名字
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.预制件">
+            <summary>
+            注：怪物的实例(必填项)
+            </summary>
+            
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.启用">
+            <summary>
+            注：是否启用生成<br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.生态区域">
+            <summary>
+            注：生态区域(必填项) <br>(默认值：None)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.区域范围">
+            <summary>
+            注：区域范围<br>(默认值：Everything)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最大生成量">
+            <summary>
+            注：生物可同时 存在的实例数量。<br></br>同时也是随时间累积的生成尝试次数.
+            <br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.生成_间隔">
+            <summary>
+            注：生物的生成间隔。<br>(默认值：100)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.生成_概率">
+            <summary>
+            注：生成的概率<br>(默认值：50)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.生成_距离">
+            <summary>
+            注：与同实例的生成距离，不是对玩家的生成距离<br>(默认值：10)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最小玩家间距">
+            <summary>
+            注：与玩家的最小距离。<br>(默认值：40)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最大玩家间距">
+            <summary>
+            注：与玩家的最大距离。<br>(默认值：80)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.生物_最低等级">
+            <summary>
+            注：最低生物等级<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.生物_最高等级">
+            <summary>
+            注：最高生物等级<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.需求_条件">
+            <summary>
+            注：生成所需世界条件<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.需求_天气">
+            <summary>
+            注：生成所需的天气<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.组最小">
+            <summary>
+            注：组合生成的最小数量<br/>例：一支怪物小队，这个小队最小多少怪<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.组最大">
+            <summary>
+            注：组合生成的最大数量<br/>例：一支怪物小队，这个小队最大多少怪<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.组间距">
+            <summary>
+            例：一支怪物小队，小队里的每个怪物，距离间隔<br>(默认值：3)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.白天生成">
+            <summary>
+            注：白天生成<br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.晚上生成">
+            <summary>
+            注：晚上生成<br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最大高度">
+            <summary>
+            注：生成所需的最大高度<br>(默认值：1000)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最小高度">
+            <summary>
+            注：生成所需的最小高度<br>(默认值：-1000)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最小倾斜">
+            <summary>
+            注：生成所需的最小地形角度，范围为 0 到 90<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最大倾斜">
+            <summary>
+            注：生成所需的最小地形角度，范围为 0 到 90 <br>(默认值：35)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最小海洋深度">
+            <summary>
+            注：生成所需的最小海洋深度<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.最大海洋深度">
+            <summary>
+            注：生成所需的最大海洋深度<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.森林内生成">
+            <summary>
+            注：是否可在森林里生成<br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.森林外生成">
+            <summary>
+            注：是否可在森林外生成<br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.追杀玩家">
+            <summary>
+            注：怪物追杀玩家<br>(默认值：false)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.SpawnConfig.地面偏移">
+            <summary>
+            注：在地面上方生成<br>(默认值：0.5)</br>
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Config.VegetationConfig.#ctor(System.String)">
+            <summary>
+            构造函数 传入植被预制件的名字
+            </summary>
+            <param name="name"></param>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.预制件">
+            <summary>
+            注：植被的预制件名(必填项)
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.名字">
+            <summary>
+            注：指的是 ZoneVegetation 的名字
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.启用">
+            <summary>
+            注：是否启用<br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最小_数量">
+            <summary>
+            注：每个区域（64m x 64m）要放置的最小数量。<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最大_数量">
+            <summary>
+            注：每个区域（64m x 64m）要放置的最大数量。<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.强制放置">
+            <summary>
+            注：仅尝试一次为每种植被找到合适的位置。如果启用，则对每个植被进行 50 次尝试<br>(默认值：false)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最小_缩放">
+            <summary>
+            注：最小缩放<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最大_缩放">
+            <summary>
+            注：最大缩放<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.随机倾斜">
+            <summary>
+            注：在指定度数范围内的随机旋转。<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.地面倾斜旋转概率">
+            <summary>
+            注：地面倾斜旋转概率（默认值：0.0）：基于地形角度设置旋转的概率（范围 0.0 到 1.0）。
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.生态区域">
+            <summary>
+            注：生态区域(必填项) <br>(默认值：None)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.区域范围">
+            <summary>
+            注：区域范围<br>(默认值：Everything)</br>
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Config.VegetationConfig.清理地面">
+            <summary>
+            注：障碍物检查 若启用，需要平整的地面。<br>(默认值：true)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.吸附固体">
+            <summary>
+            注：吸附到静态固体若启用，会放置在固体物体顶部而非地形上。<br>(默认值：false)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最低_需求高度">
+            <summary>
+            注：最低高度<br>(默认值：-1000)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最高_需求高度">
+            <summary>
+            注：最高高度<br>(默认值：1000)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最小掩码值">
+            <summary>
+            最小植被掩码值。<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最大掩码值">
+            <summary>
+            最大植被掩码值。<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.掩码检查">
+            <summary>
+            周围植被掩码检查（默认值：false）：若启用，位置会放置在较高植被掩码的附近。<br></br>
+            此检查会在整个区域内采样，且至少需要 10 个样本，因此前 10 次生成尝试总会失败。<br></br>
+            建议在需要更多生成尝试时使用。优先规则：若周围植被掩码高于平均掩码，则放置该位置。<br>(默认值：false)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.掩码检查距离">
+            <summary>
+            植被掩码检查的距离 <br>(默认值：20)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.掩码检查层数">
+            <summary>
+            检查的点数量，距离会被划分为环形层，每层检查生成点周围的 6 个点。<br>(默认值：2)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.掩码优于平均值">
+            <summary>
+            此参数将要求从平均掩码调整到最高掩码。<br></br>
+            该值必须小于 1.0，因为掩码不能高于最高掩码。<br></br>
+            也可以使用负值。<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.海洋深度小">
+            <summary>
+            最小海洋深度<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.海洋深度大">
+            <summary>
+            最大海洋深度<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最小倾斜">
+            <summary>
+            注：生成所需的最小地形角度，范围为 0 到 90<br>(默认值：0)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.最大倾斜">
+            <summary>
+            注：生成所需的最小地形角度，范围为 0 到 90 <br>(默认值：35)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.吸附水面">
+            <summary>
+            若启用，植被会放置在水位处而非地形表面。 <br>(默认值：false)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.地面偏移">
+            <summary>
+            注：在地面上方生成 <br>(默认值：0.5)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.组最小">
+            <summary>
+            注：组合生成的最小数量<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.组最大">
+            <summary>
+            注：组合生成的最大数量<br>(默认值：1)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.组间距">
+            <summary>
+            注：组合生成的最大数量<br>(默认值：3)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.森林内生成">
+            <summary>
+            注：是否可在森林里生成<br>(默认值：false)</br>
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.森林最小阈值">
+            <summary>
+            最小森林值（若仅在森林中生成）
+            </summary>
+        </member>
+        <member name="P:ValheimCatManager.Config.VegetationConfig.森林最大阈值">
+            <summary>
+            最大森林值（若仅在森林中生成）
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Data.CatModData.m_PrefabCache">
+            <summary>
+            预制件缓存（key：预制件名称）
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Data.CatModData.m_shaderCache">
+            <summary>
+            着色器缓存（key：着色器名称）
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Data.CatModData.m_PieceTableCache">
+            <summary>
+            制作表缓存（key：制作表名称）
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Data.CatModData.m_materialCache">
+            <summary>
+            材质缓存（key：材质名称）
+            </summary>
+        </member>
+        <member name="T:ValheimCatManager.Data.CatModData.MockObjectInfo">
+            <summary>
+            Mock对象信息类（存储替换所需的所有关键信息）
+            </summary>
+        </member>
+        <member name="T:ValheimCatManager.Interface.IZPackageSync">
+            <summary>注：数据同步接口，下游 Mod 实现此接口即可接入通用数据同步框架</summary>
+        </member>
+        <member name="M:ValheimCatManager.Interface.IZPackageSync.GetSyncZPackage">
+            <summary>注：服务端调用，将当前配置数据打包为 ZPackage</summary>
+        </member>
+        <member name="M:ValheimCatManager.Interface.IZPackageSync.SetSyncZPackage(ZPackage)">
+            <summary>注：客户端调用，从 ZPackage 还原配置并应用到本地</summary>
+        </member>
+        <member name="T:ValheimCatManager.Managers.AnimationManager">
+            <summary>
+            动画管理器：负责创建动画覆盖控制器、管理动画片段替换
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.CookingStationManager.RegisterCookingStationConfig(System.Collections.Generic.List{ValheimCatManager.Config.CookingStationConfig})">
+            <summary>
+            注：注册自定义烹饪站配方（如烹饪锅），添加物品转换规则（含烹饪时间）到烹饪站组件
+            </summary>
+            <param name="cookingStationConfigs">烹饪站配置列表（含烹饪站预制名、输入/输出物品、烹饪时间等）</param>
+        </member>
+        <member name="F:ValheimCatManager.Managers.DungeonManager.roomList">
+            <summary>
+            注：待注册的房间列表
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.DungeonManager.customThemeList">
+            <summary>
+            注：自定义主题列表
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.DungeonManager.themeRoomsDict">
+            <summary>
+            注：房间对应的主题字典
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.DungeonManager.roomSoftReferences">
+            <summary>
+            注：地牢房间的软引用
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.DungeonManager.RegisterDungeonRooms(DungeonDB,System.Collections.Generic.List{ValheimCatManager.Config.RoomConfig})">
+            <summary>
+            注：注册地下城房间到DungeonDB
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.DungeonManager.RegisterDungeonTheme(UnityEngine.GameObject,System.String)">
+            <summary>
+            注册自定义主题
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.DungeonManager.ApplyCustomTheme(DungeonGenerator)">
+            <summary>
+            应用自定义主题到地下城生成器
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.DungeonManager.CheckRoomTheme(System.String)">
+            <summary>
+            工具方法：检测主题是否是已有原版或自定主题对应
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.DungeonManager.RebuildRoomHash(DungeonDB)">
+            <summary>
+            重建房间哈希表
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.DungeonManager.AddRoom(ValheimCatManager.Config.RoomConfig)">
+            <summary>
+            添加房间到注册列表
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.LocationManager.customLocationList">
+            <summary>
+            注：自定义位置的字典
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.MonsterManager.customMonsterSet">
+            <summary>
+            注：怪物自定义设置列表
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.PieceManager.customPieceDict">
+            <summary>
+            注：自定义物件字典-注册用
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.PieceManager.valheimPieceCategory">
+            <summary>
+            注：英灵神殿原目录
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.PieceManager.customCategoryDict">
+            <summary>
+            注：自定义目录字典-注册用
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.PieceCategoryPatch.Transpiler(System.Collections.Generic.IEnumerable{HarmonyLib.CodeInstruction})">
+            <summary>
+            注：对PieceTable.UpdateAvailable方法的Transpiler补丁，用于修改与最大分类值相关的IL指令
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.PieceCategoryPatch.PiecesTableUpdateAvailablePrefix(PieceTable)">
+            <summary>
+            注：对PieceTable.UpdateAvailable方法的Prefix补丁，用于在更新可用部件前扩展可用部件列表
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.PieceCategoryPatch.PiecesTableUpdateAvailablePostfix(PieceTable)">
+            <summary>
+            注：对PieceTable.UpdateAvailable方法的Postfix补丁，用于在更新可用部件后调整数组和重排序部件
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.PieceCategoryPatch.PlayerSetPlaceModePostfix">
+            <summary>
+            注：对Player.SetPlaceMode方法的Postfix补丁，用于在切换放置模式后刷新分类标签
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.PieceCategoryPatch.HudAwakePostfix">
+            <summary>
+            注：对Hud.Awake方法的Postfix补丁，用于在HUD初始化时刷新分类标签
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.PieceCategoryPatch.HudUpdateBuildPostfix">
+            <summary>
+            注：对Hud.UpdateBuild方法的Postfix补丁，用于在构建界面更新时检查是否需要刷新分类
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.PieceCategoryPatch.HudLateUpdatePostfix">
+            <summary>
+            注：对Hud.LateUpdate方法的Postfix补丁，用于在HUD晚更新时检查是否需要刷新分类
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.RegisterPiece(System.Collections.Generic.Dictionary{System.Int32,ValheimCatManager.Config.PieceConfig})">
+            <summary>
+            注：读取PieceConfig配置，注册Piece到对应的PieceTable，并设置分类和资源需求
+            </summary>
+            <param name="pieceConfigDictionary">包含Piece配置的字典，键为配置ID，值为PieceConfig实例</param>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.RegisterCategory">
+            <summary>
+            注：注册自定义物件的分类标签，避免重复注册
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.EnumGetPieceCategoryValues(System.Type,System.Array@)">
+            <summary>
+            注：处理Piece.PieceCategory枚举的GetValues方法，添加自定义分类值到结果中
+            </summary>
+            <param name="enumType">枚举类型</param>
+            <param name="__result">枚举值数组的引用，用于输出包含自定义分类的结果</param>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.EnumGetPieceCategoryNames(System.Type,System.String[]@)">
+            <summary>
+            注：处理Piece.PieceCategory枚举的GetNames方法，添加自定义分类名称到结果中
+            </summary>
+            <param name="enumType">枚举类型</param>
+            <param name="__result">枚举名称数组的引用，用于输出包含自定义分类名称的结果</param>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.TranspileMaxCategory(System.Collections.Generic.IEnumerable{HarmonyLib.CodeInstruction},System.Int32)">
+            <summary>
+            注：转换与最大分类值相关的IL指令，替换原有的MaxCategory调用或常量加载
+            </summary>
+            <param name="instructions">待处理的IL指令集合</param>
+            <param name="maxOffset">最大分类值的偏移量，用于调整计算结果</param>
+            <returns>处理后的IL指令集合</returns>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.ExpandAvailablePieces(PieceTable)">
+            <summary>
+            注：扩展部件表的可用部件列表，确保列表数量与分类数量匹配
+            </summary>
+            <param name="__instance">当前PieceTable实例</param>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.AdjustPieceTableArray(PieceTable)">
+            <summary>
+            注：调整部件表中相关数组的大小，使其与可用部件列表数量保持一致
+            </summary>
+            <param name="__instance">当前PieceTable实例</param>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.ReorderAllCategoryPieces(PieceTable)">
+            <summary>
+            注：重新排序所有分类的部件，将属于"All"分类的部件置于每个列表的开头
+            </summary>
+            <param name="__instance">当前PieceTable实例</param>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.RefreshCategoriesIfNeeded">
+            <summary>
+            注：检查是否需要刷新分类，若需要则执行刷新并重置检查标志
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.RefreshCategories">
+            <summary>
+            注：刷新分类标签UI，调整布局，更新可见分类及部件表分类配置
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.CreateCategoryTabs">
+            <summary>
+            注：创建缺失的分类标签，确保标签数量与分类总数匹配
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.CreateCategoryTab">
+            <summary>
+            注：创建单个分类标签（以第一个标签为模板）
+            </summary>
+            <returns>新创建的分类标签GameObject</returns>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.CategoriesInPieceTable(PieceTable)">
+            <summary>
+            注：获取部件表中所有部件所属的分类（去重）
+            </summary>
+            <param name="pieceTable">目标部件表</param>
+            <returns>包含所有可见分类的哈希集</returns>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.UpdatePieceTableCategories(PieceTable,System.Collections.Generic.HashSet{Piece.PieceCategory})">
+            <summary>
+            注：更新部件表的分类列表，添加可见分类并移除不可见分类（含香草分类和自定义分类）
+            </summary>
+            <param name="pieceTable">目标部件表</param>
+            <param name="visibleCategories">可见分类集合</param>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.GetVanillaLabel(Piece.PieceCategory)">
+            <summary>
+            注：获取香草分类（原生游戏分类）的标签文本（从缓存中获取）
+            </summary>
+            <param name="category">目标分类</param>
+            <returns>分类的标签文本，未找到则返回空字符串</returns>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.SearchVanillaLabels">
+            <summary>
+            注：搜索并缓存所有香草分类（原生游戏分类）的标签文本
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.PieceTableCheck">
+            <summary>
+            注：工具方法---调试检测 PieceTable 缓存（CatModData.m_PieceTableCache）的状态，打印关键属性长度用于校验
+            1. 打印缓存中 PieceTable 的总数量
+            2. 逐个打印每个 PieceTable 的关键属性长度：m_categoryLabels（分类标签列表）、m_categories（分类列表）、m_availablePieces（可用部件列表）
+            用于排查分类相关列表长度不匹配的问题
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.GetPieceCategory(System.String)">
+            <summary>
+            注：工具方法---通过反射遍历 Piece.PieceCategory 枚举，获取与指定名称匹配的枚举值
+            </summary>
+            <param name="categoryName">要查找的分类名称（需与枚举名完全一致）</param>
+            <returns>匹配的 Piece.PieceCategory 枚举值；未找到时打印错误日志并返回 Piece.PieceCategory.All</returns>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PieceManager.MaxCategory">
+            <summary>
+            注：工具方法---获取 Piece.PieceCategory 枚举的最大索引值，并处理偏移（避免与 All 分类冲突）
+            逻辑：All 分类索引为100，若枚举总长度-1（原生最大索引）≥ All 索引，则额外+1偏移，防止自定义分类索引与 All 重叠
+            </summary>
+            <returns>处理偏移后的最大分类索引值</returns>
+        </member>
+        <member name="F:ValheimCatManager.Managers.PrefabManager.customItemDict">
+            <summary> 注：物品字典，准备注册给游戏 </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.PrefabManager.customPrefabDict">
+            <summary>注：预制件字典，准备注册给游戏 </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.PrefabManager.customLocationDict">
+            <summary>注：地点预制件字典，准备注册给游戏</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.PrefabManager.RegisterToObjectDB(ObjectDB,System.Collections.Generic.Dictionary{System.Int32,UnityEngine.GameObject})">
+            <summary>
+            注：将自定义物品注册到ObjectDB
+            </summary>
+            <param name="instance">目标ObjectDB实例</param>
+            <param name="itemDictionary">自定义物品字典</param>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RecipeManager.customRecipeDict">
+            <summary>
+            注：自定义的配方字典
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RecipeManager.RegisterRecipe(ObjectDB,System.Collections.Generic.Dictionary{System.String,ValheimCatManager.Config.RecipeConfig})">
+            <summary>
+            注：注册自定义配方到ObjectDB，确保配方可在游戏中使用（如制作台显示）
+            </summary>
+            <param name="instance">目标ObjectDB实例（存储游戏配方）</param>
+            <param name="recipeDictionary">自定义配方字典（键：配方标识，值：配方配置）</param>
+        </member>
+        <member name="T:ValheimCatManager.Managers.RpcManager">
+            <summary>注：RPC通信核心管理器，提供版本校验、数据同步、序列化及RPC注册调用等通用功能</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RpcManager._registeredModList">
+            <summary>注：已注册的模组完整名称列表（用于版本校验）</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RpcManager._syncProviders">
+            <summary>注：数据同步提供者字典（Key=模组全名，Value=数据同步接口实例）</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RpcManager._isVersionCheckInitialized">
+            <summary>注：是否已初始化版本校验RPC（true=尚未初始化，false=已初始化）</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RpcManager._isDataSyncInitialized">
+            <summary>注：是否已初始化数据同步RPC</summary>
+        </member>
+        <member name="P:ValheimCatManager.Managers.RpcManager.IsServer">
+            <summary>注：当前是否为服务端</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RpcManager.RPC_VersionCheck">
+            <summary>注：版本校验RPC名称</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RpcManager.RPC_DataSync_Request">
+            <summary>注：数据同步请求RPC名称（客户端→服务端）</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RpcManager.RPC_DataSync_Response">
+            <summary>注：数据同步响应RPC名称（服务端→客户端）</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.RpcManager._validatedPeers">
+            <summary>注：存放已完成模组版本校验的客户端ZRpc列表</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.RegisterModVersion">
+            <summary>注：登记当前模组到版本校验列表（由各下游Mod在加载时调用）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.InitVersionCheckRpc">
+            <summary>注：构建版本同步容器，注册整套版本校验RPC（仅执行一次）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.RPC_CheckClientModList(ZRpc,System.Collections.Generic.List{System.String})">
+            <summary>注：服务端接收客户端上报的模组版本列表，校验通过后加入已验证列表</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.RegisterDataSync(ValheimCatManager.Interface.IZPackageSync)">
+            <summary>注：注册数据同步接口（下游Mod在加载时调用，注册后自动触发首次同步）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.UpdateServerDataSync(ValheimCatManager.Interface.IZPackageSync)">
+            <summary>注：服务端主动推送最新数据给所有客户端（配置热更新时调用）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.InitDataSync">
+            <summary>注：初始化数据同步路由（注册RPC并触发客户端首次请求）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.Rpc_ClientRequestSyncData(System.Int64)">
+            <summary>注：服务端接收客户端数据请求，遍历所有已注册模块并逐个下发数据</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.Rpc_ServerSendSyncData(System.Int64,System.String,ZPackage)">
+            <summary>注：客户端接收服务端下发的单个模块数据，通过接口注入到对应Mod</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.PackToZPackage``1(``0)">
+            <summary>注：将业务对象序列化并封装为全新ZPackage</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.UnpackFromZPackage``1(ZPackage)">
+            <summary>注：读取ZPackage内二进制数据，反序列化为业务对象</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.DeserializeFromBytes``1(System.Byte[])">
+            <summary>注：字节数组反序列化为指定类型对象</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.SerializeToBytes``1(``0)">
+            <summary>注：对象序列化为二进制字节数组</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.RpcRegister(System.String,System.Action{System.Int64})">
+            <summary>注：注册无参数RPC接收回调（在GameStart时注册）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.RpcRegister``1(System.String,System.Action{System.Int64,``0})">
+            <summary>注：注册单参数RPC接收回调（在GameStart时注册）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.RpcRegister``2(System.String,System.Action{System.Int64,``0,``1})">
+            <summary>注：注册双参数RPC接收回调（在GameStart时注册）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.ClientCallRpc(System.String)">
+            <summary>注：客户端调用无参数RPC（发给服务端）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.ClientCallRpc``1(System.String,``0)">
+            <summary>注：客户端调用单参数RPC（发给服务端）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.ClientCallRpc``2(System.String,``0,``1)">
+            <summary>注：客户端调用双参数RPC（发给服务端）</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.TargetCallRpc(System.String,System.Int64)">
+            <summary>注：定向发送无参数RPC给指定Peer</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.TargetCallRpc``1(System.String,System.Int64,``0)">
+            <summary>注：定向发送单参数RPC给指定Peer</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.TargetCallRpc``2(System.String,System.Int64,``0,``1)">
+            <summary>注：定向发送双参数RPC给指定Peer</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.ClientCallRpc_PeerInfo(System.String)">
+            <summary>注：在PeerInfo握手完成后，客户端调用无参数RPC</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.ClientCallRpc_PeerInfo``1(System.String,``0)">
+            <summary>注：在PeerInfo握手完成后，客户端调用单参数RPC</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.ClientCallRpc_PeerInfo``2(System.String,``0,``1)">
+            <summary>注：在PeerInfo握手完成后，客户端调用双参数RPC</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.TargetCallRpc_PeerInfo(System.String,System.Int64)">
+            <summary>注：在PeerInfo握手完成后，定向发送无参数RPC给指定Peer</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.TargetCallRpc_PeerInfo``1(System.String,System.Int64,``0)">
+            <summary>注：在PeerInfo握手完成后，定向发送单参数RPC给指定Peer</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.TargetCallRpc_PeerInfo``2(System.String,System.Int64,``0,``1)">
+            <summary>注：在PeerInfo握手完成后，定向发送双参数RPC给指定Peer</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.BroadcastCallRpc(System.String)">
+            <summary>注：广播无参数RPC给所有Peer</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.BroadcastCallRpc``1(System.String,``0)">
+            <summary>注：广播单参数RPC给所有Peer</summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.RpcManager.BroadcastCallRpc``2(System.String,``0,``1)">
+            <summary>注：广播双参数RPC给所有Peer</summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.SmeltersManger.customSmelters">
+            <summary>
+            注：自定义炼制站配方列表
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.SmeltersManger.RegisterSmeltersConfig(System.Collections.Generic.List{ValheimCatManager.Config.SmeltersConfig})">
+            <summary>
+            注：注册自定义炼制站配方（如熔炉、锻铁炉）
+            </summary>
+            <param name="smeltersConfigs">炼制站配置列表（含炼制站预制名、输入/输出物品等）</param>
+        </member>
+        <member name="F:ValheimCatManager.Managers.SpawnManager.customSpawn">
+            <summary>
+            注：自定生成列表
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.SpawnManager.customSpawnSystem">
+            <summary>
+            注：给 SpawnSystem 添加生成的类
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.StatusEffectManager.customStatusEffectDict">
+            <summary>
+            注：自定义效果的字典
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Managers.VegetationManager.customVegetationDict">
+            <summary>
+            注：自定义植被的字典
+            </summary>
+        </member>
+        <member name="T:ValheimCatManager.Managers.VegetationManager.VegetationPatch">
+            <summary>
+            注：注册植被的补丁
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Managers.VegetationManager.RegisterVegetation(System.Collections.Generic.Dictionary{System.Int32,ValheimCatManager.Config.VegetationConfig},ZoneSystem)">
+            <summary>
+            注：注册自定义植被到ZoneSystem（区域系统），确保植被在指定区域生成
+            </summary>
+            <param name="VegetationDictionary">自定义植被字典（键：植被哈希值，值：植被配置）</param>
+            <param name="instance">目标ZoneSystem实例（游戏区域管理器）</param>
+        </member>
+        <member name="T:ValheimCatManager.Mock.MockSystem">
+            <summary>
+            模拟系统（用于替换占位预制件、占位着色器、占位材质为真实资源）
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Mock.MockSystem.mockPrefabDict">
+            <summary>
+            默认预制件字典（key：预制件ID，value：预制件名称）
+            </summary>
+        </member>
+        <member name="F:ValheimCatManager.Mock.MockSystem.MockObjectInfoList">
+            <summary>
+            存储需要替换的预制件/着色器/材质信息列表
+            </summary>
+        </member>
+        <member name="T:ValheimCatManager.Mock.MockSystem.MockSystemPatch">
+            <summary>
+            Harmony补丁类（修复参数不匹配问题，确保补丁生效）
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.StartMockPrefab">
+            <summary>
+            启用 MockSystem（执行预制件、着色器、材质的替换流程）<br></br>
+            流程：清理原有数据 → 收集信息 → 替换资源 → 清理缓存
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.CollectMockPrefab">
+            <summary>
+            [1-收集阶段] 收集需要mock的预制件信息
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.CollectComponents(UnityEngine.GameObject)">
+            <summary>
+            [2-收集阶段] 收集预制件及其子对象的组件、着色器、材质信息
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.CheckComponentFields(UnityEngine.Component)">
+            <summary>
+            [3-收集阶段] 检查组件内的字段信息（预制件替换相关）
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.DefaultItemsReplace(UnityEngine.Component,System.Reflection.FieldInfo,System.Object,System.Object)">
+            <summary>
+            处理DropTable的默认物品替换
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.ReplaceGameobject(System.Collections.Generic.List{DropTable.DropData})">
+            <summary>
+            替换DropTable中的占位预制件
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.CheckObjectFields(UnityEngine.Component,System.Reflection.FieldInfo,System.Object,System.Object)">
+            <summary>
+            [3-收集阶段] 递归检查自定义对象的内部字段
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.CheckFieldOrElement(UnityEngine.Component,System.Reflection.FieldInfo,System.Object,System.Object,System.Int32)">
+            <summary>
+            [辅助方法] 判断字段类型，并进行对应处理
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.SaveMockPrefabInfo(UnityEngine.Component,System.Reflection.FieldInfo,UnityEngine.GameObject,System.Object,System.Int32)">
+            <summary>
+            [存储阶段] 存储带有占位信息的预制件
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.SaveMockShaderInfo(UnityEngine.Renderer)">
+            <summary>
+            [存储阶段] 存储带有占位信息的着色器
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.SaveMockMaterialInfo(UnityEngine.Renderer)">
+            <summary>
+            [存储阶段] 存储带有占位信息的材质【新增】
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.HandleEnumerable(UnityEngine.Component,System.Reflection.FieldInfo,System.Collections.IEnumerable,System.Object)">
+            <summary>
+            [存储阶段] 处理数据集合类型
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.ReplacePlaceholders">
+            <summary>
+            [处理阶段] 替换占位预制件、着色器、材质为真实资源
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.ReplaceFieldValue(ValheimCatManager.Data.CatModData.MockObjectInfo,UnityEngine.GameObject)">
+            <summary>
+            [处理阶段] 更新占位预制件引用为真实预制件
+            </summary>
+        </member>
+        <member name="M:ValheimCatManager.Mock.MockSystem.Cleanup">
+            <summary>
+            清理替换列表，释放资源
+            </summary>
+        </member>
+    </members>
+</doc>

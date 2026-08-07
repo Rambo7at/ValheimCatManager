@@ -213,6 +213,23 @@ public static class CatTool
         return itemPrefab;
     }
 
+    /// <summary>注：从 GameObject 上获取指定类型组件，若不存在则返回 null</summary>
+    public static T GetGameObjectComponent<T>(GameObject gameObject) where T : Component => gameObject.GetComponent<T>();
+
+    /// <summary>注：通过预制件名称获取指定类型组件，内部调用 GetGameObject 查找预制件，若存在则获取组件</summary>
+    public static T GetGameObjectComponent<T>(string objName) where T : Component
+    {
+        if (string.IsNullOrEmpty(objName))
+        {
+            Debug.LogError($"[CatUtil.GetGameObjectComponent] 传入预制件名称为空");
+            return null;
+        }
+
+        if (GetGameObject(objName) is not GameObject obj) return null;
+
+        return GetGameObjectComponent<T>(obj);
+    }
+
     /// <summary>注：Resources兜底全局查找GameObject</summary>
     private static GameObject ResourcesGetGameObject(string name)
     {
