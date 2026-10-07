@@ -19,9 +19,7 @@ namespace ValheimCatManager.Managers
     public class LocationManager
     {
 
-        /// <summary>
-        /// 注：自定义位置的字典
-        /// </summary>
+        /// <summary>注：自定义位置的字典 </summary>
         public readonly List<LocationConfig> customLocationList = new();
 
         private static LocationManager _instance;

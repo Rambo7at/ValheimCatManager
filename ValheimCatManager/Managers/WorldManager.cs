@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using ValheimCatManager.CatUtils;
+using static Minimap;
 
 namespace ValheimCatManager.Managers;
 
@@ -77,7 +78,7 @@ public class WorldManager
             MapColor = mapColor
         };
         customBiomes[nextBiomeBit] = info;
-        Debug.Log($"[WorldManager.RegisterBiome] 新增地区 {name}({info.DisplayName}) = {nextBiomeBit}（地形皮囊 {terrain}）");
+        Debug.Log($"[WorldManager.RegisterBiome] 新增地区 {name}({info.DisplayName})");
         return nextBiomeBit;
     }
 
@@ -100,7 +101,6 @@ public class WorldManager
         if (useAngleOffset.HasValue) rule.useAngleOffset = useAngleOffset.Value;
         if (angleCenter.HasValue) rule.angleCenter = angleCenter.Value;
         if (angleWidth.HasValue) rule.angleWidth = angleWidth.Value;
-        Debug.Log($"[WorldManager.ModifyRule] layer={layer} biome={rule.biome} dist={rule.minDistance}~{rule.maxDistance} height={rule.minHeight}~{rule.maxHeight} perlin=offset{rule.perlinOffset}[{rule.perlinMin}~{rule.perlinMax}] sector={rule.angleCenter}±{(rule.angleWidth.HasValue ? rule.angleWidth.Value * 0.5f : 0f)} angle={rule.useAngleOffset}");
     }
 
     /// <summary>注：按官方 GetBiome 判定顺序初始化规则（layer 间隔100），基线与官方完全一致</summary>
@@ -336,6 +336,22 @@ public class WorldManager
             return true;
         }
 
+
+        /// <summary>前置：PlaceVegetation用HaveBiome按chunk四角缓存预筛，缓存里是折叠皮囊(Plains/SwaMinimap_UpdateBiome_Prefixmp)，
+        /// 对高位自定义身份(≥0x400)放行，交给后面逐点GetBiome精确判定，避免整条植被在该chunk被跳过</summary>
+        [HarmonyPatch(typeof(Heightmap), nameof(Heightmap.HaveBiome)), HarmonyPrefix, HarmonyPriority(0)]
+        static bool Heightmap_HaveBiome_Prefix(Heightmap.Biome biome, ref bool __result)
+        {
+            if (!Instance.useCustomRules) return true;
+            if ((int)biome >= 0x400)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+
         /// <summary>前置：重写官方 UpdateBiome。去掉 sector(Plains皮囊) 与实时身份(2048)不一致的警告；自定义地区时 m_currentBiome 用实时身份，环境/音乐才生效</summary>
         [HarmonyPatch(typeof(Player), nameof(Player.UpdateBiome)), HarmonyPrefix, HarmonyPriority(0)]
         static bool Player_UpdateBiome_Prefix(Player __instance, float dt)
@@ -366,20 +382,36 @@ public class WorldManager
             return false;
         }
 
-        /// <summary>前置：官方 GetName 用 this.Biome（缓存 Plains 皮囊）生成名称会显示"平原"。这里用 this.Center 实时判定，自定义身份返回显示名，未配置细节显示"???"</summary>
-        [HarmonyPatch(typeof(BiomeSector), nameof(BiomeSector.GetName)), HarmonyPrefix, HarmonyPriority(0)]
-        static bool BiomeSector_GetName_Prefix(BiomeSector __instance, bool debug, ref string __result)
+
+        /// <summary>前置：小地图群系名直接用实际查询点实时 GetBiome，绕开 sector.Center 落海里/边界采样不准的问题。
+        /// 小地图=玩家位置，大地图=鼠标 hover 点；命中自定义身份返回 DisplayName，否则走原版</summary>
+        [HarmonyPatch(typeof(Minimap), nameof(Minimap.UpdateBiome)), HarmonyPrefix, HarmonyPriority(0)]
+        static bool Minimap_UpdateBiome_Prefix(Minimap __instance, Player player)
         {
-            if (!WorldManager.Instance.useCustomRules) return true;
-            Heightmap.Biome realtime = WorldGenerator.instance.GetBiome(__instance.Center.x, __instance.Center.y);
-            if (Instance.customBiomes.TryGetValue(realtime, out var value))
+            if (WorldGenerator.instance == null || player == null) return true;
+
+            if (__instance.m_mode == MapMode.Large)
             {
-                __result = value.DisplayName;
-                return false;
+                Vector3 mousePos = Input.mousePresent ? Input.mousePosition : new Vector3(Screen.width / 2f, Screen.height / 2f);
+                Vector3 worldPos = __instance.ScreenToWorldPoint(mousePos);
+                if (!__instance.IsExplored(worldPos))
+                {
+                    __instance.m_biomeNameLarge.text = "";
+                    return false;
+                }
+                Heightmap.Biome b = WorldGenerator.instance.GetBiome(worldPos.x, worldPos.z);
+                if (Instance.customBiomes.TryGetValue(b, out var info))
+                {
+                    __instance.m_biomeNameLarge.text = info.DisplayName;
+                    return false;
+                }
+                return true;
             }
-            if ((int)realtime >= 0x400)
+            Heightmap.Biome rt = WorldGenerator.instance.GetBiome(player.transform.position);
+            if (Instance.customBiomes.TryGetValue(rt, out var info2))
             {
-                __result = "???";
+                __instance.m_biomeNameSmall.text = info2.DisplayName;
+                __instance.m_biomeNameLarge.text = info2.DisplayName;
                 return false;
             }
             return true;
@@ -405,21 +437,6 @@ public class WorldManager
         static void AltBiomeWorldData_GetRandomSectorByBiome_Prefix(ref Heightmap.Biome biome)
         {
             biome = Instance.GetTerrain(biome);
-        }
-
-
-        /// <summary>前置：PlaceVegetation用HaveBiome按chunk四角缓存预筛，缓存里是折叠皮囊(Plains/Swamp)，
-        /// 对高位自定义身份(≥0x400)放行，交给后面逐点GetBiome精确判定，避免整条植被在该chunk被跳过</summary>
-        [HarmonyPatch(typeof(Heightmap), nameof(Heightmap.HaveBiome)), HarmonyPrefix, HarmonyPriority(0)]
-        static bool Heightmap_HaveBiome_Prefix(Heightmap.Biome biome, ref bool __result)
-        {
-            if (!Instance.useCustomRules) return true;
-            if ((int)biome >= 0x400)
-            {
-                __result = true;
-                return false;
-            }
-            return true;
         }
 
 

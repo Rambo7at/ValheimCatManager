@@ -13,11 +13,11 @@
 
 <PropertyGroup>
   <!-- 程序集版本（.NET 内部版本号，4段格式） -->
-  <Version>0.1.7.7</Version>          
+  <Version>0.1.8.1</Version>          
   <!-- 文件版本（Windows 文件属性 → 详细信息 → 文件版本） -->
-  <FileVersion>0.1.7.7</FileVersion>      
+  <FileVersion>0.1.8.1</FileVersion>      
   <!-- 产品版本（Windows 文件属性 → 详细信息 → 产品版本） -->
-  <InformationalVersion>0.1.7.7</InformationalVersion>  
+  <InformationalVersion>0.1.8.1</InformationalVersion>  
   <!-- 文件说明（Windows 文件属性 → 详细信息 → 文件说明） -->
   <AssemblyTitle>ValheimCatManager</AssemblyTitle>
   <!-- 产品名称（Windows 文件属性 → 详细信息 → 产品名称） -->
@@ -96,8 +96,14 @@
 	  <Reference Include="UnityEngine.CoreModule">
 	    <HintPath>..\..\..\Libs\UnityEngine.CoreModule.dll</HintPath>
 	  </Reference>
+	  <Reference Include="UnityEngine.InputLegacyModule">
+	    <HintPath>..\..\..\Libs\UnityEngine.InputLegacyModule.dll</HintPath>
+	  </Reference>
 	  <Reference Include="UnityEngine.UI">
 	    <HintPath>..\..\..\Libs\UnityEngine.UI.dll</HintPath>
+	  </Reference>
+	  <Reference Include="ValheimCatManager">
+	    <HintPath>..\..\..\Libs\ValheimCatManager.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
   

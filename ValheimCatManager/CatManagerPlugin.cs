@@ -19,7 +19,7 @@ namespace ValheimCatManager
 
         public const string PluginGUID = "com.rambo7at.CatManager";
         public const string PluginName = "ValheimCatManager";
-        public const string PluginVersion = "0.1.7.7";
+        public const string PluginVersion = "0.1.8.1";
 
         public void Awake()
         {
@@ -27,6 +27,9 @@ namespace ValheimCatManager
 
             CatConfig.Instance.Load(Config);
             new GameDataExporter();
+            new LegacyWorldUpgrade();
+
+
         }
 
 

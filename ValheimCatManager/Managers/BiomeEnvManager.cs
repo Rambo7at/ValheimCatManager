@@ -60,7 +60,6 @@ public class BiomeEnvManager
             if (env != null)
             {
                 EnvMan.instance.m_environments.Add(env);
-                Debug.Log($"[BiomeEnvManager.RegisterAll] 已注册天气: {env.m_name}");
             }
         }
 
@@ -89,14 +88,15 @@ public class BiomeEnvManager
 
             EnvMan.instance.m_biomes.Add(setup);
             EnvMan.instance.InitializeBiomeEnvSetup(setup);
-            Debug.Log($"[BiomeEnvManager.RegisterAll] 已注册 {item.Biome} ({item.Name})");
+
         }
     }
 
     private class BiomeEnvManagerPatch
     {
-        [HarmonyPatch(typeof(EnvMan), nameof(EnvMan.Awake)), HarmonyPostfix, HarmonyPriority(0)]
-        static void EnvMan_Awake_Postfix() => Instance.RegisterAll();
+        /// <summary>注：等 ZoneSystem.SetupLocations 跑完（所有 LocationList 的官方环境已 AppendEnvironment），再注册自定义天气，此时 Ashlands_SeaStorm 等新增环境才查得到</summary>
+        [HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.SetupLocations)), HarmonyPostfix, HarmonyPriority(0)]
+        static void ZoneSystem_SetupLocations_Postfix() => Instance.RegisterAll();
 
         /// <summary>注：用实时身份查找群系环境配置，解决自定义群系(0x800)匹配不上的问题</summary>
         [HarmonyPatch(typeof(EnvMan), nameof(EnvMan.GetBiomeEnvSetup)), HarmonyPrefix, HarmonyPriority(0)]
@@ -118,6 +118,7 @@ public class BiomeEnvManager
             return true;
         }
     }
+
 }
 
 

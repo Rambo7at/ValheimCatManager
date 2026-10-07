@@ -22,6 +22,11 @@ internal class CatConfig
         ExportLocations = cfg.Bind("数据导出", "导出地点", true, "地点/建筑生成配置 locations.txt");
         ExportVegetation = cfg.Bind("数据导出", "导出植被", true, "植被配置 vegetation.txt");
         ExportClutter = cfg.Bind("数据导出", "导出地面杂物", true, "草、碎石、地面雾气配置 clutter.txt");
+
+        EnableLegacyWorldUpgrade = cfg.Bind("旧世界升级", "启用旧世界自动升级", false,
+      "【警告】开启后，检测到旧存档已生成过区块时，会自动删除所有植被和地点数据并重新生成。" +
+       "此操作不可逆，执行前务必备份世界存档！！！！！" +
+       "仅用于从旧版本升级到新版本，完成后建议关闭。");
     }
 
     /// <summary>注：数据导出总开关，默认关（开发参考用）</summary>
@@ -32,5 +37,8 @@ internal class CatConfig
     public ConfigEntry<bool> ExportLocations { get; set; }
     public ConfigEntry<bool> ExportVegetation { get; set; }
     public ConfigEntry<bool> ExportClutter { get; set; }
+
+    /// <summary>旧世界自动升级：检测到已有生成区块时，清理旧植被/地点 ZDO 和区块标记，让新规则生效</summary>
+    public ConfigEntry<bool> EnableLegacyWorldUpgrade { get; set; }
 }
 
